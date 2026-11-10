@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.4",
+    date: "2026-11-10",
+    title: "Profile pictures and links",
+    changes: [
+      "Add a profile picture. It shows on your public page and next to your comments.",
+      "Add links to your Facebook, X, Instagram and eBay profiles. Paste a link or just type your username.",
+    ],
+  },
+  {
     version: "0.3",
     date: "2026-11-10",
     title: "More privacy choices",

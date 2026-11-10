@@ -28,7 +28,9 @@ export default async function Settings({ searchParams }: { searchParams: { membe
       <ProfileForm fullName={priv?.full_name ?? null} email={user.email ?? ""} bio={profile?.bio ?? null}
         isPublic={profile?.is_public ?? true} showEmail={profile?.show_email ?? false} showValues={profile?.show_values ?? false}
         location={priv?.location ?? null} showLocation={profile?.show_location ?? false} commentsFrom={profile?.comments_from ?? "everyone"}
-        showFollows={profile?.show_follows ?? true} />
+        showFollows={profile?.show_follows ?? true}
+        userId={user.id} username={profile?.username ?? ""} avatarPath={profile?.avatar_path ?? null}
+        links={{ facebook_url: profile?.facebook_url, x_url: profile?.x_url, instagram_url: profile?.instagram_url, ebay_url: profile?.ebay_url }} />
 
       <section className="card" id="membership">
         <h3>Membership</h3>

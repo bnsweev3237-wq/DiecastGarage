@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { isEbayUrl } from "@/lib/cars";
+import { NETWORKS, normalizeSocial } from "@/lib/social";
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
@@ -155,8 +156,18 @@ export async function deleteComment(f: FormData) {
 export async function updateProfile(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
+  const links: Record<string, string | null> = {};
+  for (const n of NETWORKS) {
+    const r = normalizeSocial(n, str(f, n.key));
+    if (r.error) return { error: r.error };
+    links[n.key] = r.url;
+  }
+  const avatarPath = optStr(f, "avatar_path");
+  const { data: before } = await supabase.from("profiles").select("avatar_path").eq("id", user.id).single();
   const [{ error }, { error: privateError }] = await Promise.all([
     supabase.from("profiles").update({
+      ...links,
+      avatar_path: avatarPath && avatarPath.startsWith(`${user.id}/`) ? avatarPath : null,
       bio: str(f, "bio").slice(0, 500) || null,
       is_public: f.get("is_public") === "on",
       show_email: f.get("show_email") === "on",
@@ -172,6 +183,8 @@ export async function updateProfile(_: FormState, f: FormData): Promise<FormStat
     }),
   ]);
   if (error || privateError) return { error: "Couldn't save your profile. Try again." };
+  if (before?.avatar_path && before.avatar_path !== avatarPath)
+    await supabase.storage.from("avatars").remove([before.avatar_path]);
   revalidatePath("/", "layout");
   return { ok: "Profile saved" };
 }

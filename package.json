@@ -1,7 +1,7 @@
 {
   "name": "diecast-garage",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -14,6 +14,7 @@
     "next": "14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "server-only": "^0.0.1",
     "stripe": "16.12.0"
   },
   "devDependencies": {

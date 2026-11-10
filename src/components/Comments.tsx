@@ -2,13 +2,14 @@ import Link from "next/link";
 import { deleteComment } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
 import CommentForm from "./CommentForm";
+import Avatar from "./Avatar";
 
 type Props = { profileId: string; carId?: string; path: string };
 
 export default async function Comments({ profileId, carId, path }: Props) {
   const { supabase, user } = await getUser();
   let q = supabase.from("comments")
-    .select("id, body, created_at, author_id, author:profiles!comments_author_id_fkey(username)")
+    .select("id, body, created_at, author_id, author:profiles!comments_author_id_fkey(username, avatar_path)")
     .eq("profile_id", profileId).order("created_at", { ascending: false }).limit(100);
   q = carId ? q.eq("car_id", carId) : q.is("car_id", null);
   const [{ data }, { data: allowed }, { data: owner }] = await Promise.all([
@@ -20,7 +21,7 @@ export default async function Comments({ profileId, carId, path }: Props) {
     ? `@${owner.username} has turned off comments.`
     : `@${owner?.username} only allows comments from collectors they follow.`;
   const comments = (data ?? []) as unknown as {
-    id: string; body: string; created_at: string; author_id: string; author: { username: string } | null;
+    id: string; body: string; created_at: string; author_id: string; author: { username: string; avatar_path: string | null } | null;
   }[];
   return (
     <section className="card">
@@ -32,7 +33,7 @@ export default async function Comments({ profileId, carId, path }: Props) {
         {comments.map((c) => (
           <div className="comment" key={c.id}>
             <div className="who">
-              {c.author ? <Link href={`/c/${c.author.username}`}>@{c.author.username}</Link> : <span>Someone</span>}
+              {c.author ? <><Avatar path={c.author.avatar_path} username={c.author.username} size="small" /><Link href={`/c/${c.author.username}`}>@{c.author.username}</Link></> : <span>Someone</span>}
               <span>{new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
               {user && (user.id === c.author_id || user.id === profileId) && (
                 <form action={deleteComment}>

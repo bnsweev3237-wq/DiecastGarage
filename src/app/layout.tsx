@@ -11,9 +11,12 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { supabase, user } = await getUser();
-  const { data: me } = user
-    ? await supabase.from("profiles").select("username").eq("id", user.id).single()
-    : { data: null };
+  const [{ data: me }, { data: isAdmin }] = user
+    ? await Promise.all([
+        supabase.from("profiles").select("username").eq("id", user.id).single(),
+        supabase.rpc("is_admin"),
+      ])
+    : [{ data: null }, { data: false }];
   return (
     <html lang="en">
       <head>
@@ -32,6 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Link href="/for-sale">For sale</Link>
               {user && <Link href="/feed">Following</Link>}
               {user && <Link href="/garage">My garage</Link>}
+              {isAdmin === true && <Link href="/admin">Admin</Link>}
             </div>
             <div className="nav-right">
               {user ? (

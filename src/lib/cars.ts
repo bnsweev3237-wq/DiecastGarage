@@ -41,6 +41,11 @@ export function photoUrl(path: string | null) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/car-photos/${path}`;
 }
 
+export function avatarUrl(path: string | null) {
+  if (!path) return null;
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
+}
+
 export const money = (n: number | null | undefined, digits = 0) =>
   n == null || Number.isNaN(n)
     ? "—"

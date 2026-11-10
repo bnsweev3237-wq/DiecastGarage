@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import CarTile from "@/components/CarTile";
 import Comments from "@/components/Comments";
 import FollowButton from "@/components/FollowButton";
+import Avatar from "@/components/Avatar";
+import SocialLinks from "@/components/SocialLinks";
 import { getUser } from "@/lib/supabase/server";
 import { money, type Car } from "@/lib/cars";
 
@@ -45,7 +47,7 @@ export default async function Collection({ params, searchParams }: { params: { u
     <main className="wrap">
       <section className="profile">
         <div className="car" style={{ alignItems: "flex-start" }}>
-          <div className="avatar" aria-hidden="true">{name.slice(0, 1)}</div>
+          <Avatar path={profile.avatar_path} username={name} />
           <div className="car-text" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <h1>@{name}</h1>
             <span className="muted">
@@ -54,6 +56,7 @@ export default async function Collection({ params, searchParams }: { params: { u
               {typeof email === "string" && (!isOwner || profile.show_email) && <> · <a href={`mailto:${email}`}>{email}</a></>}
             </span>
             {profile.bio && <p style={{ margin: 0, maxWidth: "65ch" }}>{profile.bio}</p>}
+            <SocialLinks profile={profile} />
             <div className="stats">
               <span><b>{canView ? all.length : "—"}</b> cars</span>
               <Link className="stat" href={`/c/${profile.username}/followers`}><b>{(counts as { followers: number } | null)?.followers ?? 0}</b> followers</Link>

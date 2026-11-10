@@ -3,6 +3,8 @@ import { useFormState } from "react-dom";
 import { updateProfile, type FormState } from "@/app/actions";
 import SubmitButton from "./SubmitButton";
 import FormMessage from "./FormMessage";
+import AvatarInput from "./AvatarInput";
+import { NETWORKS, type SocialKey } from "@/lib/social";
 
 type Props = {
   fullName: string | null;
@@ -15,13 +17,18 @@ type Props = {
   showLocation: boolean;
   commentsFrom: string;
   showFollows: boolean;
+  userId: string;
+  username: string;
+  avatarPath: string | null;
+  links: Partial<Record<SocialKey, string | null>>;
 };
 
-export default function ProfileForm({ fullName, email, bio, isPublic, showEmail, showValues, location, showLocation, commentsFrom, showFollows }: Props) {
+export default function ProfileForm({ fullName, email, bio, isPublic, showEmail, showValues, location, showLocation, commentsFrom, showFollows, userId, username, avatarPath, links }: Props) {
   const [state, action] = useFormState<FormState, FormData>(updateProfile, undefined);
   return (
     <form action={action} className="card">
       <h3>Profile</h3>
+      <AvatarInput userId={userId} initial={avatarPath} username={username} />
       <div className="field"><label className="label" htmlFor="full_name">Full name</label>
         <input id="full_name" name="full_name" maxLength={100} defaultValue={fullName ?? ""} autoComplete="name" />
         <span className="hint">Only you see this. Other collectors see your username.</span></div>
@@ -31,6 +38,15 @@ export default function ProfileForm({ fullName, email, bio, isPublic, showEmail,
       <div className="field"><label className="label" htmlFor="bio">About you</label>
         <textarea id="bio" name="bio" maxLength={500} defaultValue={bio ?? ""} placeholder="What you collect, favorite drivers, years you're hunting…" />
         <span className="hint">Shown on your public page.</span></div>
+
+      <h3>Links</h3>
+      <p className="hint">Shown on your public page. Paste a link or just type your username.</p>
+      <div className="grid2">
+        {NETWORKS.map((n) => (
+          <div className="field" key={n.key}><label className="label" htmlFor={n.key}>{n.label}</label>
+            <input id={n.key} name={n.key} defaultValue={links[n.key] ?? ""} placeholder={n.example} maxLength={220} /></div>
+        ))}
+      </div>
 
       <h3>Privacy</h3>
       <label className="check" htmlFor="is_public"><input id="is_public" name="is_public" type="checkbox" defaultChecked={isPublic} /> Make my collection public</label>
