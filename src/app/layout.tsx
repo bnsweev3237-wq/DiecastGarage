@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import NavLinks from "@/components/NavLinks";
 import { getUser } from "@/lib/supabase/server";
 import { currentVersion } from "@/lib/releases";
 import { LEGAL_PAGES_LIVE } from "@/lib/legal-flags";
@@ -24,20 +25,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap"
         />
       </head>
       <body>
         <nav className="nav">
           <div className="nav-in">
-            <Link href="/" className="logo"><span className="checker" aria-hidden="true" />Diecast Garage</Link>
-            <div className="nav-links">
-              <Link href="/">Explore</Link>
-              <Link href="/for-sale">For sale</Link>
-              {user && <Link href="/feed">Following</Link>}
-              {user && <Link href="/garage">My garage</Link>}
-              {isAdmin === true && <Link href="/admin">Admin</Link>}
-            </div>
+            <Link href="/" className="logo">
+              <svg className="checker" viewBox="0 0 30 20" aria-hidden="true"><path d="M6 0H30L24 20H0Z" fill="var(--accent)" /><path d="M12 5H22L20 10H10ZM8 10H18L16 15H6Z" fill="var(--band)" /></svg>
+              Diecast Garage
+            </Link>
+            <NavLinks items={[
+              { href: "/", label: "Explore" },
+              { href: "/for-sale", label: "For sale" },
+              ...(user ? [{ href: "/feed", label: "Following" }, { href: "/garage", label: "My garage" }] : []),
+              ...(isAdmin === true ? [{ href: "/admin", label: "Admin" }] : []),
+            ]} />
             <div className="nav-right">
               {user ? (
                 <>

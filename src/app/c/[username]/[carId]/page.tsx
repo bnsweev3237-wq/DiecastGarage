@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Comments from "@/components/Comments";
+import CarOutline from "@/components/CarOutline";
 import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
 import { money, photoUrl, type Car } from "@/lib/cars";
@@ -33,7 +34,7 @@ export default async function PublicCar({ params }: { params: { username: string
       </div>
       {car.is_hidden && <p className="notice">This car is hidden. Only you can see this page.</p>}
       <div className="carpage">
-        {src ? <img className="photo" src={src} alt={`Photo of ${car.title}`} /> : <div className="photo" style={{ display: "grid", placeItems: "center" }}><span className="muted">No photo yet</span></div>}
+        {src ? <img className="photo" src={src} alt={`Photo of ${car.title}`} /> : <div className="photo" style={{ display: "grid", placeItems: "center", color: "var(--muted)" }} title="No photo yet"><CarOutline width={240} /></div>}
         <div className="side">
           {car.for_sale && car.ebay_url && (
             <section className="forsale-box">

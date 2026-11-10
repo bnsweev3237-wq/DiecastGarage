@@ -17,16 +17,19 @@ export default async function Explore({ searchParams }: { searchParams: { delete
   ]);
   const rows = (cars ?? []) as Row[];
   return (
-    <main className="wrap">
-      {searchParams.deleted && <p className="msg ok">Your account and everything in it has been deleted.</p>}
-      <div className="head">
-        <div>
+    <>
+    <section className="band">
+      <div className="band-in">
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 640 }}>
           <h1>Explore the garage</h1>
-          <p>Race car diecasts collectors just added. Follow the ones you like and see their new cars in your feed.</p>
+          <p className="muted" style={{ margin: 0, fontSize: 18 }}>Race car diecasts collectors just added. Follow the ones you like and see their new cars in your feed.</p>
         </div>
         {user ? <Link className="btn primary" href="/garage/new">+ Add a car</Link>
           : <Link className="btn primary" href="/signup">Start your collection free</Link>}
       </div>
+    </section>
+    <main className="wrap">
+      {searchParams.deleted && <p className="msg ok">Your account and everything in it has been deleted.</p>}
       {rows.length ? (
         <section className="gallery" aria-label="Recently added cars">
           {rows.map((c) => <CarTile key={c.id} car={c} owner={c.owner} />)}
@@ -47,5 +50,6 @@ export default async function Explore({ searchParams }: { searchParams: { delete
         </section>
       )}
     </main>
+    </>
   );
 }

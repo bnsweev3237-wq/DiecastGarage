@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CarOutline from "@/components/CarOutline";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { FREE_CAR_LIMIT, isActiveMembership } from "@/lib/limits";
@@ -63,7 +64,7 @@ export default async function Garage() {
             return (
               <Link key={c.id} href={`/garage/${c.id}`} className="row">
                 <div className="car">
-                  {src ? <img className="thumb" src={src} alt="" loading="lazy" /> : <span className="thumb" aria-hidden="true">No photo</span>}
+                  {src ? <img className="thumb" src={src} alt="" loading="lazy" /> : <span className="thumb" aria-hidden="true"><CarOutline width={56} /></span>}
                   <div className="car-text">
                     <div className="car-title">{c.title}</div>
                     <div className="meta">

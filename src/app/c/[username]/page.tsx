@@ -45,43 +45,45 @@ export default async function Collection({ params, searchParams }: { params: { u
   const name = profile.username;
 
   return (
-    <main className="wrap">
-      <section className="profile">
-        <div className="car" style={{ alignItems: "flex-start" }}>
-          <Avatar path={profile.avatar_path} username={name} />
-          <div className="car-text" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <h1>@{name}</h1>
-            <span className="muted">
-              {profile.is_public ? "Public collection" : "Private collection"}
-              {typeof location === "string" && (!isOwner || profile.show_location) && <> · {location}</>}
-              {typeof email === "string" && (!isOwner || profile.show_email) && <> · <a href={`mailto:${email}`}>{email}</a></>}
-            </span>
-            {profile.bio && <p style={{ margin: 0, maxWidth: "65ch" }}>{profile.bio}</p>}
-            <SocialLinks profile={profile} />
-            {user && !isOwner && <div><ReportButton type="profile" id={profile.id} /></div>}
-            <div className="stats">
-              <span><b>{canView ? all.length : "—"}</b> cars</span>
-              <Link className="stat" href={`/c/${profile.username}/followers`}><b>{(counts as { followers: number } | null)?.followers ?? 0}</b> followers</Link>
-              <Link className="stat" href={`/c/${profile.username}/following`}><b>{(counts as { following: number } | null)?.following ?? 0}</b> following</Link>
-              {forSale > 0 && <span><b>{forSale}</b> for sale</span>}
-              {showValues && valueByCar.size > 0 && <span><b>{money(totalValue)}</b> est. value</span>}
+    <>
+      <section className="band">
+        <div className="band-in">
+          <div className="car" style={{ alignItems: "center", flexWrap: "wrap" }}>
+            <Avatar path={profile.avatar_path} username={name} />
+            <div className="car-text" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <h1>@{name}</h1>
+              <span className="muted">
+                {profile.is_public ? "Public collection" : "Private collection"}
+                {typeof location === "string" && (!isOwner || profile.show_location) && <> · {location}</>}
+                {typeof email === "string" && (!isOwner || profile.show_email) && <> · <a href={`mailto:${email}`}>{email}</a></>}
+              </span>
+              {profile.bio && <p style={{ margin: 0, maxWidth: "60ch", color: "var(--band-muted)" }}>{profile.bio}</p>}
+              <SocialLinks profile={profile} />
+              <div className="actions" style={{ marginTop: 6 }}>
+                {isOwner ? <Link className="btn small" href="/settings">Edit profile &amp; privacy</Link>
+                  : profile.is_public && <FollowButton signedIn={!!user} followeeId={profile.id} username={profile.username} following={!!myFollow} />}
+                {user && !isOwner && <ReportButton type="profile" id={profile.id} />}
+              </div>
             </div>
           </div>
+          <div className="stats">
+            <span><b>{canView ? all.length : "—"}</b>Cars</span>
+            <Link className="stat" href={`/c/${profile.username}/followers`}><b>{(counts as { followers: number } | null)?.followers ?? 0}</b>Followers</Link>
+            <Link className="stat" href={`/c/${profile.username}/following`}><b>{(counts as { following: number } | null)?.following ?? 0}</b>Following</Link>
+            {showValues && valueByCar.size > 0 && <span className="value"><b>{money(totalValue)}</b>Est. value</span>}
+          </div>
         </div>
-        {isOwner ? <Link className="btn" href="/settings">Edit profile &amp; privacy</Link>
-          : profile.is_public && <FollowButton signedIn={!!user} followeeId={profile.id} username={profile.username} following={!!myFollow} />}
       </section>
 
+    <main className="wrap">
       {!canView ? (
         <div className="empty"><h3>This collection is private</h3><p>@{name} has chosen to keep their cars to themselves.</p></div>
       ) : (
         <>
-          {forSale > 0 && (
-            <div className="actions">
-              <Link className={`btn small${searchParams.filter !== "sale" ? " primary" : ""}`} href={`/c/${profile.username}`}>All cars</Link>
-              <Link className={`btn small${searchParams.filter === "sale" ? " primary" : ""}`} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>
-            </div>
-          )}
+          <nav className="tabs" aria-label="Filter cars">
+            <Link className={searchParams.filter !== "sale" ? "on" : undefined} href={`/c/${profile.username}`}>All cars ({all.length})</Link>
+            {forSale > 0 && <Link className={searchParams.filter === "sale" ? "on" : undefined} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>}
+          </nav>
           {isOwner && hiddenCount > 0 && (
             <p className="notice">{hiddenCount} hidden car{hiddenCount > 1 ? "s aren't" : " isn't"} shown here. Only you can see {hiddenCount > 1 ? "them" : "it"}, in <Link href="/garage">My garage</Link>.</p>
           )}
@@ -94,5 +96,6 @@ export default async function Collection({ params, searchParams }: { params: { u
         </>
       )}
     </main>
+    </>
   );
 }
