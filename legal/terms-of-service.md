@@ -72,7 +72,7 @@ Estimated values are based on sold listings that you or others logged, or on a v
 
 ## 9. Reporting problems and copyright
 
-If you see something that breaks these rules, contact us at [CONTACT EMAIL] with a link to it.
+If you see something that breaks these rules, use the **Report** link on the car, comment or profile, or contact us at [CONTACT EMAIL] with a link to it.
 
 **Copyright.** If you believe content on Diecast Garage infringes your copyright, send a notice to [CONTACT EMAIL] that includes:
 1. your name and contact details;
@@ -85,7 +85,7 @@ We'll remove content when a valid notice requires it, and close the accounts of 
 
 ## 10. Closing your account
 
-You can stop using Diecast Garage at any time. To delete your account and everything in it, contact us at [CONTACT EMAIL]. [UPDATE THIS ONCE THE SITE HAS A DELETE-ACCOUNT BUTTON.] Some information may stay in backups for a limited time, or longer where the law requires.
+You can stop using Diecast Garage at any time. To delete your account and everything in it, use **Delete my account** in Settings. It's permanent and can't be undone. If you have a membership, deleting your account cancels it. Some information may stay in backups for a limited time, or longer where the law requires.
 
 ## 11. Disclaimers
 

@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.5",
+    date: "2026-11-10",
+    title: "Reporting and account deletion",
+    changes: [
+      "Report a car, comment or collector that breaks the rules. Reports are private.",
+      "Delete your account and everything in it from Settings.",
+      "Sign-up is ready to ask you to agree to the Terms of Service and Privacy Policy once they're published.",
+    ],
+  },
+  {
     version: "0.4",
     date: "2026-11-10",
     title: "Profile pictures and links",

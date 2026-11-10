@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin", robots: { index: false, follow: false } };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
+  const { db } = await requireAdmin();
+  const { count: openReports } = await db.from("reports").select("*", { count: "exact", head: true }).eq("status", "open");
   return (
     <main className="wrap">
       <div className="head">
@@ -16,6 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </div>
       <nav className="actions" aria-label="Admin sections">
         <Link className="btn small" href="/admin">Overview</Link>
+        <Link className={`btn small${openReports ? " flag" : ""}`} href="/admin/reports">Reports{openReports ? ` (${openReports})` : ""}</Link>
         <Link className="btn small" href="/admin/users">Users</Link>
         <Link className="btn small" href="/admin/cars">Cars</Link>
         <Link className="btn small" href="/admin/comments">Comments</Link>

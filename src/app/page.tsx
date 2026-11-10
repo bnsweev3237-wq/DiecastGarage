@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 type Row = Car & { owner: { username: string; is_public: boolean } | null };
 
-export default async function Explore() {
+export default async function Explore({ searchParams }: { searchParams: { deleted?: string } }) {
   const { supabase, user } = await getUser();
   const [{ data: cars }, { data: collectors }] = await Promise.all([
     supabase.from("cars").select("*, owner:profiles!inner(username, is_public)")
@@ -18,6 +18,7 @@ export default async function Explore() {
   const rows = (cars ?? []) as Row[];
   return (
     <main className="wrap">
+      {searchParams.deleted && <p className="msg ok">Your account and everything in it has been deleted.</p>}
       <div className="head">
         <div>
           <h1>Explore the garage</h1>

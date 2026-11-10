@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Comments from "@/components/Comments";
+import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
 import { money, photoUrl, type Car } from "@/lib/cars";
 
@@ -52,6 +53,7 @@ export default async function PublicCar({ params }: { params: { username: string
               {showValue && <><dt>Est. value</dt><dd className="num">{money(Number(value), 2)}</dd></>}
             </dl>
             {car.description && <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{car.description}</p>}
+            {user && !isOwner && <div><ReportButton type="car" id={car.id} /></div>}
           </section>
         </div>
       </div>

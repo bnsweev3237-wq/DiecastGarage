@@ -216,3 +216,13 @@ a.admin-row:hover { background: var(--chip); }
   .admin-row, .admin-table .admin-row:has(> :nth-child(5)), .admin-row.car-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .admin-row.head { display: none; }
 }
+
+/* terms and privacy pages */
+.legal { line-height: 1.65; gap: 0; }
+.legal h1 { margin-bottom: 12px; }
+.legal h2 { font-size: 22px; margin: 28px 0 8px; }
+.legal p, .legal ul, .legal ol { margin: 0 0 12px; max-width: 70ch; }
+.legal li { margin-bottom: 4px; }
+.legal table { border-collapse: collapse; margin: 0 0 12px; display: block; overflow-x: auto; }
+.legal th, .legal td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+.report-form { max-width: 460px; padding: 14px; gap: 10px; }

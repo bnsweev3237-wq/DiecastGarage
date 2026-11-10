@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { FREE_CAR_LIMIT } from "@/lib/limits";
+import { LEGAL_PAGES_LIVE, TERMS_VERSION } from "@/lib/legal-flags";
 
 export default function SignUp() {
   const [error, setError] = useState("");
@@ -23,7 +24,7 @@ export default function SignUp() {
     const { error } = await supabase.auth.signUp({
       email, password,
       options: {
-        data: { username, full_name: String(f.get("full_name")).trim() || null },
+        data: { username, full_name: String(f.get("full_name")).trim() || null, ...(LEGAL_PAGES_LIVE ? { terms_version: TERMS_VERSION } : {}) },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/garage`,
       },
     });
@@ -51,6 +52,10 @@ export default function SignUp() {
         <div className="field"><label className="label" htmlFor="email">Email</label><input id="email" name="email" type="email" required autoComplete="email" /></div>
         <div className="field"><label className="label" htmlFor="password">Password</label><input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" />
           <span className="hint">At least 8 characters</span></div>
+        {LEGAL_PAGES_LIVE && (
+          <label className="check" htmlFor="agree"><input id="agree" name="agree" type="checkbox" required />
+            <span>I&apos;m 13 or older and agree to the <Link href="/terms" target="_blank">Terms of Service</Link> and <Link href="/privacy" target="_blank">Privacy Policy</Link></span></label>
+        )}
         {error && <p className="msg error" role="alert">{error}</p>}
         <button className="btn primary" type="submit" disabled={busy}>{busy ? "Creating account…" : "Create account"}</button>
         <p className="hint">Already a member? <Link href="/login">Sign in</Link></p>

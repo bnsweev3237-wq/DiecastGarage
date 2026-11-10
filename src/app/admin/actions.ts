@@ -11,6 +11,12 @@ function refresh() {
   revalidatePath("/", "layout");
 }
 
+// Removing reported content closes its open reports too.
+async function closeReports(db: Awaited<ReturnType<typeof requireAdmin>>["db"], adminId: string, targetId: string) {
+  await db.from("reports").update({ status: "resolved", resolved_by: adminId, resolved_at: new Date().toISOString() })
+    .eq("target_id", targetId).eq("status", "open");
+}
+
 export async function adminDeleteCar(f: FormData) {
   const { adminId, db } = await requireAdmin();
   const id = str(f, "id");
@@ -18,6 +24,7 @@ export async function adminDeleteCar(f: FormData) {
   if (!car) return;
   await db.from("cars").delete().eq("id", id);
   if (car.photo_path) await db.storage.from("car-photos").remove([car.photo_path]);
+  await closeReports(db, adminId, id);
   await logAdminAction(db, adminId, "delete_car", car.owner_id, { title: car.title, reason: str(f, "reason") || null });
   refresh();
 }
@@ -49,6 +56,7 @@ export async function adminDeleteComment(f: FormData) {
   const { data: c } = await db.from("comments").select("author_id, body").eq("id", id).maybeSingle();
   if (!c) return;
   await db.from("comments").delete().eq("id", id);
+  await closeReports(db, adminId, id);
   await logAdminAction(db, adminId, "delete_comment", c.author_id, { body: c.body.slice(0, 300) });
   refresh();
 }
@@ -87,7 +95,19 @@ export async function adminDeleteAccount(f: FormData) {
     if (files?.length) await db.storage.from(bucket).remove(files.map((x) => `${userId}/${x.name}`));
   }
   await db.auth.admin.deleteUser(userId); // removes the profile, cars, comments and follows with it
+  await closeReports(db, adminId, userId);
   await logAdminAction(db, adminId, "delete_account", null, { username: p.username, reason: str(f, "reason") || null });
   refresh();
   redirect("/admin/users");
+}
+
+// Close every open report on one item: "resolved" after acting on it, "dismissed" when it's fine.
+export async function adminCloseReport(f: FormData) {
+  const { adminId, db } = await requireAdmin();
+  const status = str(f, "status") === "dismissed" ? "dismissed" : "resolved";
+  const targetId = str(f, "target_id");
+  await db.from("reports").update({ status, resolved_by: adminId, resolved_at: new Date().toISOString() })
+    .eq("target_id", targetId).eq("status", "open");
+  await logAdminAction(db, adminId, status === "dismissed" ? "dismiss_report" : "resolve_report", str(f, "owner_id") || null, { type: str(f, "target_type") });
+  revalidatePath("/admin", "layout");
 }

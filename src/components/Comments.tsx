@@ -3,6 +3,7 @@ import { deleteComment } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
 import CommentForm from "./CommentForm";
 import Avatar from "./Avatar";
+import ReportButton from "./ReportButton";
 
 type Props = { profileId: string; carId?: string; path: string };
 
@@ -41,6 +42,7 @@ export default async function Comments({ profileId, carId, path }: Props) {
                   <button className="linkbtn" type="submit">Delete</button>
                 </form>
               )}
+              {user && user.id !== c.author_id && <ReportButton type="comment" id={c.id} />}
             </div>
             <p>{c.body}</p>
           </div>

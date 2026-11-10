@@ -5,6 +5,7 @@ import Comments from "@/components/Comments";
 import FollowButton from "@/components/FollowButton";
 import Avatar from "@/components/Avatar";
 import SocialLinks from "@/components/SocialLinks";
+import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
 import { money, type Car } from "@/lib/cars";
 
@@ -57,6 +58,7 @@ export default async function Collection({ params, searchParams }: { params: { u
             </span>
             {profile.bio && <p style={{ margin: 0, maxWidth: "65ch" }}>{profile.bio}</p>}
             <SocialLinks profile={profile} />
+            {user && !isOwner && <div><ReportButton type="profile" id={profile.id} /></div>}
             <div className="stats">
               <span><b>{canView ? all.length : "—"}</b> cars</span>
               <Link className="stat" href={`/c/${profile.username}/followers`}><b>{(counts as { followers: number } | null)?.followers ?? 0}</b> followers</Link>

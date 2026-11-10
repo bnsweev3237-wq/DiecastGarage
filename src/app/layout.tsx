@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { currentVersion } from "@/lib/releases";
+import { LEGAL_PAGES_LIVE } from "@/lib/legal-flags";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="footer-in">
             <span>Diecast Garage <span className="num">v{currentVersion}</span> · test version</span>
             <Link href="/release-notes">Release notes</Link>
+            {LEGAL_PAGES_LIVE && <><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></>}
           </div>
         </footer>
       </body>

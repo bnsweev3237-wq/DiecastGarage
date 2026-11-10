@@ -5,6 +5,7 @@ const LABELS: Record<string, string> = {
   delete_car: "Deleted a car", remove_car_photo: "Removed a car photo", clear_car_description: "Cleared a car description",
   delete_comment: "Deleted a comment", clear_avatar: "Removed a profile picture", clear_bio: "Cleared About text",
   clear_links: "Removed profile links", delete_account: "Deleted an account",
+  resolve_report: "Resolved a report", dismiss_report: "Dismissed a report",
 };
 
 export default async function AdminLog() {

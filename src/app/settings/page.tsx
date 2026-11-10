@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
+import DeleteAccount from "@/components/DeleteAccount";
 import { getUser } from "@/lib/supabase/server";
 import { FREE_CAR_LIMIT, isActiveMembership } from "@/lib/limits";
 import { paymentsEnabled } from "@/lib/stripe";
@@ -60,6 +61,8 @@ export default async function Settings({ searchParams }: { searchParams: { membe
       </section>
 
       <form action="/auth/signout" method="post"><button className="btn" type="submit">Sign out</button></form>
+
+      <DeleteAccount username={profile?.username ?? ""} isMember={member} />
     </main>
   );
 }

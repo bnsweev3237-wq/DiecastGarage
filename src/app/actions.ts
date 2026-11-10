@@ -3,8 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { paymentsEnabled, stripe } from "@/lib/stripe";
 import { isEbayUrl } from "@/lib/cars";
 import { NETWORKS, normalizeSocial } from "@/lib/social";
+import { REPORT_REASONS } from "@/lib/reports";
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
@@ -187,4 +190,45 @@ export async function updateProfile(_: FormState, f: FormData): Promise<FormStat
     await supabase.storage.from("avatars").remove([before.avatar_path]);
   revalidatePath("/", "layout");
   return { ok: "Profile saved" };
+}
+
+export async function submitReport(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) return { error: "Sign in to report something." };
+  const reason = str(f, "reason");
+  const type = str(f, "target_type");
+  if (!REPORT_REASONS.some(([k]) => k === reason)) return { error: "Choose a reason." };
+  if (!["car", "comment", "profile"].includes(type)) return { error: "Couldn't send that report." };
+  const { error } = await supabase.from("reports").insert({
+    target_type: type, target_id: str(f, "target_id"), reason, details: str(f, "details").slice(0, 1000) || null,
+  });
+  // A duplicate means they already reported it and it's still open, which is fine to treat as sent.
+  if (error && !error.message.includes("reports_one_open")) return { error: "Couldn't send that report. Try again." };
+  return { ok: "Thanks. We'll take a look." };
+}
+
+// Permanently deletes the signed-in collector's account and everything in it.
+export async function deleteMyAccount(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const { data: me } = await supabase.from("profiles").select("username").eq("id", user.id).single();
+  if (!me || str(f, "confirm").toLowerCase() !== me.username) return { error: `Type ${me?.username ?? "your username"} exactly to confirm.` };
+  const db = createAdminClient();
+  const { data: isAdmin } = await db.from("admins").select("user_id").eq("user_id", user.id).maybeSingle();
+  if (isAdmin) return { error: "Admin accounts can't be deleted here. Remove your admin access first." };
+
+  const { data: m } = await db.from("memberships").select("stripe_subscription_id, status").eq("user_id", user.id).maybeSingle();
+  if (paymentsEnabled() && m?.stripe_subscription_id && m.status !== "canceled") {
+    try { await stripe.subscriptions.cancel(m.stripe_subscription_id); }
+    catch { return { error: "Couldn't cancel your membership, so nothing was deleted. Try again in a minute." }; }
+  }
+  for (const bucket of ["car-photos", "avatars"]) {
+    const { data: files } = await db.storage.from(bucket).list(user.id, { limit: 1000 });
+    if (files?.length) await db.storage.from(bucket).remove(files.map((x) => `${user.id}/${x.name}`));
+  }
+  const { error } = await db.auth.admin.deleteUser(user.id); // the profile, cars, comments and follows go with it
+  if (error) return { error: "Couldn't delete your account. Try again in a minute." };
+  await supabase.auth.signOut();
+  revalidatePath("/", "layout");
+  redirect("/?deleted=1");
 }
