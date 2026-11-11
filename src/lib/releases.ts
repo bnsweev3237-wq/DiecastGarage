@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.7",
+    date: "2026-11-11",
+    title: "Diecast Garage is now Racasto",
+    changes: [
+      "New name: Racasto, The Diecast Racing Society.",
+      "New logo: a slanted red badge with a twin-stripe R.",
+      "New icons for your browser tab and phone home screen, and a preview image when you share a link.",
+    ],
+  },
+  {
     version: "0.6",
     date: "2026-11-10",
     title: "New look",

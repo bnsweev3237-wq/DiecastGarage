@@ -42,8 +42,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* header band */
 .nav { background: var(--band); color: var(--band-ink); }
 .nav-in { max-width: 1160px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); display: flex; align-items: stretch; gap: 20px; flex-wrap: wrap; min-height: 64px; }
-.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--band-ink); font-family: var(--f-display); font-style: italic; font-weight: 900; font-size: 26px; text-transform: uppercase; }
-.checker { width: 30px; height: 20px; flex: none; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--band-ink); }
+.logo-mark { flex: none; display: block; }
+.logo-word { font-family: "Archivo", var(--f-body); font-stretch: 112%; font-weight: 900; font-size: 25px; letter-spacing: -.01em; text-transform: uppercase; line-height: 1; }
 .nav-links { display: flex; gap: 2px; flex-wrap: wrap; flex: 1; align-items: stretch; }
 .nav-links a { display: flex; align-items: center; color: var(--band-muted); text-decoration: none; padding: 0 14px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; }
 .nav-links a:hover { color: var(--band-ink); }
@@ -277,7 +278,8 @@ body > main { flex: 1 0 auto; width: 100%; }
 /* phone header: logo and buttons on one row, sections in a swipeable row under them */
 @media (max-width: 720px) {
   .nav-in { gap: 0 12px; }
-  .logo { flex: 1; min-height: 56px; font-size: 23px; }
+  .logo { flex: 1; min-height: 56px; }
+  .logo-word { font-size: 22px; }
   .nav-right { padding-block: 0; }
   .nav-links { order: 3; flex: 0 0 calc(100% + 32px); flex-wrap: nowrap; overflow-x: auto; min-height: 46px; margin-inline: -16px; padding-inline: 2px; border-top: 1px solid var(--band-line); scrollbar-width: none; }
   .nav-links a { padding: 0 14px; white-space: nowrap; }

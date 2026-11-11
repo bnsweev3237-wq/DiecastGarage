@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
+import Logo from "@/components/Logo";
 import { getUser } from "@/lib/supabase/server";
 import { currentVersion } from "@/lib/releases";
 import { LEGAL_PAGES_LIVE } from "@/lib/legal-flags";
 import "./globals.css";
 
+const description = "The Diecast Racing Society. Show off your race car diecast collection, follow other collectors, and value your cars from real sold listings.";
+
 export const metadata: Metadata = {
-  title: { default: "Diecast Garage", template: "%s · Diecast Garage" },
-  description: "Show off your race car diecast collection, follow other collectors, and value your cars from real sold listings.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  title: { default: "Racasto · The Diecast Racing Society", template: "%s · Racasto" },
+  description,
+  applicationName: "Racasto",
+  openGraph: { siteName: "Racasto", title: "Racasto · The Diecast Racing Society", description, type: "website" },
+  twitter: { card: "summary_large_image", title: "Racasto · The Diecast Racing Society", description },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -25,15 +32,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,900&family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap"
         />
       </head>
       <body>
         <nav className="nav">
           <div className="nav-in">
-            <Link href="/" className="logo">
-              <svg className="checker" viewBox="0 0 30 20" aria-hidden="true"><path d="M6 0H30L24 20H0Z" fill="var(--accent)" /><path d="M12 5H22L20 10H10ZM8 10H18L16 15H6Z" fill="var(--band)" /></svg>
-              Diecast Garage
+            <Link href="/" className="logo" aria-label="Racasto home">
+              <Logo />
             </Link>
             <NavLinks items={[
               { href: "/", label: "Explore" },
@@ -59,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {children}
         <footer className="footer">
           <div className="footer-in">
-            <span>Diecast Garage <span className="num">v{currentVersion}</span> · test version</span>
+            <span>Racasto · The Diecast Racing Society · <span className="num">v{currentVersion}</span> test version</span>
             <Link href="/release-notes">Release notes</Link>
             {LEGAL_PAGES_LIVE && <><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></>}
           </div>

@@ -43,7 +43,7 @@ export default function SignUp() {
   return (
     <main className="wrap auth">
       <form className="card" onSubmit={onSubmit}>
-        <h2>Join Diecast Garage</h2>
+        <h2>Join Racasto</h2>
         <p className="hint">Free for up to {FREE_CAR_LIMIT} cars. Become a member any time for an unlimited garage.</p>
         <div className="field"><label className="label" htmlFor="full_name">Full name</label><input id="full_name" name="full_name" maxLength={100} autoComplete="name" />
           <span className="hint">Private. Only you see it.</span></div>
