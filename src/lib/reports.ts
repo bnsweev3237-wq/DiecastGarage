@@ -5,11 +5,11 @@ export const REPORT_REASONS = [
   ["hate", "Hate speech"],
   ["sexual", "Sexual or violent content"],
   ["scam", "Scam or fraud"],
-  ["misrepresented", "Misrepresented car (custom or replica passed off as original)"],
+  ["misrepresented", "Misrepresented item (fake, custom or reproduction passed off as original)"],
   ["copyright", "Uses my photo or copyrighted content"],
   ["private_info", "Shares someone's private information"],
   ["other", "Something else"],
 ] as const;
 
-export type ReportTarget = "car" | "comment" | "profile";
+export type ReportTarget = "item" | "comment" | "profile";
 export const reasonLabel = (r: string) => REPORT_REASONS.find(([k]) => k === r)?.[1] ?? r;

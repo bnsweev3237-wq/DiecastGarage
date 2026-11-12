@@ -17,36 +17,36 @@ async function closeReports(db: Awaited<ReturnType<typeof requireAdmin>>["db"], 
     .eq("target_id", targetId).eq("status", "open");
 }
 
-export async function adminDeleteCar(f: FormData) {
+export async function adminDeleteItem(f: FormData) {
   const { adminId, db } = await requireAdmin();
   const id = str(f, "id");
-  const { data: car } = await db.from("cars").select("owner_id, title, photo_path").eq("id", id).maybeSingle();
+  const { data: car } = await db.from("items").select("owner_id, title, photo_path").eq("id", id).maybeSingle();
   if (!car) return;
-  await db.from("cars").delete().eq("id", id);
+  await db.from("items").delete().eq("id", id);
   if (car.photo_path) await db.storage.from("car-photos").remove([car.photo_path]);
   await closeReports(db, adminId, id);
-  await logAdminAction(db, adminId, "delete_car", car.owner_id, { title: car.title, reason: str(f, "reason") || null });
+  await logAdminAction(db, adminId, "delete_item", car.owner_id, { title: car.title, reason: str(f, "reason") || null });
   refresh();
 }
 
-export async function adminRemoveCarPhoto(f: FormData) {
+export async function adminRemoveItemPhoto(f: FormData) {
   const { adminId, db } = await requireAdmin();
   const id = str(f, "id");
-  const { data: car } = await db.from("cars").select("owner_id, title, photo_path").eq("id", id).maybeSingle();
+  const { data: car } = await db.from("items").select("owner_id, title, photo_path").eq("id", id).maybeSingle();
   if (!car?.photo_path) return;
-  await db.from("cars").update({ photo_path: null }).eq("id", id);
+  await db.from("items").update({ photo_path: null }).eq("id", id);
   await db.storage.from("car-photos").remove([car.photo_path]);
-  await logAdminAction(db, adminId, "remove_car_photo", car.owner_id, { title: car.title });
+  await logAdminAction(db, adminId, "remove_item_photo", car.owner_id, { title: car.title });
   refresh();
 }
 
-export async function adminClearCarDescription(f: FormData) {
+export async function adminClearItemDescription(f: FormData) {
   const { adminId, db } = await requireAdmin();
   const id = str(f, "id");
-  const { data: car } = await db.from("cars").select("owner_id, title").eq("id", id).maybeSingle();
+  const { data: car } = await db.from("items").select("owner_id, title").eq("id", id).maybeSingle();
   if (!car) return;
-  await db.from("cars").update({ description: null }).eq("id", id);
-  await logAdminAction(db, adminId, "clear_car_description", car.owner_id, { title: car.title });
+  await db.from("items").update({ description: null }).eq("id", id);
+  await logAdminAction(db, adminId, "clear_item_description", car.owner_id, { title: car.title });
   refresh();
 }
 
@@ -94,7 +94,7 @@ export async function adminDeleteAccount(f: FormData) {
     const { data: files } = await db.storage.from(bucket).list(userId, { limit: 1000 });
     if (files?.length) await db.storage.from(bucket).remove(files.map((x) => `${userId}/${x.name}`));
   }
-  await db.auth.admin.deleteUser(userId); // removes the profile, cars, comments and follows with it
+  await db.auth.admin.deleteUser(userId); // removes the profile, items, comments and follows with it
   await closeReports(db, adminId, userId);
   await logAdminAction(db, adminId, "delete_account", null, { username: p.username, reason: str(f, "reason") || null });
   refresh();

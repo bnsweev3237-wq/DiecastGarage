@@ -1,4 +1,4 @@
-import { avatarUrl } from "@/lib/cars";
+import { avatarUrl } from "@/lib/items";
 
 export default function Avatar({ path, username, size }: { path: string | null; username: string; size?: "small" }) {
   const cls = size === "small" ? "avatar small" : "avatar";

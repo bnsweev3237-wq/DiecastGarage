@@ -8,7 +8,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: { q?:
     db.from("profiles").select("id, username, is_public, created_at").order("created_at", { ascending: false }),
     db.auth.admin.listUsers({ perPage: 1000 }),
     db.from("memberships").select("user_id, status"),
-    db.from("cars").select("owner_id"),
+    db.from("items").select("owner_id"),
   ]);
   const email = new Map(auth?.users.map((u) => [u.id, u.email ?? ""]) ?? []);
   const status = new Map((members ?? []).map((m) => [m.user_id, m.status]));
@@ -23,7 +23,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: { q?:
         <button className="btn" type="submit">Search</button>
       </form>
       <div className="admin-table">
-        <div className="admin-row head"><span className="label">Collector</span><span className="label">Email</span><span className="label">Cars</span><span className="label">Plan</span><span className="label">Joined</span></div>
+        <div className="admin-row head"><span className="label">Collector</span><span className="label">Email</span><span className="label">Items</span><span className="label">Plan</span><span className="label">Joined</span></div>
         {rows.map((p) => (
           <Link key={p.id} href={`/admin/users/${p.id}`} className="admin-row">
             <span>@{p.username}{!p.is_public && <span className="hint"> · private</span>}</span>

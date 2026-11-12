@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next")?.startsWith("/") ? params.get("next")! : "/garage";
+  const next = params.get("next")?.startsWith("/") ? params.get("next")! : "/collection";
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 

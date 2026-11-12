@@ -5,7 +5,7 @@ import { submitReport, type FormState } from "@/app/actions";
 import { REPORT_REASONS, type ReportTarget } from "@/lib/reports";
 import SubmitButton from "./SubmitButton";
 
-const NOUN: Record<ReportTarget, string> = { car: "car", comment: "comment", profile: "collector" };
+const NOUN: Record<ReportTarget, string> = { item: "item", comment: "comment", profile: "collector" };
 
 export default function ReportButton({ type, id }: { type: ReportTarget; id: string }) {
   const [open, setOpen] = useState(false);

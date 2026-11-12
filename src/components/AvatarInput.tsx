@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { avatarUrl } from "@/lib/cars";
+import { avatarUrl } from "@/lib/items";
 
 // Center-crops to a square so every profile picture lines up the same way.
 async function squareCrop(file: File, size = 400): Promise<Blob> {

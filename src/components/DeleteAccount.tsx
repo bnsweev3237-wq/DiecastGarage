@@ -12,7 +12,7 @@ export default function DeleteAccount({ username, isMember }: { username: string
     <section className="card danger-zone">
       <h3>Delete my account</h3>
       <p className="hint">
-        Permanently deletes your account, cars, photos, sold listings, comments and follows. This can&apos;t be undone.
+        Permanently deletes your account, items, photos, sold listings, comments and follows. This can&apos;t be undone.
         {isMember && " Your membership will be cancelled, with no refund for the rest of the current period."}
       </p>
       {!open ? (

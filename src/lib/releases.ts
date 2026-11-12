@@ -4,6 +4,19 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.8",
+    date: "2026-11-12",
+    title: "Welcome to The Collectors Association",
+    changes: [
+      "New name and look: The Collectors Association, one home for collectors of everything.",
+      "Collect anything: trading cards, coins, comics, diecast, sneakers, toys, LEGO, Funko, vinyl, video games and more.",
+      "Each category has its own details, like set, card number and grade for cards, or year, mint mark and grade for coins.",
+      "Add the condition of each item, and whether it's still in its original packaging.",
+      "Filter your collection, Explore and For sale by category.",
+      "\"My garage\" is now \"My collection\". Old links still work.",
+    ],
+  },
+  {
     version: "0.7",
     date: "2026-11-11",
     title: "Diecast Garage is now Racasto",
@@ -20,7 +33,7 @@ export const releases: Release[] = [
     changes: [
       "A fresh, racing-inspired design across the whole site: bold slanted headings, a black header band and race-red accents.",
       "Collection pages open with a big header showing the collector, their stats and links.",
-      "Car cards show brand, scale, year and box at a glance, with an outline drawing until a photo is added.",
+      "Item cards show brand, scale, year and box at a glance, with an outline drawing until a photo is added.",
       "The site switches to a dark version automatically when your phone or computer is in dark mode.",
       "A cleaner header on phones, with sections you can swipe through.",
     ],

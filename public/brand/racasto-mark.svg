@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 0 142 130">
-  <path d="M34 9H124Q134 9 131 19L108 111Q105 121 95 121H6Q-4 121-1 111L22 19Q25 9 34 9Z" fill="#E1182F"/>
-  <g transform="translate(66 65) skewX(-14) translate(-66 -65)" fill="none">
-    <path d="M48 100V36H76A15 15 0 0 1 76 66H48M66 66L88 100" stroke="#fff" stroke-width="20"/>
-    <path d="M48 104V36H76A15 15 0 0 1 76 66H48M66 66L90 103" stroke="#E1182F" stroke-width="5"/>
-  </g>
-  <path d="M104 26H116L114 34H102Z" fill="#FFC72C"/>
-</svg>

@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link className="btn small" href="/admin">Overview</Link>
         <Link className={`btn small${openReports ? " flag" : ""}`} href="/admin/reports">Reports{openReports ? ` (${openReports})` : ""}</Link>
         <Link className="btn small" href="/admin/users">Users</Link>
-        <Link className="btn small" href="/admin/cars">Cars</Link>
+        <Link className="btn small" href="/admin/items">Items</Link>
         <Link className="btn small" href="/admin/comments">Comments</Link>
         <Link className="btn small" href="/admin/log">Activity log</Link>
       </nav>

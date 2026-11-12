@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CarTile from "@/components/CarTile";
+import ItemTile from "@/components/ItemTile";
 import Comments from "@/components/Comments";
 import FollowButton from "@/components/FollowButton";
 import Avatar from "@/components/Avatar";
 import SocialLinks from "@/components/SocialLinks";
 import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
-import { money, type Car } from "@/lib/cars";
+import { money, type Item } from "@/lib/items";
 
 export const dynamic = "force-dynamic";
 
@@ -26,17 +26,17 @@ export default async function Collection({ params, searchParams }: { params: { u
     // Counts come from a function so they stay right even when some follow lists are private.
     supabase.rpc("follow_counts", { p_profile: profile.id }).single(),
     user ? supabase.from("follows").select("followee_id").eq("follower_id", user.id).eq("followee_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
-    canView ? supabase.from("cars").select("*").eq("owner_id", profile.id).order("created_at", { ascending: false }) : Promise.resolve({ data: [] }),
+    canView ? supabase.from("items").select("*").eq("owner_id", profile.id).order("created_at", { ascending: false }) : Promise.resolve({ data: [] }),
     // Both return nothing unless the collector chose to show them (or it's their own page).
     supabase.rpc("profile_email", { p_profile: profile.id }),
-    canView ? supabase.rpc("car_values", { p_owner: profile.id }) : Promise.resolve({ data: [] }),
+    canView ? supabase.rpc("item_values", { p_owner: profile.id }) : Promise.resolve({ data: [] }),
     supabase.rpc("profile_location", { p_profile: profile.id }),
   ]);
-  const valueByCar = new Map(((values ?? []) as { car_id: string; value: number }[]).map((v) => [v.car_id, Number(v.value)]));
+  const valueByCar = new Map(((values ?? []) as { item_id: string; value: number }[]).map((v) => [v.item_id, Number(v.value)]));
   const showValues = isOwner ? profile.show_values : valueByCar.size > 0;
   const totalValue = [...valueByCar.values()].reduce((a, b) => a + b, 0);
   // Owners get their hidden cars back from the database; leave them out so this page matches what others see.
-  const mine = (cars ?? []) as Car[];
+  const mine = (cars ?? []) as Item[];
   const all = mine.filter((c) => !c.is_hidden);
   const hiddenCount = mine.length - all.length;
   for (const c of mine) if (c.is_hidden) valueByCar.delete(c.id);
@@ -67,7 +67,7 @@ export default async function Collection({ params, searchParams }: { params: { u
             </div>
           </div>
           <div className="stats">
-            <span><b>{canView ? all.length : "—"}</b>Cars</span>
+            <span><b>{canView ? all.length : "—"}</b>Items</span>
             <Link className="stat" href={`/c/${profile.username}/followers`}><b>{(counts as { followers: number } | null)?.followers ?? 0}</b>Followers</Link>
             <Link className="stat" href={`/c/${profile.username}/following`}><b>{(counts as { following: number } | null)?.following ?? 0}</b>Following</Link>
             {showValues && valueByCar.size > 0 && <span className="value"><b>{money(totalValue)}</b>Est. value</span>}
@@ -77,20 +77,20 @@ export default async function Collection({ params, searchParams }: { params: { u
 
     <main className="wrap">
       {!canView ? (
-        <div className="empty"><h3>This collection is private</h3><p>@{name} has chosen to keep their cars to themselves.</p></div>
+        <div className="empty"><h3>This collection is private</h3><p>@{name} has chosen to keep their collection to themselves.</p></div>
       ) : (
         <>
-          <nav className="tabs" aria-label="Filter cars">
-            <Link className={searchParams.filter !== "sale" ? "on" : undefined} href={`/c/${profile.username}`}>All cars ({all.length})</Link>
+          <nav className="tabs" aria-label="Filter items">
+            <Link className={searchParams.filter !== "sale" ? "on" : undefined} href={`/c/${profile.username}`}>All items ({all.length})</Link>
             {forSale > 0 && <Link className={searchParams.filter === "sale" ? "on" : undefined} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>}
           </nav>
           {isOwner && hiddenCount > 0 && (
-            <p className="notice">{hiddenCount} hidden car{hiddenCount > 1 ? "s aren't" : " isn't"} shown here. Only you can see {hiddenCount > 1 ? "them" : "it"}, in <Link href="/garage">My garage</Link>.</p>
+            <p className="notice">{hiddenCount} hidden item{hiddenCount > 1 ? "s aren't" : " isn't"} shown here. Only you can see {hiddenCount > 1 ? "them" : "it"}, in <Link href="/collection">My collection</Link>.</p>
           )}
           {shown.length ? (
-            <section className="gallery">{shown.map((c) => <CarTile key={c.id} car={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</section>
+            <section className="gallery">{shown.map((c) => <ItemTile key={c.id} item={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</section>
           ) : (
-            <div className="empty"><h3>No cars yet</h3>{isOwner && <Link className="btn primary" href="/garage/new">+ Add a car</Link>}</div>
+            <div className="empty"><h3>Nothing here yet</h3>{isOwner && <Link className="btn primary" href="/collection/new">+ Add an item</Link>}</div>
           )}
           <Comments profileId={profile.id} path={`/c/${profile.username}`} />
         </>

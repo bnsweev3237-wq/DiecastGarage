@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { paymentsEnabled, stripe } from "@/lib/stripe";
-import { isEbayUrl } from "@/lib/cars";
+import { isEbayUrl } from "@/lib/items";
+import { CATEGORIES, CONDITIONS, cleanAttributes } from "@/lib/categories";
 import { NETWORKS, normalizeSocial } from "@/lib/social";
 import { REPORT_REASONS } from "@/lib/reports";
 
@@ -20,21 +21,25 @@ function num(f: FormData, k: string) {
   return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : null;
 }
 
-function parseCar(f: FormData) {
+// Photos for items are still stored in the original "car-photos" bucket.
+function parseItem(f: FormData) {
   const forSale = f.get("for_sale") === "on";
   const ebayUrl = optStr(f, "ebay_url");
-  if (!str(f, "title")) return { error: "Give the car a name, like the driver, number and sponsor." };
-  if (forSale && !ebayUrl) return { error: "Add the eBay listing link to mark this car for sale." };
+  const category = CATEGORIES.some((c) => c.key === str(f, "category")) ? str(f, "category") : "other";
+  if (!str(f, "title")) return { error: "Give the item a name." };
+  if (forSale && !ebayUrl) return { error: "Add the eBay listing link to mark this item for sale." };
   if (forSale && ebayUrl && !isEbayUrl(ebayUrl))
     return { error: "The for-sale link must be an eBay listing that starts with https://www.ebay.com/ (or another eBay site)." };
   return {
-    car: {
+    item: {
       title: str(f, "title").slice(0, 160),
-      brand: optStr(f, "brand"),
-      scale: optStr(f, "scale"),
-      year: optStr(f, "year"),
+      category,
+      attributes: cleanAttributes(category, (k) => str(f, `a_${k}`)),
+      condition: CONDITIONS.some(([k]) => k === str(f, "condition")) ? str(f, "condition") : null,
+      brand: optStr(f, "brand")?.slice(0, 60) ?? null,
+      year: optStr(f, "year")?.slice(0, 12) ?? null,
       description: optStr(f, "description"),
-      boxed: f.get("boxed") === "on",
+      in_package: f.get("in_package") === "on",
       is_hidden: f.get("is_hidden") === "on",
       photo_path: optStr(f, "photo_path"),
       search_terms: optStr(f, "search_terms"),
@@ -52,75 +57,75 @@ function parseCar(f: FormData) {
 
 const dbError = (message: string) =>
   message.includes("FREE_LIMIT")
-    ? "Free accounts can keep up to 5 cars. Become a member in Settings to add more."
+    ? "Free accounts can keep up to 5 items. Become a member in Settings to add more."
     : message.includes("for_sale_needs_ebay_link")
       ? "The for-sale link must be an eBay listing."
       : "Couldn't save. Check your connection and try again.";
 
-export async function createCar(_: FormState, f: FormData): Promise<FormState> {
+export async function createItem(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
-  const parsed = parseCar(f);
+  const parsed = parseItem(f);
   if ("error" in parsed) return { error: parsed.error };
-  const { data, error } = await supabase.from("cars").insert(parsed.car).select("id").single();
+  const { data, error } = await supabase.from("items").insert(parsed.item).select("id").single();
   if (error) return { error: dbError(error.message) };
-  await supabase.from("car_purchases").insert({ car_id: data.id, ...parsed.purchase });
-  revalidatePath("/garage");
-  redirect(`/garage/${data.id}?added=1`);
+  await supabase.from("item_purchases").insert({ item_id: data.id, ...parsed.purchase });
+  revalidatePath("/collection");
+  redirect(`/collection/${data.id}?added=1`);
 }
 
-export async function updateCar(_: FormState, f: FormData): Promise<FormState> {
+export async function updateItem(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
   const id = str(f, "id");
-  const parsed = parseCar(f);
+  const parsed = parseItem(f);
   if ("error" in parsed) return { error: parsed.error };
-  const { data: before } = await supabase.from("cars").select("photo_path").eq("id", id).single();
-  const { error } = await supabase.from("cars").update(parsed.car).eq("id", id).eq("owner_id", user.id);
+  const { data: before } = await supabase.from("items").select("photo_path").eq("id", id).single();
+  const { error } = await supabase.from("items").update(parsed.item).eq("id", id).eq("owner_id", user.id);
   if (error) return { error: dbError(error.message) };
-  await supabase.from("car_purchases").upsert({ car_id: id, ...parsed.purchase });
-  if (before?.photo_path && before.photo_path !== parsed.car.photo_path)
+  await supabase.from("item_purchases").upsert({ item_id: id, ...parsed.purchase });
+  if (before?.photo_path && before.photo_path !== parsed.item.photo_path)
     await supabase.storage.from("car-photos").remove([before.photo_path]);
-  revalidatePath(`/garage/${id}`);
-  revalidatePath("/garage");
+  revalidatePath(`/collection/${id}`);
+  revalidatePath("/collection");
   return { ok: "Saved" };
 }
 
-export async function deleteCar(f: FormData) {
+export async function deleteItem(f: FormData) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
   const id = str(f, "id");
-  const { data } = await supabase.from("cars").select("photo_path").eq("id", id).single();
-  await supabase.from("cars").delete().eq("id", id).eq("owner_id", user.id);
+  const { data } = await supabase.from("items").select("photo_path").eq("id", id).single();
+  await supabase.from("items").delete().eq("id", id).eq("owner_id", user.id);
   if (data?.photo_path) await supabase.storage.from("car-photos").remove([data.photo_path]);
-  revalidatePath("/garage");
-  redirect("/garage");
+  revalidatePath("/collection");
+  redirect("/collection");
 }
 
 export async function addComp(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
-  const carId = str(f, "car_id");
+  const carId = str(f, "item_id");
   const price = num(f, "price");
   if (!price) return { error: "Enter what it sold for." };
   const note = str(f, "note");
   const isUrl = /^https?:\/\//i.test(note);
   const source = ["eBay", "Facebook", "Other"].includes(str(f, "source")) ? str(f, "source") : "Other";
   const { error } = await supabase.from("comps").insert({
-    car_id: carId, price, source, sold_on: optStr(f, "sold_on"),
+    item_id: carId, price, source, sold_on: optStr(f, "sold_on"),
     url: isUrl ? note.slice(0, 600) : null, note: isUrl ? null : note.slice(0, 200) || null,
   });
   if (error) return { error: "Couldn't log that sale. Try again." };
-  revalidatePath(`/garage/${carId}`);
-  revalidatePath("/garage");
+  revalidatePath(`/collection/${carId}`);
+  revalidatePath("/collection");
   return { ok: "Sold listing logged" };
 }
 
 export async function removeComp(f: FormData) {
   const { supabase } = await getUser();
   await supabase.from("comps").delete().eq("id", str(f, "id"));
-  revalidatePath(`/garage/${str(f, "car_id")}`);
-  revalidatePath("/garage");
+  revalidatePath(`/collection/${str(f, "item_id")}`);
+  revalidatePath("/collection");
 }
 
 export async function toggleFollow(f: FormData) {
@@ -143,7 +148,7 @@ export async function addComment(_: FormState, f: FormData): Promise<FormState> 
   if (!body) return { error: "Write something first." };
   if (body.length > 1000) return { error: "Keep comments under 1,000 characters." };
   const { error } = await supabase.from("comments").insert({
-    profile_id: str(f, "profile_id"), car_id: optStr(f, "car_id"), body,
+    profile_id: str(f, "profile_id"), item_id: optStr(f, "item_id"), body,
   });
   if (error) return { error: "Couldn't post your comment. Try again." };
   revalidatePath(str(f, "path"));
@@ -198,7 +203,7 @@ export async function submitReport(_: FormState, f: FormData): Promise<FormState
   const reason = str(f, "reason");
   const type = str(f, "target_type");
   if (!REPORT_REASONS.some(([k]) => k === reason)) return { error: "Choose a reason." };
-  if (!["car", "comment", "profile"].includes(type)) return { error: "Couldn't send that report." };
+  if (!["item", "comment", "profile"].includes(type)) return { error: "Couldn't send that report." };
   const { error } = await supabase.from("reports").insert({
     target_type: type, target_id: str(f, "target_id"), reason, details: str(f, "details").slice(0, 1000) || null,
   });
@@ -226,7 +231,7 @@ export async function deleteMyAccount(_: FormState, f: FormData): Promise<FormSt
     const { data: files } = await db.storage.from(bucket).list(user.id, { limit: 1000 });
     if (files?.length) await db.storage.from(bucket).remove(files.map((x) => `${user.id}/${x.name}`));
   }
-  const { error } = await db.auth.admin.deleteUser(user.id); // the profile, cars, comments and follows go with it
+  const { error } = await db.auth.admin.deleteUser(user.id); // the profile, items, comments and follows go with it
   if (error) return { error: "Couldn't delete your account. Try again in a minute." };
   await supabase.auth.signOut();
   revalidatePath("/", "layout");

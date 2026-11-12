@@ -6,7 +6,7 @@ import { requireAdmin, when } from "@/lib/admin";
 export default async function AdminComments() {
   const { db } = await requireAdmin();
   const { data } = await db.from("comments")
-    .select("id, body, created_at, car_id, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)")
+    .select("id, body, created_at, item_id, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)")
     .order("created_at", { ascending: false }).limit(200);
   return (
     <section className="card">
@@ -19,7 +19,7 @@ export default async function AdminComments() {
             <div key={c.id} className="admin-row">
               <span className="hint">
                 <Link href={`/admin/users/${author.id}`}>@{author.username}</Link> on{" "}
-                <Link href={c.car_id ? `/c/${on}/${c.car_id}` : `/c/${on}`}>@{on}{c.car_id ? "'s car" : ""}</Link> · {when(c.created_at)}
+                <Link href={c.item_id ? `/c/${on}/${c.item_id}` : `/c/${on}`}>@{on}{c.item_id ? "'s item" : ""}</Link> · {when(c.created_at)}
               </span>
               <span className="admin-text">{c.body}</span>
               <ConfirmAction action={adminDeleteComment} fields={{ id: c.id }} label="Delete" confirmText="Delete this comment?" />

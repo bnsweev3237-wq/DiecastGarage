@@ -1,17 +1,14 @@
-// The Racasto mark: a slanted red tile with the twin-stripe R and a yellow tab.
+// The Collectors Association mark: chunky "TCA" standing on a rounded coral plinth with two bolts.
 // Brand files for print and social live in public/brand.
-export const BRAND_RED = "#E1182F";
-export const BRAND_GOLD = "#FFC72C";
+export const BRAND_CORAL = "#FF6B4A";
 
-export function LogoMark({ size = 32 }: { size?: number }) {
+export function LogoMark({ height = 40 }: { height?: number }) {
   return (
-    <svg width={size * (142 / 130)} height={size} viewBox="-6 0 142 130" aria-hidden="true" className="logo-mark">
-      <path d="M34 9H124Q134 9 131 19L108 111Q105 121 95 121H6Q-4 121-1 111L22 19Q25 9 34 9Z" fill={BRAND_RED} />
-      <g transform="translate(66 65) skewX(-14) translate(-66 -65)" fill="none">
-        <path d="M48 100V36H76A15 15 0 0 1 76 66H48M66 66L88 100" stroke="#fff" strokeWidth="20" />
-        <path d="M48 104V36H76A15 15 0 0 1 76 66H48M66 66L90 103" stroke={BRAND_RED} strokeWidth="5" />
-      </g>
-      <path d="M104 26H116L114 34H102Z" fill={BRAND_GOLD} />
+    <svg height={height} width={height * (140 / 96)} viewBox="0 0 140 96" aria-hidden="true" className="logo-mark">
+      <text x="70" y="58" textAnchor="middle" fontFamily="Rubik, system-ui, sans-serif" fontWeight="900" fontSize="56" letterSpacing="-1" fill="currentColor">TCA</text>
+      <rect x="10" y="66" width="120" height="18" rx="9" fill={BRAND_CORAL} />
+      <circle cx="22" cy="75" r="3" fill="var(--panel, #fff)" />
+      <circle cx="118" cy="75" r="3" fill="var(--panel, #fff)" />
     </svg>
   );
 }
@@ -19,8 +16,8 @@ export function LogoMark({ size = 32 }: { size?: number }) {
 export default function Logo() {
   return (
     <>
-      <LogoMark size={34} />
-      <span className="logo-word">Racasto</span>
+      <LogoMark />
+      <span className="logo-word">The Collectors<br />Association</span>
     </>
   );
 }

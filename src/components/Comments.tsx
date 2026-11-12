@@ -5,14 +5,14 @@ import CommentForm from "./CommentForm";
 import Avatar from "./Avatar";
 import ReportButton from "./ReportButton";
 
-type Props = { profileId: string; carId?: string; path: string };
+type Props = { profileId: string; itemId?: string; path: string };
 
-export default async function Comments({ profileId, carId, path }: Props) {
+export default async function Comments({ profileId, itemId, path }: Props) {
   const { supabase, user } = await getUser();
   let q = supabase.from("comments")
     .select("id, body, created_at, author_id, author:profiles!comments_author_id_fkey(username, avatar_path)")
     .eq("profile_id", profileId).order("created_at", { ascending: false }).limit(100);
-  q = carId ? q.eq("car_id", carId) : q.is("car_id", null);
+  q = itemId ? q.eq("item_id", itemId) : q.is("item_id", null);
   const [{ data }, { data: allowed }, { data: owner }] = await Promise.all([
     q,
     user ? supabase.rpc("can_comment", { p_profile: profileId }) : Promise.resolve({ data: false }),
@@ -28,7 +28,7 @@ export default async function Comments({ profileId, carId, path }: Props) {
     <section className="card">
       <h3>Comments <span className="hint">({comments.length})</span></h3>
       {!user ? <p className="hint"><Link href={`/login?next=${encodeURIComponent(path)}`}>Sign in</Link> to leave a comment.</p>
-        : allowed ? <CommentForm profileId={profileId} carId={carId} path={path} />
+        : allowed ? <CommentForm profileId={profileId} itemId={itemId} path={path} />
         : <p className="hint">{closedMessage}</p>}
       <div className="comments">
         {comments.map((c) => (

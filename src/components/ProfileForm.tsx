@@ -50,12 +50,12 @@ export default function ProfileForm({ fullName, email, bio, isPublic, showEmail,
 
       <h3>Privacy</h3>
       <label className="check" htmlFor="is_public"><input id="is_public" name="is_public" type="checkbox" defaultChecked={isPublic} /> Make my collection public</label>
-      <p className="hint">Public: anyone can see your cars, follow you and comment. Private: only you can see your cars, and your for-sale cars stay off the For sale page.</p>
+      <p className="hint">Public: anyone can see your collection, follow you and comment. Private: only you can see your items, and your for-sale items stay off the For sale page.</p>
       <label className="check" htmlFor="show_email"><input id="show_email" name="show_email" type="checkbox" defaultChecked={showEmail} /> Show my email address ({email}) on my public page</label>
-      <label className="check" htmlFor="show_location"><input id="show_location" name="show_location" type="checkbox" defaultChecked={showLocation} /> Show my location on my public page and for-sale cars</label>
+      <label className="check" htmlFor="show_location"><input id="show_location" name="show_location" type="checkbox" defaultChecked={showLocation} /> Show my location on my public page and for-sale items</label>
       <label className="check" htmlFor="show_follows"><input id="show_follows" name="show_follows" type="checkbox" defaultChecked={showFollows} /> Show who I follow and who follows me</label>
-      <label className="check" htmlFor="show_values"><input id="show_values" name="show_values" type="checkbox" defaultChecked={showValues} /> Show my cars&apos; estimated values</label>
-      <p className="hint">These only apply while your collection is public. To hide a single car, open it in My garage and tick Hide.</p>
+      <label className="check" htmlFor="show_values"><input id="show_values" name="show_values" type="checkbox" defaultChecked={showValues} /> Show my items&apos; estimated values</label>
+      <p className="hint">These only apply while your collection is public. To hide a single item, open it in My collection and tick Hide.</p>
       <div className="field"><label className="label" htmlFor="comments_from">Who can comment on my collection</label>
         <select id="comments_from" name="comments_from" defaultValue={commentsFrom}>
           <option value="everyone">Everyone signed in</option>

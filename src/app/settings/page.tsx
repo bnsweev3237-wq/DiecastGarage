@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
 import DeleteAccount from "@/components/DeleteAccount";
 import { getUser } from "@/lib/supabase/server";
-import { FREE_CAR_LIMIT, isActiveMembership } from "@/lib/limits";
+import { FREE_ITEM_LIMIT, isActiveMembership } from "@/lib/limits";
 import { paymentsEnabled } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export default async function Settings({ searchParams }: { searchParams: { membe
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("profile_private").select("full_name, location").eq("id", user.id).maybeSingle(),
     supabase.from("memberships").select("*").eq("user_id", user.id).single(),
-    supabase.from("cars").select("id", { count: "exact", head: true }).eq("owner_id", user.id),
+    supabase.from("items").select("id", { count: "exact", head: true }).eq("owner_id", user.id),
   ]);
   const member = isActiveMembership(m?.status);
   const renews = m?.current_period_end ? new Date(m.current_period_end).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
@@ -38,21 +38,21 @@ export default async function Settings({ searchParams }: { searchParams: { membe
         <div className="plan">
           <div className={member ? "" : "on"}>
             <span className="label">Free</span>
-            <ul><li>Up to {FREE_CAR_LIMIT} cars</li><li>Value tracking, follows and comments</li></ul>
+            <ul><li>Up to {FREE_ITEM_LIMIT} items</li><li>Value tracking, follows and comments</li></ul>
           </div>
           <div className={member ? "on" : ""}>
             <span className="label">Member</span>
-            <ul><li>Unlimited cars</li><li>Everything in Free</li></ul>
+            <ul><li>Unlimited items</li><li>Everything in Free</li></ul>
           </div>
         </div>
         {member ? (
           <>
-            <p className="hint">You&apos;re a member{renews ? `. Renews ${renews}` : ""}. You have {count ?? 0} cars.</p>
+            <p className="hint">You&apos;re a member{renews ? `. Renews ${renews}` : ""}. You have {count ?? 0} items.</p>
             <form action="/api/stripe/portal" method="post"><button className="btn" type="submit">Manage or cancel membership</button></form>
           </>
         ) : (
           <>
-            <p className="hint">You&apos;re using {count ?? 0} of {FREE_CAR_LIMIT} free cars. Payment is handled securely by Stripe.</p>
+            <p className="hint">You&apos;re using {count ?? 0} of {FREE_ITEM_LIMIT} free items. Payment is handled securely by Stripe.</p>
             {paymentsEnabled()
               ? <form action="/api/stripe/checkout" method="post"><button className="btn flag" type="submit">Become a member</button></form>
               : <p className="notice">Memberships are coming soon.</p>}

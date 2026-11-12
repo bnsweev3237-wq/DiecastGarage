@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { photoUrl } from "@/lib/cars";
+import { photoUrl } from "@/lib/items";
 
 async function shrink(file: File, max = 1600, quality = 0.85): Promise<Blob> {
   const bmp = await createImageBitmap(file);
@@ -39,7 +39,7 @@ export default function PhotoInput({ userId, initial, title }: { userId: string;
   return (
     <div className="field full">
       <input type="hidden" name="photo_path" value={path ?? ""} />
-      {src ? <img className="photo" src={src} alt={`Photo of ${title || "this car"}`} />
+      {src ? <img className="photo" src={src} alt={`Photo of ${title || "this item"}`} />
         : <label className="photo" htmlFor="photo">+ Add a photo</label>}
       <div className="actions">
         <label className="btn small" htmlFor="photo">{src ? "Replace photo" : "Choose photo"}</label>

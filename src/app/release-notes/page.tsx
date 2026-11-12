@@ -8,7 +8,7 @@ export default function ReleaseNotes() {
       <div className="head">
         <div>
           <h1>Release notes</h1>
-          <p>What&apos;s new in Racasto. Versions start at 0.x during testing; 1.0 is the first public release.</p>
+          <p>What&apos;s new at The Collectors Association. Versions start at 0.x during testing; 1.0 is the first public release.</p>
         </div>
       </div>
       {releases.map((r) => (

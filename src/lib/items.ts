@@ -1,12 +1,14 @@
-export type Car = {
+export type Item = {
   id: string;
   owner_id: string;
   title: string;
+  category: string;
+  attributes: Record<string, string> | null;
+  condition: string | null;
   brand: string | null;
-  scale: string | null;
   year: string | null;
   description: string | null;
-  boxed: boolean;
+  in_package: boolean;
   is_hidden: boolean;
   photo_path: string | null;
   search_terms: string | null;
@@ -26,11 +28,6 @@ export type Comp = {
   url: string | null;
   note: string | null;
 };
-
-export const BRANDS = ["Lionel Racing", "Action", "Racing Champions", "Revell", "Team Caliber", "Press Pass", "Wheels",
-  "University of Racing", "Hot Wheels", "Matchbox", "Greenlight", "Maisto", "Bburago", "Minichamps", "Spark", "AUTOart",
-  "Kyosho", "Tecnomodel", "Ertl", "Johnny Lightning"];
-export const SCALES = ["1:64", "1:43", "1:32", "1:24", "1:18", "1:12", "1:87"];
 
 // Keep in sync with the for_sale_needs_ebay_link check in the migration.
 const EBAY_URL = /^https:\/\/([a-z0-9-]+\.)*ebay\.(com|us|ca|co\.uk|com\.au|de|fr|it|es|ie|at|ch|nl|be|pl|com\.sg|com\.my|ph|in)\//i;
@@ -74,8 +71,13 @@ export function valueOf(purchase: Purchase | null, comps: Comp[]) {
   return est ? { value: est.median, manual: false, est } : null;
 }
 
-export const searchTerms = (car: Pick<Car, "title" | "brand" | "scale" | "search_terms">) =>
-  (car.search_terms || [car.title, car.brand, car.scale, "diecast"].filter(Boolean).join(" ")).trim();
+// What to search for on eBay and Facebook when looking up sold listings.
+export function searchTerms(item: Pick<Item, "title" | "brand" | "category" | "attributes" | "search_terms">) {
+  if (item.search_terms) return item.search_terms.trim();
+  const attrs = item.attributes ?? {};
+  const keys = ["scale", "set", "number", "grade", "issue", "denomination", "mint_mark", "set_number", "platform", "size"];
+  return [item.title, item.brand, ...keys.map((k) => attrs[k])].filter(Boolean).join(" ").trim();
+}
 export const ebaySoldUrl = (q: string) =>
   `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(q)}&LH_Sold=1&LH_Complete=1&_sop=13`;
 export const facebookUrl = (q: string) => `https://www.facebook.com/marketplace/search/?query=${encodeURIComponent(q)}`;

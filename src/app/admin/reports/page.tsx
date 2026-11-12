@@ -1,12 +1,12 @@
 import Link from "next/link";
 import ConfirmAction from "@/components/ConfirmAction";
 import SubmitButton from "@/components/SubmitButton";
-import { adminCloseReport, adminDeleteCar, adminDeleteComment } from "@/app/admin/actions";
+import { adminCloseReport, adminDeleteItem, adminDeleteComment } from "@/app/admin/actions";
 import { requireAdmin, when } from "@/lib/admin";
-import { photoUrl } from "@/lib/cars";
+import { photoUrl } from "@/lib/items";
 import { reasonLabel } from "@/lib/reports";
 
-type Report = { id: string; target_type: "car" | "comment" | "profile"; target_id: string; reason: string; details: string | null; created_at: string; reporter: { username: string } | null };
+type Report = { id: string; target_type: "item" | "comment" | "profile"; target_id: string; reason: string; details: string | null; created_at: string; reporter: { username: string } | null };
 
 export default async function AdminReports({ searchParams }: { searchParams: { show?: string } }) {
   const { db } = await requireAdmin();
@@ -21,8 +21,8 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
   for (const r of reports) groups.set(r.target_id, [...(groups.get(r.target_id) ?? []), r]);
   const ids = (t: string) => [...new Set(reports.filter((r) => r.target_type === t).map((r) => r.target_id))];
   const [{ data: cars }, { data: comments }, { data: profiles }] = await Promise.all([
-    db.from("cars").select("id, title, description, photo_path, owner:profiles(id, username)").in("id", ids("car")),
-    db.from("comments").select("id, body, car_id, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)").in("id", ids("comment")),
+    db.from("items").select("id, title, description, photo_path, owner:profiles(id, username)").in("id", ids("item")),
+    db.from("comments").select("id, body, item_id, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)").in("id", ids("comment")),
     db.from("profiles").select("id, username, bio").in("id", ids("profile")),
   ]);
   const car = new Map((cars ?? []).map((c) => [c.id, c]));
@@ -35,10 +35,10 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
         <Link className={`btn small${closed ? "" : " primary"}`} href="/admin/reports">Open</Link>
         <Link className={`btn small${closed ? " primary" : ""}`} href="/admin/reports?show=closed">Closed</Link>
       </div>
-      {!groups.size && <div className="empty"><h3>{closed ? "No closed reports" : "No open reports"}</h3>{!closed && <p>When collectors report a car, comment or profile, it shows up here.</p>}</div>}
+      {!groups.size && <div className="empty"><h3>{closed ? "No closed reports" : "No open reports"}</h3>{!closed && <p>When collectors report an item, comment or profile, it shows up here.</p>}</div>}
       {[...groups.entries()].map(([targetId, rs]) => {
         const first = rs[0];
-        const c = first.target_type === "car" ? car.get(targetId) : undefined;
+        const c = first.target_type === "item" ? car.get(targetId) : undefined;
         const k = first.target_type === "comment" ? comment.get(targetId) : undefined;
         const p = first.target_type === "profile" ? profile.get(targetId) : undefined;
         const carOwner = c?.owner as unknown as { id: string; username: string } | undefined;
@@ -65,7 +65,7 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
             )}
             {k && (
               <div>
-                <div className="hint"><Link href={`/admin/users/${author?.id}`}>@{author?.username}</Link> on {(k.profile as unknown as { username: string }).username}&apos;s {k.car_id ? "car" : "collection"}</div>
+                <div className="hint"><Link href={`/admin/users/${author?.id}`}>@{author?.username}</Link> on {(k.profile as unknown as { username: string }).username}&apos;s {k.item_id ? "item" : "collection"}</div>
                 <p className="admin-text">{k.body}</p>
               </div>
             )}
@@ -88,7 +88,7 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
 
             {!closed && (
               <div className="actions">
-                {c && <ConfirmAction action={adminDeleteCar} fields={{ id: c.id }} label="Delete car" confirmText="Delete this car, its photo and comments? Its reports close too." />}
+                {c && <ConfirmAction action={adminDeleteItem} fields={{ id: c.id }} label="Delete item" confirmText="Delete this item, its photo and comments? Its reports close too." />}
                 {k && <ConfirmAction action={adminDeleteComment} fields={{ id: k.id }} label="Delete comment" confirmText="Delete this comment? Its reports close too." />}
                 {p && <Link className="btn small" href={`/admin/users/${p.id}`}>Review account</Link>}
                 <form action={adminCloseReport}>

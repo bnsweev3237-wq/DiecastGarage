@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import ConfirmAction from "@/components/ConfirmAction";
 import SubmitButton from "@/components/SubmitButton";
-import { adminClearProfile, adminDeleteAccount, adminDeleteCar, adminDeleteComment, adminRemoveCarPhoto, adminClearCarDescription } from "@/app/admin/actions";
+import { adminClearProfile, adminDeleteAccount, adminDeleteItem, adminDeleteComment, adminRemoveItemPhoto, adminClearItemDescription } from "@/app/admin/actions";
 import { requireAdmin, when } from "@/lib/admin";
-import { money, photoUrl, valueOf, type Car, type Comp, type Purchase } from "@/lib/cars";
+import { money, photoUrl, valueOf, type Item, type Comp, type Purchase } from "@/lib/items";
 import { NETWORKS } from "@/lib/social";
 
 export default async function AdminUser({ params }: { params: { id: string } }) {
@@ -15,14 +15,14 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
     db.from("profile_private").select("*").eq("id", params.id).maybeSingle(),
     db.auth.admin.getUserById(params.id),
     db.from("memberships").select("*").eq("user_id", params.id).maybeSingle(),
-    db.from("cars").select("*, car_purchases(*), comps(*)").eq("owner_id", params.id).order("created_at", { ascending: false }),
+    db.from("items").select("*, item_purchases(*), comps(*)").eq("owner_id", params.id).order("created_at", { ascending: false }),
     db.from("comments").select("id, body, created_at, profile:profiles!comments_profile_id_fkey(username)").eq("author_id", params.id).order("created_at", { ascending: false }).limit(100),
     db.from("comments").select("id, body, created_at, author:profiles!comments_author_id_fkey(username)").eq("profile_id", params.id).order("created_at", { ascending: false }).limit(100),
     db.from("admins").select("user_id").eq("user_id", params.id).maybeSingle(),
   ]);
   if (!p) notFound();
   const u = auth?.user;
-  const rows = (cars ?? []) as (Car & { car_purchases: Purchase | null; comps: Comp[] })[];
+  const rows = (cars ?? []) as (Item & { item_purchases: Purchase | null; comps: Comp[] })[];
   const links = NETWORKS.filter((n) => p[n.key]);
 
   return (
@@ -63,10 +63,10 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
       </section>
 
       <section className="card">
-        <h3>Cars ({rows.length})</h3>
+        <h3>Items ({rows.length})</h3>
         <div className="admin-table">
           {rows.map((c) => {
-            const v = valueOf(c.car_purchases, c.comps);
+            const v = valueOf(c.item_purchases, c.comps);
             const src = photoUrl(c.photo_path);
             return (
               <div key={c.id} className="admin-row car-row">
@@ -77,16 +77,16 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
                     <div className="meta">
                       {c.is_hidden && <span className="chip box">Hidden</span>}
                       {c.for_sale && <span className="chip sale">For sale</span>}
-                      <span className="hint">Paid {money(c.car_purchases?.paid ?? null, 2)} · value {v ? money(v.value, 2) : "—"}</span>
+                      <span className="hint">Paid {money(c.item_purchases?.paid ?? null, 2)} · value {v ? money(v.value, 2) : "—"}</span>
                       {c.ebay_url && <a href={c.ebay_url} target="_blank" rel="noopener noreferrer nofollow">eBay listing ↗</a>}
                     </div>
                     {c.description && <p className="admin-text hint">{c.description}</p>}
                   </div>
                 </div>
                 <div className="actions">
-                  {c.photo_path && <ConfirmAction action={adminRemoveCarPhoto} fields={{ id: c.id }} label="Remove photo" confirmText="Remove this photo?" />}
-                  {c.description && <ConfirmAction action={adminClearCarDescription} fields={{ id: c.id }} label="Remove description" confirmText="Clear this description?" />}
-                  <ConfirmAction action={adminDeleteCar} fields={{ id: c.id }} label="Delete car" confirmText="Delete this car, its photo and its comments?" />
+                  {c.photo_path && <ConfirmAction action={adminRemoveItemPhoto} fields={{ id: c.id }} label="Remove photo" confirmText="Remove this photo?" />}
+                  {c.description && <ConfirmAction action={adminClearItemDescription} fields={{ id: c.id }} label="Remove description" confirmText="Clear this description?" />}
+                  <ConfirmAction action={adminDeleteItem} fields={{ id: c.id }} label="Delete item" confirmText="Delete this item, its photo and its comments?" />
                 </div>
               </div>
             );
@@ -124,7 +124,7 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
       {!isAdmin && (
         <section className="card danger-zone">
           <h3>Delete account</h3>
-          <p className="hint">Permanently deletes @{p.username}&apos;s login, profile, cars, photos, comments and follows. This can&apos;t be undone.</p>
+          <p className="hint">Permanently deletes @{p.username}&apos;s login, profile, items, photos, comments and follows. This can&apos;t be undone.</p>
           <form action={adminDeleteAccount} className="grid2">
             <input type="hidden" name="user_id" value={p.id} />
             <div className="field"><label className="label" htmlFor="confirm">Type {p.username} to confirm</label><input id="confirm" name="confirm" required autoComplete="off" /></div>

@@ -7,15 +7,15 @@ import { currentVersion } from "@/lib/releases";
 import { LEGAL_PAGES_LIVE } from "@/lib/legal-flags";
 import "./globals.css";
 
-const description = "The Diecast Racing Society. Show off your race car diecast collection, follow other collectors, and value your cars from real sold listings.";
+const description = "One home for collectors of everything. Catalog your cards, coins, comics, diecast, sneakers, toys and more, follow other collectors, and value your items from real sold listings.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: { default: "Racasto · The Diecast Racing Society", template: "%s · Racasto" },
+  title: { default: "The Collectors Association", template: "%s · The Collectors Association" },
   description,
-  applicationName: "Racasto",
-  openGraph: { siteName: "Racasto", title: "Racasto · The Diecast Racing Society", description, type: "website" },
-  twitter: { card: "summary_large_image", title: "Racasto · The Diecast Racing Society", description },
+  applicationName: "The Collectors Association",
+  openGraph: { siteName: "The Collectors Association", title: "The Collectors Association", description, type: "website" },
+  twitter: { card: "summary_large_image", title: "The Collectors Association", description },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -32,19 +32,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,900&family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap"
         />
       </head>
       <body>
         <nav className="nav">
           <div className="nav-in">
-            <Link href="/" className="logo" aria-label="Racasto home">
+            <Link href="/" className="logo" aria-label="The Collectors Association home">
               <Logo />
             </Link>
             <NavLinks items={[
               { href: "/", label: "Explore" },
               { href: "/for-sale", label: "For sale" },
-              ...(user ? [{ href: "/feed", label: "Following" }, { href: "/garage", label: "My garage" }] : []),
+              ...(user ? [{ href: "/feed", label: "Following" }, { href: "/collection", label: "My collection" }] : []),
               ...(isAdmin === true ? [{ href: "/admin", label: "Admin" }] : []),
             ]} />
             <div className="nav-right">
@@ -65,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {children}
         <footer className="footer">
           <div className="footer-in">
-            <span>Racasto · The Diecast Racing Society · <span className="num">v{currentVersion}</span> test version</span>
+            <span>The Collectors Association · <span className="num">v{currentVersion}</span> test version</span>
             <Link href="/release-notes">Release notes</Link>
             {LEGAL_PAGES_LIVE && <><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></>}
           </div>
