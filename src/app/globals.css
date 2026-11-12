@@ -276,4 +276,14 @@ body > main { flex: 1 0 auto; width: 100%; }
   .nav-links a { padding: 7px 14px; white-space: nowrap; }
   .band h1 { font-size: 40px; }
   h1 { font-size: 34px; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scrollbar-width: none; }
+  .tabs a { white-space: nowrap; flex: none; }
 }
+
+/* install-the-app banner */
+.install-banner { position: fixed; z-index: 30; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-width: 520px; margin: 0 auto; display: flex; align-items: center; gap: 12px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 12px 12px 12px 14px; box-shadow: 0 12px 32px rgb(0 0 0 / .18); }
+.install-banner img { border-radius: 11px; flex: none; }
+.install-text { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 14px; line-height: 1.35; }
+.install-text span { color: var(--muted); }

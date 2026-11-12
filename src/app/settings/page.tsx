@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
 import DeleteAccount from "@/components/DeleteAccount";
+import { InstallSection } from "@/components/InstallApp";
 import { getUser } from "@/lib/supabase/server";
 import { FREE_ITEM_LIMIT, isActiveMembership } from "@/lib/limits";
 import { paymentsEnabled } from "@/lib/stripe";
@@ -59,6 +60,8 @@ export default async function Settings({ searchParams }: { searchParams: { membe
           </>
         )}
       </section>
+
+      <InstallSection />
 
       <form action="/auth/signout" method="post"><button className="btn" type="submit">Sign out</button></form>
 

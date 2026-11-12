@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
 import Logo from "@/components/Logo";
+import { InstallBanner, ServiceWorker } from "@/components/InstallApp";
 import { getUser } from "@/lib/supabase/server";
 import { currentVersion } from "@/lib/releases";
 import { LEGAL_PAGES_LIVE } from "@/lib/legal-flags";
@@ -16,6 +17,18 @@ export const metadata: Metadata = {
   applicationName: "The Collectors Association",
   openGraph: { siteName: "The Collectors Association", title: "The Collectors Association", description, type: "website" },
   twitter: { card: "summary_large_image", title: "The Collectors Association", description },
+  appleWebApp: { capable: true, title: "TCA", statusBarStyle: "default" },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#18181a" },
+  ],
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -63,6 +76,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </nav>
         {children}
+        <InstallBanner />
+        <ServiceWorker />
         <footer className="footer">
           <div className="footer-in">
             <span>The Collectors Association · <span className="num">v{currentVersion}</span> test version</span>

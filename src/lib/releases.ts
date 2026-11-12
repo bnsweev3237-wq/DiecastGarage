@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.9",
+    date: "2026-11-12",
+    title: "Install the app",
+    changes: [
+      "Add The Collectors Association to your phone's home screen or your computer like an app: tap Install on Android and in Chrome or Edge, or Share then Add to Home Screen on iPhone.",
+      "Opens full-screen with its own icon, and long-press the icon for shortcuts to Add an item and My collection.",
+      "A friendly page instead of an error when you're offline.",
+      "Find install instructions any time under Settings, Get the app.",
+    ],
+  },
+  {
     version: "0.8",
     date: "2026-11-12",
     title: "Welcome to The Collectors Association",
