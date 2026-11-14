@@ -6,7 +6,7 @@ import DeleteItem from "@/components/DeleteItem";
 import { removeComp } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
 import { conditionLabel } from "@/lib/categories";
-import { certLabel, ebaySoldUrl, facebookUrl, money, searchTerms, signed, totalCost, valueOf, type Item, type Comp, type Purchase } from "@/lib/items";
+import { certLabel, ebaySoldUrl, facebookUrl, money, searchTerms, signed, totalCost, valueCost, valueOf, type Item, type Comp, type Purchase } from "@/lib/items";
 
 export const dynamic = "force-dynamic";
 
@@ -22,9 +22,11 @@ export default async function EditItem({ params, searchParams }: { params: { id:
   const purchase = c.item_purchases;
   const comps = [...c.comps].sort((a, b) => (b.sold_on ?? "").localeCompare(a.sold_on ?? ""));
   const v = valueOf(purchase, comps);
-  const cost = totalCost(purchase);
-  const extras = cost != null && cost !== Number(purchase!.paid);
   const sold = c.status === "sold";
+  // Sold items count everything you spent; estimated value is compared without shipping, like sold listings.
+  const cost = sold ? totalCost(purchase) : valueCost(purchase);
+  const extras = cost != null && cost !== Number(purchase!.paid);
+  const shippingLeftOut = !sold && purchase?.paid != null && Number(purchase.shipping ?? 0) > 0;
   const soldFor = sold && purchase?.sold_price != null ? Number(purchase.sold_price) : null;
   const gain = sold ? (soldFor != null && cost != null ? soldFor - cost : null) : v && cost != null ? v.value - cost : null;
   const terms = searchTerms(c);
@@ -44,10 +46,11 @@ export default async function EditItem({ params, searchParams }: { params: { id:
             <div className="est">
               {sold ? <div><span className="label">Sold for</span><div className="v">{soldFor != null ? money(soldFor, 2) : "—"}</div></div>
                 : <div><span className="label">{v?.manual ? (c.status === "wishlist" ? "Target price" : "Your value") : "Median sold"}</span><div className="v">{v ? money(v.value, 2) : "—"}</div></div>}
-              {c.status !== "wishlist" && <div><span className="label">{extras ? "Total cost" : "Paid"}</span><div className="v">{cost != null ? money(cost, 2) : "—"}</div></div>}
+              {c.status !== "wishlist" && <div><span className="label">{extras ? (sold ? "Total cost" : "Cost") : "Paid"}</span><div className="v">{cost != null ? money(cost, 2) : "—"}</div></div>}
               {c.status !== "wishlist" && <div><span className="label">{sold ? "Profit" : "Gain / loss"}</span><div className={`v ${gain == null ? "" : gain >= 0 ? "up" : "down"}`}>{gain == null ? "—" : signed(Math.round(gain))}</div></div>}
             </div>
-            {extras && <p className="hint">Total cost is {money(Number(purchase!.paid), 2)} paid{purchase!.shipping ? ` + ${money(Number(purchase!.shipping), 2)} shipping` : ""}{purchase!.tax ? ` + ${money(Number(purchase!.tax), 2)} tax` : ""}{purchase!.fees ? ` + ${money(Number(purchase!.fees), 2)} fees` : ""}.</p>}
+            {extras && <p className="hint">{sold ? "Total cost" : "Cost"} is {money(Number(purchase!.paid), 2)} paid{sold && purchase!.shipping ? ` + ${money(Number(purchase!.shipping), 2)} shipping` : ""}{purchase!.tax ? ` + ${money(Number(purchase!.tax), 2)} tax` : ""}{purchase!.fees ? ` + ${money(Number(purchase!.fees), 2)} fees` : ""}.</p>}
+            {shippingLeftOut && <p className="hint">The {money(Number(purchase!.shipping), 2)} you paid for shipping isn&apos;t counted here, because sold listing prices don&apos;t include shipping. It still counts toward your profit if you sell.</p>}
             {(purchase?.storage_location || purchase?.acquired_from) && (
               <p className="hint">{purchase?.acquired_from && <>Got it from {purchase.acquired_from}. </>}{purchase?.storage_location && <>Stored in {purchase.storage_location}.</>}</p>
             )}

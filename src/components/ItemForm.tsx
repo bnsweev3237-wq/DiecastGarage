@@ -133,7 +133,8 @@ export default function ItemForm({ userId, item, purchase, defaultCategory, defa
           <div className="field"><label className="label" htmlFor="purchased_at">Date bought</label>
             <input id="purchased_at" name="purchased_at" type="date" defaultValue={purchase?.purchased_at ?? ""} /></div>
           <div className="field"><label className="label" htmlFor="shipping">Shipping ($)</label>
-            <input id="shipping" name="shipping" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.shipping ?? ""} placeholder="0.00" /></div>
+            <input id="shipping" name="shipping" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.shipping ?? ""} placeholder="0.00" />
+            <span className="hint">Left out of gain or loss, since sold listing prices don&apos;t include shipping. Counted in profit when you sell.</span></div>
           <div className="field"><label className="label" htmlFor="tax">Tax ($)</label>
             <input id="tax" name="tax" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.tax ?? ""} placeholder="0.00" /></div>
           <div className="field"><label className="label" htmlFor="fees">Fees ($)</label>

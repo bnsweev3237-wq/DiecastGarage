@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.15",
+    date: "2026-11-14",
+    title: "Fairer gain and loss",
+    changes: [
+      "Gain or loss against sold listings no longer counts the shipping you paid, because eBay sold prices don't include shipping either. Tax and fees still count.",
+      "Profit on items you've sold still includes shipping, since that's money you spent.",
+    ],
+  },
+  {
     version: "0.14",
     date: "2026-11-14",
     title: "Complimentary memberships",

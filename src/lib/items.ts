@@ -48,9 +48,17 @@ export type Purchase = {
 };
 
 // What it really cost you: price paid plus shipping, tax and fees. Null when no price paid was entered.
+// Used for profit on items you've sold.
 export function totalCost(p: Purchase | null | undefined) {
   if (p?.paid == null) return null;
   return Number(p.paid) + Number(p.shipping ?? 0) + Number(p.tax ?? 0) + Number(p.fees ?? 0);
+}
+
+// Cost to compare against estimated value: price paid plus tax and fees, without shipping.
+// Sold listing prices on eBay don't include shipping, so leaving it out keeps gain or loss like for like.
+export function valueCost(p: Purchase | null | undefined) {
+  if (p?.paid == null) return null;
+  return Number(p.paid) + Number(p.tax ?? 0) + Number(p.fees ?? 0);
 }
 
 // All of an item's photos, cover first.
