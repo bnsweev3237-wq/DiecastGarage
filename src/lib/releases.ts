@@ -4,6 +4,18 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.11",
+    date: "2026-11-14",
+    title: "Turned up the excitement",
+    changes: [
+      "A bold new Explore page: a big headline, live counts of items, collectors and items for sale, and a scrolling ticker of every hobby.",
+      "Browse by category with chunky emoji buttons.",
+      "Item cards now show a category sticker on the photo and a price tag on items for sale, with a punchier hover.",
+      "New How it works section for visitors, and a Collectors to follow section with profile pictures.",
+      "Racing stripes and an orange speed line on page banners.",
+    ],
+  },
+  {
     version: "0.10",
     date: "2026-11-14",
     title: "We're theCollectorHQ",

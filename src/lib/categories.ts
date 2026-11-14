@@ -13,6 +13,7 @@ export type FieldDef = {
 export type Category = {
   key: string;
   label: string;
+  emoji: string; // shown on category buttons and item stickers
   brandLabel: string; // what "brand" means for this hobby
   packagingLabel: string; // what "in original packaging" means for this hobby
   fields: FieldDef[];
@@ -22,7 +23,7 @@ const GRADERS_CARDS = ["Raw (ungraded)", "PSA", "BGS", "CGC", "SGC", "TAG"];
 
 export const CATEGORIES: Category[] = [
   {
-    key: "diecast", label: "Diecast & model vehicles", brandLabel: "Brand", packagingLabel: "Has the original box",
+    key: "diecast", emoji: "🏎️", label: "Diecast & model vehicles", brandLabel: "Brand", packagingLabel: "Has the original box",
     fields: [
       { key: "scale", label: "Scale", placeholder: "1:24", options: ["1:64", "1:43", "1:32", "1:24", "1:18", "1:12", "1:87"], short: true },
       { key: "series", label: "Series or line", placeholder: "Hot Wheels Premium, Lionel Racing" },
@@ -30,7 +31,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "cards", label: "Trading cards", brandLabel: "Manufacturer", packagingLabel: "In a sleeve, toploader or slab",
+    key: "cards", emoji: "🃏", label: "Trading cards", brandLabel: "Manufacturer", packagingLabel: "In a sleeve, toploader or slab",
     fields: [
       { key: "game", label: "Sport or game", placeholder: "Pokémon, Baseball", options: ["Pokémon", "Magic: The Gathering", "Yu-Gi-Oh!", "One Piece", "Lorcana", "Baseball", "Basketball", "Football", "Hockey", "Soccer"], short: true },
       { key: "set", label: "Set", placeholder: "Base Set, 2023 Topps Chrome", short: true },
@@ -41,7 +42,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "coins", label: "Coins & currency", brandLabel: "Mint", packagingLabel: "In original mint packaging",
+    key: "coins", emoji: "🪙", label: "Coins & currency", brandLabel: "Mint", packagingLabel: "In original mint packaging",
     fields: [
       { key: "country", label: "Country", placeholder: "United States", short: true },
       { key: "denomination", label: "Denomination", placeholder: "Morgan dollar, $20 note", short: true },
@@ -51,7 +52,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "comics", label: "Comics", brandLabel: "Publisher", packagingLabel: "Bagged and boarded",
+    key: "comics", emoji: "💥", label: "Comics", brandLabel: "Publisher", packagingLabel: "Bagged and boarded",
     fields: [
       { key: "series", label: "Series", placeholder: "The Amazing Spider-Man", short: true },
       { key: "issue", label: "Issue", placeholder: "#300", short: true },
@@ -61,7 +62,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "sneakers", label: "Sneakers", brandLabel: "Brand", packagingLabel: "Has the original box",
+    key: "sneakers", emoji: "👟", label: "Sneakers", brandLabel: "Brand", packagingLabel: "Has the original box",
     fields: [
       { key: "model", label: "Model", placeholder: "Air Jordan 1 High", short: true },
       { key: "colorway", label: "Colorway", placeholder: "Chicago", short: true },
@@ -70,7 +71,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "toys", label: "Toys & action figures", brandLabel: "Brand", packagingLabel: "Still in the package (MOC/MIB)",
+    key: "toys", emoji: "🤖", label: "Toys & action figures", brandLabel: "Brand", packagingLabel: "Still in the package (MOC/MIB)",
     fields: [
       { key: "line", label: "Toy line", placeholder: "Star Wars Black Series", short: true },
       { key: "character", label: "Character", placeholder: "Boba Fett", short: true },
@@ -78,7 +79,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "lego", label: "LEGO", brandLabel: "Brand", packagingLabel: "Sealed in the box",
+    key: "lego", emoji: "🧱", label: "LEGO", brandLabel: "Brand", packagingLabel: "Sealed in the box",
     fields: [
       { key: "set_number", label: "Set number", placeholder: "75192", short: true },
       { key: "theme", label: "Theme", placeholder: "Star Wars, Technic", short: true },
@@ -86,7 +87,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "funko", label: "Funko Pop!", brandLabel: "Brand", packagingLabel: "In the original box",
+    key: "funko", emoji: "🧸", label: "Funko Pop!", brandLabel: "Brand", packagingLabel: "In the original box",
     fields: [
       { key: "number", label: "Pop number", placeholder: "#01", short: true },
       { key: "series", label: "Series", placeholder: "Marvel, Star Wars", short: true },
@@ -94,7 +95,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "vinyl", label: "Vinyl records", brandLabel: "Label", packagingLabel: "Still sealed",
+    key: "vinyl", emoji: "💿", label: "Vinyl records", brandLabel: "Label", packagingLabel: "Still sealed",
     fields: [
       { key: "artist", label: "Artist", placeholder: "The Beatles", short: true },
       { key: "format", label: "Format", options: ["LP", "12\" single", "7\" 45", "EP", "Box set"], short: true },
@@ -103,7 +104,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "games", label: "Video games", brandLabel: "Publisher", packagingLabel: "Still sealed",
+    key: "games", emoji: "🎮", label: "Video games", brandLabel: "Publisher", packagingLabel: "Still sealed",
     fields: [
       { key: "platform", label: "Platform", placeholder: "Nintendo 64", options: ["NES", "SNES", "Nintendo 64", "GameCube", "Game Boy", "Switch", "PlayStation", "PS2", "Xbox", "Sega Genesis"], short: true },
       { key: "region", label: "Region", options: ["NTSC (US)", "PAL (Europe)", "NTSC-J (Japan)"] },
@@ -112,7 +113,7 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: "other", label: "Other", brandLabel: "Brand or maker", packagingLabel: "In original packaging",
+    key: "other", emoji: "⭐", label: "Other", brandLabel: "Brand or maker", packagingLabel: "In original packaging",
     fields: [{ key: "type", label: "What kind of collectible", placeholder: "Stamps, watches, movie props", short: true }],
   },
 ];
