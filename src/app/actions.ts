@@ -96,6 +96,9 @@ function parseItem(f: FormData, userId: string) {
       storage_location: optStr(f, "storage_location")?.slice(0, 100) ?? null,
       sold_price: status === "sold" ? num(f, "sold_price") : null,
       sold_at: status === "sold" ? optStr(f, "sold_at") : null,
+      include_shipping: f.get("include_shipping") === "on",
+      include_tax: f.get("include_tax") === "on",
+      include_fees: f.get("include_fees") === "on",
     },
   };
 }

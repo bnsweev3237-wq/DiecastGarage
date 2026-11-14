@@ -6,10 +6,11 @@ export const releases: Release[] = [
   {
     version: "0.15",
     date: "2026-11-14",
-    title: "Fairer gain and loss",
+    title: "You choose what counts in gain and loss",
     changes: [
-      "Gain or loss against sold listings no longer counts the shipping you paid, because eBay sold prices don't include shipping either. Tax and fees still count.",
-      "Profit on items you've sold still includes shipping, since that's money you spent.",
+      "Shipping, tax and fees each have an \"Include in gain/loss calculations\" box. They're left out unless you tick it, because eBay sold prices don't include them.",
+      "Your choices apply to gain or loss against estimated value and to profit on items you've sold.",
+      "Item pages say which amounts aren't being counted.",
     ],
   },
   {

@@ -499,3 +499,5 @@ body > main { flex: 1 0 auto; width: 100%; }
 .seg-tabs a.on { color: var(--ink); border-bottom-color: var(--accent); }
 @media (max-width: 520px) { .seg-tabs a { padding: 8px 10px; font-size: 18px; } }
 .tile.featured .tag-cat { max-width: calc(100% - 96px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.check.small { font-size: 13px; font-weight: 600; color: var(--muted); gap: 8px; }
+.check.small input { width: 16px; height: 16px; }

@@ -45,21 +45,27 @@ export type Purchase = {
   shipping: number | null; tax: number | null; fees: number | null;
   acquired_from: string | null; storage_location: string | null;
   sold_price: number | null; sold_at: string | null;
+  include_shipping: boolean; include_tax: boolean; include_fees: boolean;
 };
 
-// What it really cost you: price paid plus shipping, tax and fees. Null when no price paid was entered.
-// Used for profit on items you've sold.
-export function totalCost(p: Purchase | null | undefined) {
+// The extras a collector can choose to count toward gain or loss and profit. All are off by default,
+// because eBay sold prices don't include shipping, tax or fees.
+export const COST_EXTRAS = [
+  { key: "shipping", include: "include_shipping", label: "Shipping" },
+  { key: "tax", include: "include_tax", label: "Tax" },
+  { key: "fees", include: "include_fees", label: "Fees" },
+] as const;
+
+// Cost used for gain or loss and profit: price paid plus whichever extras the collector chose to include.
+// Null when no price paid was entered.
+export function gainCost(p: Purchase | null | undefined) {
   if (p?.paid == null) return null;
-  return Number(p.paid) + Number(p.shipping ?? 0) + Number(p.tax ?? 0) + Number(p.fees ?? 0);
+  return COST_EXTRAS.reduce((sum, x) => sum + (p[x.include] ? Number(p[x.key] ?? 0) : 0), Number(p.paid));
 }
 
-// Cost to compare against estimated value: price paid plus tax and fees, without shipping.
-// Sold listing prices on eBay don't include shipping, so leaving it out keeps gain or loss like for like.
-export function valueCost(p: Purchase | null | undefined) {
-  if (p?.paid == null) return null;
-  return Number(p.paid) + Number(p.tax ?? 0) + Number(p.fees ?? 0);
-}
+// Extras that were entered but left out of gain or loss, for a note like "$8.00 shipping isn't counted".
+export const leftOutExtras = (p: Purchase | null | undefined) =>
+  p?.paid == null ? [] : COST_EXTRAS.filter((x) => !p[x.include] && Number(p[x.key] ?? 0) > 0).map((x) => ({ label: x.label.toLowerCase(), amount: Number(p[x.key]) }));
 
 // All of an item's photos, cover first.
 export const allPhotos = (item: Pick<Item, "photo_path" | "photos">) =>

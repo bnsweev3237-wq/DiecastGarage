@@ -132,13 +132,13 @@ export default function ItemForm({ userId, item, purchase, defaultCategory, defa
             <input id="paid" name="paid" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.paid ?? ""} placeholder="0.00" /></div>
           <div className="field"><label className="label" htmlFor="purchased_at">Date bought</label>
             <input id="purchased_at" name="purchased_at" type="date" defaultValue={purchase?.purchased_at ?? ""} /></div>
-          <div className="field"><label className="label" htmlFor="shipping">Shipping ($)</label>
-            <input id="shipping" name="shipping" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.shipping ?? ""} placeholder="0.00" />
-            <span className="hint">Left out of gain or loss, since sold listing prices don&apos;t include shipping. Counted in profit when you sell.</span></div>
-          <div className="field"><label className="label" htmlFor="tax">Tax ($)</label>
-            <input id="tax" name="tax" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.tax ?? ""} placeholder="0.00" /></div>
-          <div className="field"><label className="label" htmlFor="fees">Fees ($)</label>
-            <input id="fees" name="fees" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.fees ?? ""} placeholder="grading, buyer's premium" /></div>
+          {([["shipping", "Shipping", "0.00"], ["tax", "Tax", "0.00"], ["fees", "Fees", "grading, buyer's premium"]] as const).map(([key, label, ph]) => (
+            <div className="field" key={key}><label className="label" htmlFor={key}>{label} ($)</label>
+              <input id={key} name={key} type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.[key] ?? ""} placeholder={ph} />
+              <label className="check small" htmlFor={`include_${key}`}>
+                <input id={`include_${key}`} name={`include_${key}`} type="checkbox" defaultChecked={purchase?.[`include_${key}`] ?? false} /> Include in gain/loss calculations
+              </label></div>
+          ))}
           <div className="field"><label className="label" htmlFor="acquired_from">Where I got it</label>
             <input id="acquired_from" name="acquired_from" maxLength={100} list="sources" defaultValue={purchase?.acquired_from ?? ""} placeholder="eBay, card show, trade" />
             <datalist id="sources">{["eBay", "Facebook Marketplace", "Card or toy show", "Local shop", "Auction house", "Garage or estate sale", "Trade", "Gift", "Inherited", "Pulled from a pack"].map((x) => <option key={x} value={x} />)}</datalist></div>

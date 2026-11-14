@@ -4,7 +4,7 @@ import { Stars } from "@/components/Stars";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { FREE_ITEM_LIMIT, isMember } from "@/lib/limits";
-import { certLabel, money, photoUrl, signed, totalCost, valueCost, valueOf, type Item, type ItemStatus, type Comp, type Purchase } from "@/lib/items";
+import { certLabel, money, photoUrl, signed, gainCost, valueOf, type Item, type ItemStatus, type Comp, type Purchase } from "@/lib/items";
 import { CATEGORIES, categoryOf, summary } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
@@ -48,8 +48,8 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
   const rows = items.map((c) => {
     const p = c.item_purchases;
     const v = valueOf(p, c.comps);
-    // Profit on sold items counts shipping; gain or loss against sold listings doesn't, since those prices exclude it.
-    const tc = view === "sold" ? totalCost(p) : valueCost(p);
+    // Price paid plus whichever of shipping, tax and fees the collector chose to include.
+    const tc = gainCost(p);
     pieces += c.quantity ?? 1;
     cost += tc ?? 0;
     if (view === "sold") {
@@ -107,7 +107,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
       {view === "owned" && (
         <section className="totals" aria-label="Collection totals">
           <div className="total"><span className="label">Items</span><span className="v num">{items.length}</span><span className="n">{pieces !== items.length ? `${pieces} pieces · ` : ""}{valued} valued</span></div>
-          <div className="total"><span className="label">Cost</span><span className="v num">{money(cost)}</span><span className="n">paid + tax and fees, not shipping</span></div>
+          <div className="total"><span className="label">Cost</span><span className="v num">{money(cost)}</span><span className="n">paid, plus extras you chose</span></div>
           <div className="total"><span className="label">Est. value</span><span className="v num">{money(value)}</span><span className="n">median of sold listings</span></div>
           <div className="total"><span className="label">Gain / loss</span>
             <span className={`v num ${valued ? (gain >= 0 ? "up" : "down") : ""}`}>{valued ? signed(gain) : "—"}</span>
@@ -117,7 +117,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
       {view === "sold" && (
         <section className="totals" aria-label="Sales totals">
           <div className="total"><span className="label">Sold</span><span className="v num">{items.length}</span><span className="n">items</span></div>
-          <div className="total"><span className="label">Total cost</span><span className="v num">{money(cost)}</span><span className="n">paid + shipping, tax, fees</span></div>
+          <div className="total"><span className="label">Total cost</span><span className="v num">{money(cost)}</span><span className="n">paid, plus extras you chose</span></div>
           <div className="total"><span className="label">Sold for</span><span className="v num">{money(soldFor)}</span><span className="n">sale prices</span></div>
           <div className="total"><span className="label">Profit</span>
             <span className={`v num ${profitKnown ? (profit >= 0 ? "up" : "down") : ""}`}>{profitKnown ? signed(profit) : "—"}</span>
