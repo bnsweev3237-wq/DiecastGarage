@@ -1,10 +1,10 @@
-# The Collectors Association: Privacy Policy
+# theCollectorHQ: Privacy Policy
 
 **DRAFT — not yet in effect.** Fill in everything in [BRACKETS] and have a lawyer review this before publishing it. It describes how the site works today; update it whenever that changes.
 
 **Effective date:** [DATE]
 
-This policy explains what information The Collectors Association collects, how we use it, who can see it, and the choices you have. "We" and "us" means [YOUR NAME OR BUSINESS NAME], which runs The Collectors Association.
+This policy explains what information theCollectorHQ collects, how we use it, who can see it, and the choices you have. "We" and "us" means [YOUR NAME OR BUSINESS NAME], which runs theCollectorHQ.
 
 ## 1. What we collect
 
@@ -45,7 +45,7 @@ Things you post publicly can be seen, copied or shared by anyone, including peop
 
 ## 3. How we use your information
 
-- to run The Collectors Association: show your collection, calculate values, power follows and comments, and keep you signed in;
+- to run theCollectorHQ: show your collection, calculate values, power follows and comments, and keep you signed in;
 - to send messages about your account, such as sign-up confirmations, password resets, and membership receipts;
 - to keep the community safe: reviewing reports, removing content that breaks our Terms, and preventing spam and abuse;
 - to process memberships through Stripe;
@@ -61,7 +61,7 @@ We share information only with the services that run the site for us, and only w
 | Vercel | hosts the website | United States |
 | Stripe | processes membership payments | United States |
 
-We may also share information if the law requires it, to protect someone's safety, to enforce our Terms, or as part of a sale or reorganization of The Collectors Association. If that last one happens, this policy will continue to apply to your information.
+We may also share information if the law requires it, to protect someone's safety, to enforce our Terms, or as part of a sale or reorganization of theCollectorHQ. If that last one happens, this policy will continue to apply to your information.
 
 **Links to other sites.** For-sale items link to eBay, and profiles can link to Facebook, X and Instagram. Those sites have their own privacy policies; we don't control what they do.
 
@@ -79,7 +79,7 @@ Depending on where you live, you may have other rights, such as asking what we h
 
 ## 7. Children
 
-The Collectors Association isn't meant for children under 13, and we don't knowingly collect information from them. If you believe a child under 13 has an account, contact us at [CONTACT EMAIL] and we'll delete it.
+theCollectorHQ isn't meant for children under 13, and we don't knowingly collect information from them. If you believe a child under 13 has an account, contact us at [CONTACT EMAIL] and we'll delete it.
 
 ## 8. Security
 

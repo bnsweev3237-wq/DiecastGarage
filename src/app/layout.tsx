@@ -12,12 +12,12 @@ const description = "One home for collectors of everything. Catalog your cards, 
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: { default: "The Collectors Association", template: "%s · The Collectors Association" },
+  title: { default: "theCollectorHQ", template: "%s · theCollectorHQ" },
   description,
-  applicationName: "The Collectors Association",
-  openGraph: { siteName: "The Collectors Association", title: "The Collectors Association", description, type: "website" },
-  twitter: { card: "summary_large_image", title: "The Collectors Association", description },
-  appleWebApp: { capable: true, title: "TCA", statusBarStyle: "default" },
+  applicationName: "theCollectorHQ",
+  openGraph: { siteName: "theCollectorHQ", title: "theCollectorHQ", description, type: "website" },
+  twitter: { card: "summary_large_image", title: "theCollectorHQ", description },
+  appleWebApp: { capable: true, title: "CollectorHQ", statusBarStyle: "default" },
   formatDetection: { telephone: false },
 };
 
@@ -45,13 +45,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap"
         />
       </head>
       <body>
         <nav className="nav">
           <div className="nav-in">
-            <Link href="/" className="logo" aria-label="The Collectors Association home">
+            <Link href="/" className="logo" aria-label="theCollectorHQ home">
               <Logo />
             </Link>
             <NavLinks items={[
@@ -80,7 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ServiceWorker />
         <footer className="footer">
           <div className="footer-in">
-            <span>The Collectors Association · <span className="num">v{currentVersion}</span> test version</span>
+            <span>theCollectorHQ · <span className="num">v{currentVersion}</span> test version</span>
             <Link href="/release-notes">Release notes</Link>
             {LEGAL_PAGES_LIVE && <><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></>}
           </div>

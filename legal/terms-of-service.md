@@ -1,16 +1,16 @@
-# The Collectors Association: Terms of Service
+# theCollectorHQ: Terms of Service
 
 **DRAFT — not yet in effect.** Fill in everything in [BRACKETS] and have a lawyer review this before publishing it. It's a starting point modeled on common community-site terms, not legal advice.
 
 **Effective date:** [DATE]
 
-Welcome to The Collectors Association, a community for collectors of every kind, run by [YOUR NAME OR BUSINESS NAME] ("we", "us"). These terms are an agreement between you and us. By creating an account or using the site, you agree to them. If you don't agree, please don't use The Collectors Association.
+Welcome to theCollectorHQ, a community for collectors of every kind, run by [YOUR NAME OR BUSINESS NAME] ("we", "us"). These terms are an agreement between you and us. By creating an account or using the site, you agree to them. If you don't agree, please don't use theCollectorHQ.
 
 ## 1. Changes to these terms
 
-We may update these terms as the site grows. If we make a significant change, we'll post the new version on this page with a new effective date, and tell signed-in members on the site or by email. If you keep using The Collectors Association after a change takes effect, you accept the updated terms.
+We may update these terms as the site grows. If we make a significant change, we'll post the new version on this page with a new effective date, and tell signed-in members on the site or by email. If you keep using theCollectorHQ after a change takes effect, you accept the updated terms.
 
-## 2. Who can use The Collectors Association
+## 2. Who can use theCollectorHQ
 
 - You must be at least **13 years old**. If you're under 18, you need a parent or guardian's permission, and a parent or guardian must make any purchase, such as a membership.
 - One person, one account. Don't create accounts for someone else without permission, or to get around a suspension or the free item limit.
@@ -22,13 +22,13 @@ We may update these terms as the site grows. If we make a significant change, we
 "Your content" means anything you add: photos, item details, descriptions, comments, your profile, and your links.
 
 - **You own your content.** Posting it doesn't transfer ownership to us.
-- **You give us permission to show it.** By posting, you give us a worldwide, non-exclusive, royalty-free license to store, display, resize and share your content as needed to run The Collectors Association. That covers showing your public collection to other people and making thumbnails of your photos. This license ends when you delete the content or your account, except for copies in routine backups for a limited time, and for content others have already reposted or quoted in comments.
+- **You give us permission to show it.** By posting, you give us a worldwide, non-exclusive, royalty-free license to store, display, resize and share your content as needed to run theCollectorHQ. That covers showing your public collection to other people and making thumbnails of your photos. This license ends when you delete the content or your account, except for copies in routine backups for a limited time, and for content others have already reposted or quoted in comments.
 - **Only post what you have the right to post.** Use your own photos, or photos you have permission to use. Don't copy pictures from other people's listings or websites.
 - **Privacy settings are yours to choose.** You control whether your collection, email, location, values and follow lists are public. Details marked private, such as your full name and what you paid, are not shown to other collectors. See our [Privacy Policy](PRIVACY POLICY LINK).
 
 ## 4. Community rules
 
-The Collectors Association only works if collectors can trust each other. Don't post or do any of the following:
+theCollectorHQ only works if collectors can trust each other. Don't post or do any of the following:
 
 1. **Illegal content or activity**, or anything that promotes it.
 2. **Harassment, bullying or threats**, including targeting someone across their items, comments or profile.
@@ -45,7 +45,7 @@ The Collectors Association only works if collectors can trust each other. Don't 
 
 ## 5. Buying and selling
 
-- **Sales happen on eBay, not on The Collectors Association.** When you mark an item for sale, you must link to your own active eBay listing for that item. Buyers check out on eBay, under [eBay's User Agreement](https://www.ebay.com/help/policies/member-behaviour-policies/user-agreement?id=4259).
+- **Sales happen on eBay, not on theCollectorHQ.** When you mark an item for sale, you must link to your own active eBay listing for that item. Buyers check out on eBay, under [eBay's User Agreement](https://www.ebay.com/help/policies/member-behaviour-policies/user-agreement?id=4259).
 - **We are not part of any sale.** We don't handle payments, shipping, returns or disputes, and we don't check, inspect or guarantee any item, listing, buyer or seller. Settle problems with the other person and through eBay's processes.
 - **Keep listings honest and current.** Take the for-sale mark off an item once it's sold or the listing ends.
 - **Be careful.** Check the eBay listing, the seller's feedback and the shipping before you buy. Never send money outside eBay to someone you met here.
@@ -65,7 +65,7 @@ Estimated values are based on sold listings that you or others logged, or on a v
 
 ## 8. How we enforce these terms
 
-- We may **remove any content** that breaks these terms or that we reasonably believe harms other collectors or The Collectors Association. We may do this without notice.
+- We may **remove any content** that breaks these terms or that we reasonably believe harms other collectors or theCollectorHQ. We may do this without notice.
 - We may **limit, suspend or close an account** that breaks these terms, repeatedly or seriously, or that puts other people at risk. If a paid membership is closed for breaking these terms, it isn't refunded.
 - We aren't required to review content before it's posted, and we can't catch everything. Not removing something doesn't mean we approve of it.
 - We may keep or share information when the law requires it, or to protect people's safety.
@@ -74,7 +74,7 @@ Estimated values are based on sold listings that you or others logged, or on a v
 
 If you see something that breaks these rules, use the **Report** link on the item, comment or profile, or contact us at [CONTACT EMAIL] with a link to it.
 
-**Copyright.** If you believe content on The Collectors Association infringes your copyright, send a notice to [CONTACT EMAIL] that includes:
+**Copyright.** If you believe content on theCollectorHQ infringes your copyright, send a notice to [CONTACT EMAIL] that includes:
 1. your name and contact details;
 2. a description of the work you own;
 3. a link to the content you believe infringes it;
@@ -85,15 +85,15 @@ We'll remove content when a valid notice requires it, and close the accounts of 
 
 ## 10. Closing your account
 
-You can stop using The Collectors Association at any time. To delete your account and everything in it, use **Delete my account** in Settings. It's permanent and can't be undone. If you have a membership, deleting your account cancels it. Some information may stay in backups for a limited time, or longer where the law requires.
+You can stop using theCollectorHQ at any time. To delete your account and everything in it, use **Delete my account** in Settings. It's permanent and can't be undone. If you have a membership, deleting your account cancels it. Some information may stay in backups for a limited time, or longer where the law requires.
 
 ## 11. Disclaimers
 
-The Collectors Association is provided **"as is" and "as available."** To the fullest extent the law allows, we make no promises about the site, including that it will always be available, error-free or secure, or that content on it — including values, listings and other collectors' posts — is accurate. Content posted by collectors is their responsibility, not ours.
+theCollectorHQ is provided **"as is" and "as available."** To the fullest extent the law allows, we make no promises about the site, including that it will always be available, error-free or secure, or that content on it — including values, listings and other collectors' posts — is accurate. Content posted by collectors is their responsibility, not ours.
 
 ## 12. Limits on our liability
 
-To the fullest extent the law allows, we aren't liable for any indirect, incidental, special, consequential or punitive damages, or for lost profits, data or goodwill, arising from your use of The Collectors Association, from other collectors' content or conduct, or from any purchase or sale you make. Our total liability for any claim is limited to the greater of the amount you paid us in the 12 months before the claim, or [US $50]. Some places don't allow these limits, so they may not all apply to you.
+To the fullest extent the law allows, we aren't liable for any indirect, incidental, special, consequential or punitive damages, or for lost profits, data or goodwill, arising from your use of theCollectorHQ, from other collectors' content or conduct, or from any purchase or sale you make. Our total liability for any claim is limited to the greater of the amount you paid us in the 12 months before the claim, or [US $50]. Some places don't allow these limits, so they may not all apply to you.
 
 ## 13. Your responsibility to us
 
@@ -107,8 +107,8 @@ These terms are governed by the laws of [YOUR STATE OR PROVINCE AND COUNTRY], wi
 
 - If any part of these terms can't be enforced, the rest still applies.
 - If we don't enforce a term right away, we can still enforce it later.
-- You can't transfer your account or these terms to anyone else. We may transfer them if The Collectors Association is sold or reorganized.
-- These terms, together with our Privacy Policy, are the whole agreement between you and us about The Collectors Association.
+- You can't transfer your account or these terms to anyone else. We may transfer them if theCollectorHQ is sold or reorganized.
+- These terms, together with our Privacy Policy, are the whole agreement between you and us about theCollectorHQ.
 
 ## 16. Contact
 

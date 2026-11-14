@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.10",
+    date: "2026-11-14",
+    title: "We're theCollectorHQ",
+    changes: [
+      "New name: theCollectorHQ, home base for collectors of everything.",
+      "A bold new logo and look: black, white and orange, with sporty headings.",
+      "New app icon. If you installed the app, remove it and install it again to get the new name and icon.",
+    ],
+  },
+  {
     version: "0.9",
     date: "2026-11-12",
     title: "Install the app",

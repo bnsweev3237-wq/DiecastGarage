@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 // Chrome and Edge fire this when the site can be installed with one tap.
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 
-const DISMISS_KEY = "tca-install-dismissed";
+const DISMISS_KEY = "chq-install-dismissed";
 const DISMISS_DAYS = 30;
 
 function isInstalled() {
@@ -64,7 +64,7 @@ export function InstallBanner() {
     <aside className="install-banner" aria-label="Install the app">
       <img src="/icons/icon-192.png" width="44" height="44" alt="" />
       <div className="install-text">
-        <b>Get the TCA app</b>
+        <b>Get the CollectorHQ app</b>
         {canPrompt ? <span>Add it to your home screen for one-tap access to your collection.</span>
           : <span>Tap <ShareIcon /> Share, then <b>Add to Home Screen</b>.</span>}
       </div>
@@ -84,7 +84,7 @@ export function InstallSection() {
         <p className="hint">You&apos;re using the installed app. It updates automatically.</p>
       ) : canPrompt ? (
         <>
-          <p className="hint">Install The Collectors Association on this device for one-tap access from your home screen or desktop.</p>
+          <p className="hint">Install theCollectorHQ on this device for one-tap access from your home screen or desktop.</p>
           <div><button className="btn primary" type="button" onClick={install}>Install the app</button></div>
         </>
       ) : ios ? (

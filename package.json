@@ -1,7 +1,7 @@
 {
-  "name": "the-collectors-association",
+  "name": "thecollectorhq",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.10.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

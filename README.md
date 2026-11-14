@@ -1,4 +1,4 @@
-# The Collectors Association
+# theCollectorHQ
 
 One home for collectors of everything (formerly Diecast Garage, then Racasto). Brand files are in `public/brand`.
 
@@ -19,7 +19,7 @@ Built with Next.js 14, Supabase (accounts, Postgres, photo storage) and Stripe (
 4. From **Project Settings → API**, copy the project URL, the `anon` key and the `service_role` key.
 
 ### 2. Stripe
-1. In **Product catalog**, create a product "The Collectors Association Membership" with a **recurring** price (for example $4.99/month). Copy the price ID (`price_...`).
+1. In **Product catalog**, create a product "theCollectorHQ Membership" with a **recurring** price (for example $4.99/month). Copy the price ID (`price_...`).
 2. In **Developers → API keys**, copy the secret key.
 3. In **Developers → Webhooks**, add an endpoint `https://YOUR-SITE/api/stripe/webhook` listening for `customer.subscription.created`, `customer.subscription.updated` and `customer.subscription.deleted`. Copy its signing secret (`whsec_...`).
 4. In **Settings → Billing → Customer portal**, turn the portal on so members can cancel or update their card.

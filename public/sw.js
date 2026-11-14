@@ -1,7 +1,7 @@
-// The Collectors Association service worker.
+// theCollectorHQ service worker.
 // Pages always come from the network so collections, prices and sign-in are never stale;
 // only the offline page, icons and built files are cached. Bump VERSION when this file changes.
-const VERSION = "tca-v1";
+const VERSION = "chq-v1";
 const OFFLINE = "/offline.html";
 const PRECACHE = [OFFLINE, "/icons/icon-192.png"];
 

@@ -1,11 +1,11 @@
-/* The Collectors Association: friendly and rounded. Chunky Rubik headings, Manrope text,
-   ink black with coral, cobalt and sunny yellow. Light by default, dark when the device asks. */
+/* theCollectorHQ: bold and sporty, matching the logo. Heavy condensed Barlow headings, Manrope text,
+   black and white with safety orange. Light by default, dark when the device asks. */
 :root {
   --bg: #ffffff; --panel: #ffffff; --ink: #121212; --muted: #5c5c5c; --line: #e8e6e3;
-  --accent: #ff6b4a; --accent-ink: #121212; --blue: #2443b8; --sun: #ffc93c; --sun-ink: #2a2000;
+  --accent: #fe7101; --accent-ink: #121212; --blue: #c2410c; --sun: #ffc93c; --sun-ink: #2a2000;
   --good: #13804a; --bad: #d63a1f; --chip: #f4f2ef; --soft: #fafaf8;
   --band: #121212; --band-ink: #ffffff; --band-muted: #c4c4c4; --band-line: #2e2e2e;
-  --f-display: "Rubik", system-ui, sans-serif;
+  --f-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --f-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono: "Manrope", system-ui, sans-serif;
   --radius: 16px; --shadow: 0 1px 2px rgb(0 0 0 / .05), 0 6px 18px rgb(0 0 0 / .05);
@@ -14,7 +14,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0f0f10; --panel: #18181a; --ink: #f3f3f3; --muted: #a9a9a9; --line: #2b2b2e;
-    --accent: #ff7b5c; --blue: #8aa2ff; --good: #4cc983; --bad: #ff7b66; --chip: #232326; --soft: #141416;
+    --accent: #ff7a14; --blue: #ff9a4d; --good: #4cc983; --bad: #ff7b66; --chip: #232326; --soft: #141416;
     --band: #000000; --band-line: #262626; --shadow: none; color-scheme: dark;
   }
 }
@@ -24,10 +24,10 @@ html, body { margin: 0; }
 body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--f-body); }
 img { max-width: 100%; }
 a { color: var(--blue); }
-h1, h2, h3 { font-family: var(--f-display); margin: 0; letter-spacing: -.015em; text-wrap: balance; }
-h1 { font-size: 44px; font-weight: 800; line-height: 1.05; }
-h2 { font-size: 26px; font-weight: 800; line-height: 1.15; }
-h3 { font-size: 19px; font-weight: 700; line-height: 1.2; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; letter-spacing: 0; text-wrap: balance; }
+h1 { font-size: 50px; font-weight: 900; font-style: italic; line-height: 1; letter-spacing: -.01em; }
+h2 { font-size: 30px; font-weight: 800; line-height: 1.1; }
+h3 { font-size: 22px; font-weight: 700; line-height: 1.15; }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 6px; }
 .num { font-variant-numeric: tabular-nums; }
@@ -42,8 +42,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .nav { background: var(--panel); color: var(--ink); border-bottom: 1px solid var(--line); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; }
 .nav-in { max-width: 1160px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); display: flex; align-items: stretch; gap: 20px; flex-wrap: wrap; min-height: 66px; }
 .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); }
-.logo-mark { flex: none; display: block; }
-.logo-word { font-family: var(--f-display); font-weight: 800; font-size: 18px; letter-spacing: -.01em; line-height: 1.05; }
+.logo-img { display: block; height: 60px; width: auto; flex: none; }
 .nav-links { display: flex; gap: 2px; flex-wrap: wrap; flex: 1; align-items: center; }
 .nav-links a { display: flex; align-items: center; color: var(--muted); text-decoration: none; padding: 8px 14px; font-weight: 700; font-size: 15px; border-radius: 999px; }
 .nav-links a:hover { color: var(--ink); background: var(--chip); }
@@ -53,7 +52,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* hero band (Explore and collection pages) */
 .band { background: var(--band); color: var(--band-ink); }
 .band-in { max-width: 1160px; margin: 0 auto; padding: 40px max(16px, env(safe-area-inset-right)) 44px max(16px, env(safe-area-inset-left)); display: flex; gap: 28px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; }
-.band h1 { font-size: 56px; }
+.band h1 { font-size: 64px; }
+.band { box-shadow: inset 0 -5px 0 var(--accent); }
 .band .muted, .band .hint { color: var(--band-muted); }
 .band a { color: var(--band-ink); }
 .band .btn { background: transparent; color: var(--band-ink); border-color: var(--band-line); }
@@ -148,10 +148,10 @@ a.row:hover { background: var(--soft); }
 .tile .img { aspect-ratio: 1 / 1; width: 100%; object-fit: cover; background: var(--chip); display: grid; place-items: center; color: #b9b5af; }
 .tile .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; }
 .tile .cat { align-self: flex-start; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--blue); }
-.tile .car-title { font-family: var(--f-display); font-weight: 700; font-size: 18px; line-height: 1.2; }
+.tile .car-title { font-family: var(--f-display); font-weight: 700; font-size: 21px; line-height: 1.15; }
 .tile .specline { font-size: 13px; color: var(--muted); font-weight: 600; }
 .tile .by { font-size: 13px; color: var(--muted); }
-.tile .price { font-family: var(--f-display); font-weight: 800; font-size: 20px; }
+.tile .price { font-family: var(--f-display); font-weight: 800; font-size: 23px; }
 
 .empty { padding: 48px 20px; text-align: center; color: var(--muted); display: flex; flex-direction: column; gap: 12px; align-items: center; border: 2px dashed var(--line); border-radius: var(--radius); }
 .empty h3 { color: var(--ink); font-size: 24px; }
@@ -270,12 +270,12 @@ body > main { flex: 1 0 auto; width: 100%; }
 @media (max-width: 720px) {
   .nav-in { gap: 0 12px; }
   .logo { flex: 1; min-height: 58px; }
-  .logo-word { font-size: 15px; }
+  .logo-img { height: 44px; }
   .nav-right { padding-block: 0; }
   .nav-links { order: 3; flex: 0 0 calc(100% + 32px); flex-wrap: nowrap; overflow-x: auto; min-height: 46px; margin-inline: -16px; padding-inline: 2px; border-top: 1px solid var(--line); scrollbar-width: none; }
   .nav-links a { padding: 7px 14px; white-space: nowrap; }
-  .band h1 { font-size: 40px; }
-  h1 { font-size: 34px; }
+  .band h1 { font-size: 46px; }
+  h1 { font-size: 38px; }
   .tabs { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scrollbar-width: none; }
   .tabs a { white-space: nowrap; flex: none; }
 }

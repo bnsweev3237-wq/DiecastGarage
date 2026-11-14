@@ -1,23 +1,10 @@
-// The Collectors Association mark: chunky "TCA" standing on a rounded coral plinth with two bolts.
+// theCollectorHQ logo: the collector's binder with the italic "theCollectorHQ.com" wordmark and orange swoosh.
 // Brand files for print and social live in public/brand.
-export const BRAND_CORAL = "#FF6B4A";
-
-export function LogoMark({ height = 40 }: { height?: number }) {
-  return (
-    <svg height={height} width={height * (140 / 96)} viewBox="0 0 140 96" aria-hidden="true" className="logo-mark">
-      <text x="70" y="58" textAnchor="middle" fontFamily="Rubik, system-ui, sans-serif" fontWeight="900" fontSize="56" letterSpacing="-1" fill="currentColor">TCA</text>
-      <rect x="10" y="66" width="120" height="18" rx="9" fill={BRAND_CORAL} />
-      <circle cx="22" cy="75" r="3" fill="var(--panel, #fff)" />
-      <circle cx="118" cy="75" r="3" fill="var(--panel, #fff)" />
-    </svg>
-  );
-}
+export const BRAND_ORANGE = "#FE7101";
 
 export default function Logo() {
   return (
-    <>
-      <LogoMark />
-      <span className="logo-word">The Collectors<br />Association</span>
-    </>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/brand/chq-logo-header.png" alt="theCollectorHQ" width={244} height={64} className="logo-img" />
   );
 }

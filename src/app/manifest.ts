@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 // Lets phones and computers install the site as an app.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "The Collectors Association",
-    short_name: "TCA",
+    name: "theCollectorHQ",
+    short_name: "CollectorHQ",
     description: "Catalog, value and show off every collection: cards, coins, comics, diecast, sneakers, toys and more.",
     id: "/",
     start_url: "/collection?source=app",
