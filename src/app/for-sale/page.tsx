@@ -1,7 +1,7 @@
 import ItemTile from "@/components/ItemTile";
 import { getUser } from "@/lib/supabase/server";
 import { type Item } from "@/lib/items";
-import { CATEGORIES } from "@/lib/categories";
+import CategoryOptions from "@/components/CategoryOptions";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "For sale" };
@@ -28,7 +28,7 @@ export default async function ForSale({ searchParams }: { searchParams: { catego
         <input name="q" defaultValue={searchParams.q} placeholder="Search for an item" aria-label="Search" />
         <select name="category" defaultValue={searchParams.category ?? ""} aria-label="Category">
           <option value="">All categories</option>
-          {CATEGORIES.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
+          <CategoryOptions />
         </select>
         <button className="btn" type="submit">Search</button>
       </form>

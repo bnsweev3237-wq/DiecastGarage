@@ -3,7 +3,7 @@ import ItemTile from "@/components/ItemTile";
 import Avatar from "@/components/Avatar";
 import { getUser } from "@/lib/supabase/server";
 import type { Item } from "@/lib/items";
-import { CATEGORIES, categoryOf } from "@/lib/categories";
+import { CATEGORIES, categoriesIn, categoryOf } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 
@@ -82,11 +82,12 @@ export default async function Explore({ searchParams }: { searchParams: { delete
 
         <nav className="cats" aria-label="Browse by category">
           <Link className={!category ? "on" : undefined} href="/"><span className="cat-emoji">🔥</span>Everything</Link>
-          {CATEGORIES.map((c) => (
+          {[...(picked && picked.group !== "popular" ? [picked] : []), ...categoriesIn("popular")].map((c) => (
             <Link key={c.key} className={category === c.key ? "on" : undefined} href={`/?category=${c.key}`}>
               <span className="cat-emoji">{c.emoji}</span>{c.label}
             </Link>
           ))}
+          <Link className="more" href="/categories"><span className="cat-emoji">🗂️</span>All {CATEGORIES.length} categories →</Link>
         </nav>
 
         <div className="sec-head">

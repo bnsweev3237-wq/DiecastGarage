@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.12",
+    date: "2026-11-14",
+    title: "Every eBay collectibles category",
+    changes: [
+      "54 categories: every Collectibles category on eBay, from Advertising, Autographs and Breweriana to Militaria, Postcards and Tobacciana, plus our popular hobbies.",
+      "Each new category has its own details, like the signer and authenticator for autographs, or the war and branch for militaria.",
+      "Category menus are grouped into Popular, More collectibles and Something else.",
+      "A new All categories page, linked from Explore.",
+    ],
+  },
+  {
     version: "0.11",
     date: "2026-11-14",
     title: "Turned up the excitement",

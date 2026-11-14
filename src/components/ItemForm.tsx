@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useFormState } from "react-dom";
 import { createItem, updateItem, type FormState } from "@/app/actions";
 import { isEbayUrl, type Item, type Purchase } from "@/lib/items";
-import { CATEGORIES, CONDITIONS, categoryOf } from "@/lib/categories";
+import { CONDITIONS, categoryOf } from "@/lib/categories";
+import CategoryOptions from "./CategoryOptions";
 import PhotoInput from "./PhotoInput";
 import SubmitButton from "./SubmitButton";
 import FormMessage from "./FormMessage";
@@ -29,7 +30,7 @@ export default function ItemForm({ userId, item, purchase, defaultCategory }: Pr
         <PhotoInput userId={userId} initial={item?.photo_path ?? null} title={title} />
         <div className="field full"><label className="label" htmlFor="category">Category</label>
           <select id="category" name="category" value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
+            <CategoryOptions />
           </select></div>
         <div className="field full"><label className="label" htmlFor="title">Name</label>
           <input id="title" name="title" required maxLength={160} value={title} onChange={(e) => setTitle(e.target.value)}
