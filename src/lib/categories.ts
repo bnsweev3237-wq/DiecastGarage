@@ -22,8 +22,6 @@ export type Category = {
   fields: FieldDef[];
 };
 
-const GRADERS_CARDS = ["Raw (ungraded)", "PSA", "BGS", "CGC", "SGC", "TAG"];
-
 export const CATEGORIES: Category[] = [
   {
     key: "diecast", emoji: "🏎️", group: "popular", label: "Diecast & model vehicles", brandLabel: "Brand", packagingLabel: "Has the original box",
@@ -40,8 +38,6 @@ export const CATEGORIES: Category[] = [
       { key: "set", label: "Set", placeholder: "Base Set, 2023 Topps Chrome", short: true },
       { key: "number", label: "Card number", placeholder: "4/102" },
       { key: "subject", label: "Player or character", placeholder: "Charizard, Shohei Ohtani" },
-      { key: "grader", label: "Graded by", options: GRADERS_CARDS },
-      { key: "grade", label: "Grade", placeholder: "10, 9.5", short: true },
     ],
   },
   {
@@ -50,8 +46,6 @@ export const CATEGORIES: Category[] = [
       { key: "country", label: "Country", placeholder: "United States", short: true },
       { key: "denomination", label: "Denomination", placeholder: "Morgan dollar, $20 note", short: true },
       { key: "mint_mark", label: "Mint mark", placeholder: "CC, S, D" },
-      { key: "grader", label: "Graded by", options: ["Raw (ungraded)", "PCGS", "NGC", "ANACS", "PMG"] },
-      { key: "grade", label: "Grade", placeholder: "MS-65", short: true },
     ],
   },
   {
@@ -60,8 +54,6 @@ export const CATEGORIES: Category[] = [
       { key: "series", label: "Series", placeholder: "The Amazing Spider-Man", short: true },
       { key: "issue", label: "Issue", placeholder: "#300", short: true },
       { key: "variant", label: "Variant or printing", placeholder: "Newsstand, 2nd printing" },
-      { key: "grader", label: "Graded by", options: ["Raw (ungraded)", "CGC", "CBCS", "PGX"] },
-      { key: "grade", label: "Grade", placeholder: "9.8", short: true },
     ],
   },
   {
@@ -112,7 +104,6 @@ export const CATEGORIES: Category[] = [
       { key: "platform", label: "Platform", placeholder: "Nintendo 64", options: ["NES", "SNES", "Nintendo 64", "GameCube", "Game Boy", "Switch", "PlayStation", "PS2", "Xbox", "Sega Genesis"], short: true },
       { key: "region", label: "Region", options: ["NTSC (US)", "PAL (Europe)", "NTSC-J (Japan)"] },
       { key: "completeness", label: "Completeness", options: ["Loose", "Complete in box", "New / sealed"], short: true },
-      { key: "grade", label: "Grade", placeholder: "WATA 9.4 A+" },
     ],
   },
   {
@@ -151,7 +142,6 @@ export const CATEGORIES: Category[] = [
     fields: [
       { key: "signer", label: "Signed by", placeholder: "Babe Ruth, Taylor Swift", short: true },
       { key: "signed_item", label: "Signed item", placeholder: "Baseball, photo, guitar", short: true },
-      { key: "authentication", label: "Authenticated by", placeholder: "PSA/DNA, JSA, Beckett", options: ["PSA/DNA", "JSA", "Beckett", "Fanatics", "Unauthenticated"] },
       { key: "era", label: "Era or decade", placeholder: "1950s", short: true },
     ],
   },
@@ -471,11 +461,14 @@ export const CONDITIONS: [string, string][] = [
 export const categoryOf = (key: string | null | undefined) => CATEGORIES.find((c) => c.key === key) ?? CATEGORIES[CATEGORIES.length - 1];
 export const conditionLabel = (key: string | null | undefined) => CONDITIONS.find(([k]) => k === key)?.[1] ?? null;
 
-// Short "Pokémon · Base Set · 9" style summary for cards and lists.
-export function summary(item: { category: string; brand: string | null; year: string | null; attributes: Record<string, unknown> | null }) {
+// Short "Pokémon · Base Set · PSA 10" style summary for cards and lists.
+type Summarized = { category: string; brand: string | null; year: string | null; attributes: Record<string, unknown> | null;
+  is_certified?: boolean; cert_type?: string | null; cert_by?: string | null; cert_grade?: string | null };
+export function summary(item: Summarized) {
   const cat = categoryOf(item.category);
   const attrs = item.attributes ?? {};
-  const bits = [item.brand, ...cat.fields.filter((f) => f.short).map((f) => attrs[f.key]), item.year]
+  const grade = item.is_certified && item.cert_type === "graded" ? [item.cert_by?.split(" ")[0], item.cert_grade].filter(Boolean).join(" ") : null;
+  const bits = [item.brand, ...cat.fields.filter((f) => f.short).map((f) => attrs[f.key]), grade, item.year]
     .map((v) => (typeof v === "string" ? v.trim() : ""))
     .filter(Boolean);
   return [...new Set(bits)].slice(0, 4).join(" · ");

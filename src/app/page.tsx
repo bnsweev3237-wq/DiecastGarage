@@ -26,13 +26,13 @@ export default async function Explore({ searchParams }: { searchParams: { delete
   const { supabase, user } = await getUser();
   const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
   let itemsQuery = supabase.from("items").select("*, owner:profiles!inner(username, is_public)")
-    .eq("owner.is_public", true).order("created_at", { ascending: false }).limit(24);
+    .eq("owner.is_public", true).eq("status", "owned").order("created_at", { ascending: false }).limit(24);
   if (category) itemsQuery = itemsQuery.eq("category", category);
   const [{ data: items }, { data: collectors }, { count: itemCount }, { count: collectorCount }, { count: saleCount }] = await Promise.all([
     itemsQuery,
     supabase.from("profiles").select("username, avatar_path, items(count)").eq("is_public", true)
       .order("created_at", { ascending: false }).limit(12),
-    supabase.from("items").select("id, owner:profiles!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("is_hidden", false),
+    supabase.from("items").select("id, owner:profiles!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("is_hidden", false).eq("status", "owned"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_public", true),
     supabase.from("items").select("id, owner:profiles!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("for_sale", true).eq("is_hidden", false),
   ]);

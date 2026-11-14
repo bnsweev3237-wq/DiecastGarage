@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { paymentsEnabled, stripe } from "@/lib/stripe";
-import { isEbayUrl } from "@/lib/items";
+import { MAX_PHOTOS, MAX_TAGS, STATUSES, isEbayUrl } from "@/lib/items";
 import { CATEGORIES, CONDITIONS, cleanAttributes } from "@/lib/categories";
 import { NETWORKS, normalizeSocial } from "@/lib/social";
 import { REPORT_REASONS } from "@/lib/reports";
@@ -22,14 +22,39 @@ function num(f: FormData, k: string) {
 }
 
 // Photos for items are still stored in the original "car-photos" bucket.
-function parseItem(f: FormData) {
-  const forSale = f.get("for_sale") === "on";
+// Only paths in the user's own folder are kept, so nobody can attach someone else's photo.
+function photoList(f: FormData, userId: string) {
+  let list: unknown = [];
+  try { list = JSON.parse(str(f, "photos") || "[]"); } catch { list = []; }
+  const ok = (Array.isArray(list) ? list : []).filter((x): x is string => typeof x === "string" && x.startsWith(`${userId}/`) && x.length < 200);
+  return [...new Set(ok)].slice(0, MAX_PHOTOS);
+}
+
+// "Earnhardt, PC, trade bait" → up to 10 short tags, no duplicates.
+function tagList(raw: string) {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const t of raw.split(/[,#\n]/)) {
+    const tag = t.trim().replace(/\s+/g, " ").slice(0, 30);
+    if (tag && !seen.has(tag.toLowerCase())) { seen.add(tag.toLowerCase()); out.push(tag); }
+  }
+  return out.slice(0, MAX_TAGS);
+}
+
+function parseItem(f: FormData, userId: string) {
+  const status = STATUSES.some((x) => x.key === str(f, "status")) ? str(f, "status") : "owned";
+  const forSale = status === "owned" && f.get("for_sale") === "on";
   const ebayUrl = optStr(f, "ebay_url");
   const category = CATEGORIES.some((c) => c.key === str(f, "category")) ? str(f, "category") : "other";
   if (!str(f, "title")) return { error: "Give the item a name." };
   if (forSale && !ebayUrl) return { error: "Add the eBay listing link to mark this item for sale." };
   if (forSale && ebayUrl && !isEbayUrl(ebayUrl))
     return { error: "The for-sale link must be an eBay listing that starts with https://www.ebay.com/ (or another eBay site)." };
+  const certified = f.get("is_certified") === "on";
+  const certType = str(f, "cert_type") === "coa" ? "coa" : "graded";
+  const rating = Number(str(f, "rating"));
+  const quantity = Math.round(Number(str(f, "quantity") || "1"));
+  const photos = photoList(f, userId);
   return {
     item: {
       title: str(f, "title").slice(0, 160),
@@ -38,19 +63,39 @@ function parseItem(f: FormData) {
       condition: CONDITIONS.some(([k]) => k === str(f, "condition")) ? str(f, "condition") : null,
       brand: optStr(f, "brand")?.slice(0, 60) ?? null,
       year: optStr(f, "year")?.slice(0, 12) ?? null,
-      description: optStr(f, "description"),
+      description: optStr(f, "description")?.slice(0, 2000) ?? null,
       in_package: f.get("in_package") === "on",
       is_hidden: f.get("is_hidden") === "on",
-      photo_path: optStr(f, "photo_path"),
+      photo_path: photos[0] ?? null,
+      photos: photos.slice(1),
       search_terms: optStr(f, "search_terms"),
       for_sale: forSale,
       ebay_url: ebayUrl,
       asking_price: forSale ? num(f, "asking_price") : null,
+      status,
+      featured: f.get("featured") === "on",
+      rating: Number.isInteger(rating) && rating >= 1 && rating <= 5 ? rating : null,
+      quantity: Number.isFinite(quantity) && quantity >= 1 ? Math.min(quantity, 9999) : 1,
+      edition: optStr(f, "edition")?.slice(0, 60) ?? null,
+      is_certified: certified,
+      cert_type: certified ? certType : null,
+      cert_by: certified ? optStr(f, "cert_by")?.slice(0, 60) ?? null : null,
+      cert_grade: certified && certType === "graded" ? optStr(f, "cert_grade")?.slice(0, 20) ?? null : null,
+      cert_number: certified ? optStr(f, "cert_number")?.slice(0, 60) ?? null : null,
+      provenance: optStr(f, "provenance")?.slice(0, 2000) ?? null,
+      tags: tagList(str(f, "tags")),
     },
     purchase: {
       paid: num(f, "paid"),
+      shipping: num(f, "shipping"),
+      tax: num(f, "tax"),
+      fees: num(f, "fees"),
       purchased_at: optStr(f, "purchased_at"),
       manual_value: num(f, "manual_value"),
+      acquired_from: optStr(f, "acquired_from")?.slice(0, 100) ?? null,
+      storage_location: optStr(f, "storage_location")?.slice(0, 100) ?? null,
+      sold_price: status === "sold" ? num(f, "sold_price") : null,
+      sold_at: status === "sold" ? optStr(f, "sold_at") : null,
     },
   };
 }
@@ -58,14 +103,16 @@ function parseItem(f: FormData) {
 const dbError = (message: string) =>
   message.includes("FREE_LIMIT")
     ? "Free accounts can keep up to 5 items. Become a member in Settings to add more."
-    : message.includes("for_sale_needs_ebay_link")
+    : message.includes("for_sale_only_when_owned")
+      ? "Only items in your collection can be for sale."
+      : message.includes("for_sale_needs_ebay_link")
       ? "The for-sale link must be an eBay listing."
       : "Couldn't save. Check your connection and try again.";
 
 export async function createItem(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
-  const parsed = parseItem(f);
+  const parsed = parseItem(f, user.id);
   if ("error" in parsed) return { error: parsed.error };
   const { data, error } = await supabase.from("items").insert(parsed.item).select("id").single();
   if (error) return { error: dbError(error.message) };
@@ -78,14 +125,16 @@ export async function updateItem(_: FormState, f: FormData): Promise<FormState> 
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
   const id = str(f, "id");
-  const parsed = parseItem(f);
+  const parsed = parseItem(f, user.id);
   if ("error" in parsed) return { error: parsed.error };
-  const { data: before } = await supabase.from("items").select("photo_path").eq("id", id).single();
+  const { data: before } = await supabase.from("items").select("photo_path, photos").eq("id", id).single();
   const { error } = await supabase.from("items").update(parsed.item).eq("id", id).eq("owner_id", user.id);
   if (error) return { error: dbError(error.message) };
   await supabase.from("item_purchases").upsert({ item_id: id, ...parsed.purchase });
-  if (before?.photo_path && before.photo_path !== parsed.item.photo_path)
-    await supabase.storage.from("car-photos").remove([before.photo_path]);
+  // Delete photos that were removed from the item.
+  const kept = new Set([parsed.item.photo_path, ...parsed.item.photos]);
+  const gone = [before?.photo_path, ...(before?.photos ?? [])].filter((x): x is string => !!x && !kept.has(x));
+  if (gone.length) await supabase.storage.from("car-photos").remove(gone);
   revalidatePath(`/collection/${id}`);
   revalidatePath("/collection");
   return { ok: "Saved" };
@@ -95,9 +144,10 @@ export async function deleteItem(f: FormData) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
   const id = str(f, "id");
-  const { data } = await supabase.from("items").select("photo_path").eq("id", id).single();
+  const { data } = await supabase.from("items").select("photo_path, photos").eq("id", id).single();
   await supabase.from("items").delete().eq("id", id).eq("owner_id", user.id);
-  if (data?.photo_path) await supabase.storage.from("car-photos").remove([data.photo_path]);
+  const files = [data?.photo_path, ...(data?.photos ?? [])].filter((x): x is string => !!x);
+  if (files.length) await supabase.storage.from("car-photos").remove(files);
   revalidatePath("/collection");
   redirect("/collection");
 }

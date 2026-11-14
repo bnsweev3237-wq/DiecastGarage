@@ -4,6 +4,20 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.13",
+    date: "2026-11-14",
+    title: "Richer item details",
+    changes: [
+      "Up to 8 photos per item. Pick any one as the cover, and visitors can flip through them all.",
+      "Graded or COA: tick the box to add who graded or certified it, the grade and the cert number. PSA, PCGS, NGC and CGC numbers get a Verify link.",
+      "Rate items from 1 to 5 stars, and feature your grails so they show first on your page.",
+      "Status: In my collection, Wishlist or Sold. Keep sold items on record with the sale price and see your real profit.",
+      "Quantity, edition or serial number, tags, and provenance and history for every item.",
+      "Private extras: shipping, tax and fees for your true cost, where you got it, and where it's stored.",
+      "My collection has Collection, Wishlist and Sold tabs, plus tag filters.",
+    ],
+  },
+  {
     version: "0.12",
     date: "2026-11-14",
     title: "Every eBay collectibles category",

@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: { username: string 
   return { title: `@${params.username}` };
 }
 
-export default async function Collection({ params, searchParams }: { params: { username: string }; searchParams: { filter?: string } }) {
+export default async function Collection({ params, searchParams }: { params: { username: string }; searchParams: { filter?: string; tag?: string } }) {
   const { supabase, user } = await getUser();
   const { data: profile } = await supabase.from("profiles").select("*").eq("username", params.username.toLowerCase()).maybeSingle();
   if (!profile) notFound();
@@ -26,21 +26,29 @@ export default async function Collection({ params, searchParams }: { params: { u
     // Counts come from a function so they stay right even when some follow lists are private.
     supabase.rpc("follow_counts", { p_profile: profile.id }).single(),
     user ? supabase.from("follows").select("followee_id").eq("follower_id", user.id).eq("followee_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
-    canView ? supabase.from("items").select("*").eq("owner_id", profile.id).order("created_at", { ascending: false }) : Promise.resolve({ data: [] }),
+    canView ? supabase.from("items").select("*").eq("owner_id", profile.id).order("featured", { ascending: false }).order("created_at", { ascending: false }) : Promise.resolve({ data: [] }),
     // Both return nothing unless the collector chose to show them (or it's their own page).
     supabase.rpc("profile_email", { p_profile: profile.id }),
     canView ? supabase.rpc("item_values", { p_owner: profile.id }) : Promise.resolve({ data: [] }),
     supabase.rpc("profile_location", { p_profile: profile.id }),
   ]);
   const valueByCar = new Map(((values ?? []) as { item_id: string; value: number }[]).map((v) => [v.item_id, Number(v.value)]));
+  // Owners get their hidden items back from the database; leave them out so this page matches what others see.
+  const mine = (cars ?? []) as Item[];
+  const visible = mine.filter((c) => !c.is_hidden);
+  const hiddenCount = mine.length - visible.length;
+  // Only items they own count toward the collection's value.
+  for (const c of mine) if (c.is_hidden || c.status !== "owned") valueByCar.delete(c.id);
   const showValues = isOwner ? profile.show_values : valueByCar.size > 0;
   const totalValue = [...valueByCar.values()].reduce((a, b) => a + b, 0);
-  // Owners get their hidden cars back from the database; leave them out so this page matches what others see.
-  const mine = (cars ?? []) as Item[];
-  const all = mine.filter((c) => !c.is_hidden);
-  const hiddenCount = mine.length - all.length;
-  for (const c of mine) if (c.is_hidden) valueByCar.delete(c.id);
-  const shown = searchParams.filter === "sale" ? all.filter((c) => c.for_sale) : all;
+  const all = visible.filter((c) => c.status === "owned");
+  const wishlist = visible.filter((c) => c.status === "wishlist");
+  const sold = visible.filter((c) => c.status === "sold");
+  const filter = ["sale", "wishlist", "sold"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
+  const base = filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : all;
+  const tag = searchParams.tag?.toLowerCase();
+  const shown = tag ? base.filter((c) => (c.tags ?? []).some((t) => t.toLowerCase() === tag)) : base;
+  const grails = !filter && !tag ? all.filter((c) => c.featured) : [];
   const forSale = all.filter((c) => c.for_sale).length;
   const name = profile.username;
 
@@ -81,15 +89,25 @@ export default async function Collection({ params, searchParams }: { params: { u
       ) : (
         <>
           <nav className="tabs" aria-label="Filter items">
-            <Link className={searchParams.filter !== "sale" ? "on" : undefined} href={`/c/${profile.username}`}>All items ({all.length})</Link>
-            {forSale > 0 && <Link className={searchParams.filter === "sale" ? "on" : undefined} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>}
+            <Link className={!filter ? "on" : undefined} href={`/c/${profile.username}`}>Collection ({all.length})</Link>
+            {forSale > 0 && <Link className={filter === "sale" ? "on" : undefined} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>}
+            {wishlist.length > 0 && <Link className={filter === "wishlist" ? "on" : undefined} href={`/c/${profile.username}?filter=wishlist`}>Wishlist ({wishlist.length})</Link>}
+            {sold.length > 0 && <Link className={filter === "sold" ? "on" : undefined} href={`/c/${profile.username}?filter=sold`}>Sold ({sold.length})</Link>}
           </nav>
+          {tag && <p className="notice">Showing items tagged <b>#{searchParams.tag}</b>. <Link href={`/c/${profile.username}`}>Show everything</Link></p>}
+          {grails.length > 0 && (
+            <>
+              <div className="sec-head"><h2>★ Grails</h2></div>
+              <section className="gallery">{grails.map((c) => <ItemTile key={c.id} item={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</section>
+              <div className="sec-head"><h2>Everything</h2></div>
+            </>
+          )}
           {isOwner && hiddenCount > 0 && (
             <p className="notice">{hiddenCount} hidden item{hiddenCount > 1 ? "s aren't" : " isn't"} shown here. Only you can see {hiddenCount > 1 ? "them" : "it"}, in <Link href="/collection">My collection</Link>.</p>
           )}
-          {shown.length ? (
-            <section className="gallery">{shown.map((c) => <ItemTile key={c.id} item={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</section>
-          ) : (
+          {shown.length > grails.length ? (
+            <section className="gallery">{shown.filter((c) => !grails.includes(c)).map((c) => <ItemTile key={c.id} item={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</section>
+          ) : grails.length ? null : (
             <div className="empty"><h3>Nothing here yet</h3>{isOwner && <Link className="btn primary" href="/collection/new">+ Add an item</Link>}</div>
           )}
           <Comments profileId={profile.id} path={`/c/${profile.username}`} />

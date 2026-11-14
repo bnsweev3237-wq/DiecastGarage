@@ -16,9 +16,68 @@ export type Item = {
   ebay_url: string | null;
   asking_price: number | null;
   created_at: string;
+  status: ItemStatus;
+  featured: boolean;
+  rating: number | null;
+  quantity: number;
+  edition: string | null;
+  is_certified: boolean;
+  cert_type: "graded" | "coa" | null;
+  cert_by: string | null;
+  cert_grade: string | null;
+  cert_number: string | null;
+  provenance: string | null;
+  tags: string[];
+  photos: string[];
 };
 
-export type Purchase = { paid: number | null; purchased_at: string | null; manual_value: number | null };
+export type ItemStatus = "owned" | "wishlist" | "sold";
+export const STATUSES: { key: ItemStatus; label: string; hint: string }[] = [
+  { key: "owned", label: "In my collection", hint: "You own it" },
+  { key: "wishlist", label: "Wishlist", hint: "You're hunting for it" },
+  { key: "sold", label: "Sold", hint: "Keep it on record with what you sold it for" },
+];
+export const MAX_PHOTOS = 8; // the cover plus 7 more
+export const MAX_TAGS = 10;
+
+export type Purchase = {
+  paid: number | null; purchased_at: string | null; manual_value: number | null;
+  shipping: number | null; tax: number | null; fees: number | null;
+  acquired_from: string | null; storage_location: string | null;
+  sold_price: number | null; sold_at: string | null;
+};
+
+// What it really cost you: price paid plus shipping, tax and fees. Null when no price paid was entered.
+export function totalCost(p: Purchase | null | undefined) {
+  if (p?.paid == null) return null;
+  return Number(p.paid) + Number(p.shipping ?? 0) + Number(p.tax ?? 0) + Number(p.fees ?? 0);
+}
+
+// All of an item's photos, cover first.
+export const allPhotos = (item: Pick<Item, "photo_path" | "photos">) =>
+  [item.photo_path, ...(item.photos ?? [])].filter((x): x is string => !!x);
+
+// "PSA 10", "COA by JSA" and so on, for badges.
+export function certLabel(item: Pick<Item, "is_certified" | "cert_type" | "cert_by" | "cert_grade">) {
+  if (!item.is_certified) return null;
+  if (item.cert_type === "coa") return item.cert_by ? `COA · ${item.cert_by}` : "COA";
+  return [item.cert_by, item.cert_grade].filter(Boolean).join(" ") || "Graded";
+}
+
+export const GRADERS = ["PSA", "BGS (Beckett)", "CGC", "SGC", "TAG", "PCGS", "NGC", "ANACS", "PMG", "CBCS", "WATA", "VGA", "AFA", "HGA"];
+export const COA_ISSUERS = ["PSA/DNA", "JSA", "Beckett (BAS)", "Fanatics", "Upper Deck", "Steiner", "Topps", "Manufacturer", "Dealer or seller"];
+
+// Link to the grader's own certificate lookup, so anyone can check the number.
+export function certLookupUrl(by: string | null, number: string | null) {
+  if (!by || !number) return null;
+  const n = encodeURIComponent(number.replace(/\s+/g, ""));
+  const b = by.toLowerCase();
+  if (b.startsWith("psa")) return `https://www.psacard.com/cert/${n}`;
+  if (b.startsWith("pcgs")) return `https://www.pcgs.com/cert/${n}`;
+  if (b.startsWith("ngc")) return `https://www.ngccoin.com/certlookup/${n}/`;
+  if (b.startsWith("cgc")) return `https://www.cgccomics.com/certlookup/${n}/`;
+  return null;
+}
 
 export type Comp = {
   id: string;
@@ -72,11 +131,12 @@ export function valueOf(purchase: Purchase | null, comps: Comp[]) {
 }
 
 // What to search for on eBay and Facebook when looking up sold listings.
-export function searchTerms(item: Pick<Item, "title" | "brand" | "category" | "attributes" | "search_terms">) {
+export function searchTerms(item: Pick<Item, "title" | "brand" | "category" | "attributes" | "search_terms"> & Partial<Pick<Item, "is_certified" | "cert_type" | "cert_by" | "cert_grade">>) {
   if (item.search_terms) return item.search_terms.trim();
   const attrs = item.attributes ?? {};
-  const keys = ["scale", "set", "number", "grade", "issue", "denomination", "mint_mark", "set_number", "platform", "size"];
-  return [item.title, item.brand, ...keys.map((k) => attrs[k])].filter(Boolean).join(" ").trim();
+  const keys = ["scale", "set", "number", "issue", "denomination", "mint_mark", "set_number", "platform", "size"];
+  const graded = "is_certified" in item && item.is_certified && item.cert_type === "graded" ? [item.cert_by?.split(" ")[0], item.cert_grade] : [];
+  return [item.title, item.brand, ...keys.map((k) => attrs[k]), ...graded].filter(Boolean).join(" ").trim();
 }
 export const ebaySoldUrl = (q: string) =>
   `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(q)}&LH_Sold=1&LH_Complete=1&_sop=13`;

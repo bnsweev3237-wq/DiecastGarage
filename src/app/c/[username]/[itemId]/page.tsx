@@ -2,10 +2,11 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Comments from "@/components/Comments";
-import ItemPlaceholder from "@/components/ItemPlaceholder";
+import Gallery from "@/components/Gallery";
+import { Stars } from "@/components/Stars";
 import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
-import { money, photoUrl, type Item } from "@/lib/items";
+import { allPhotos, certLookupUrl, money, type Item } from "@/lib/items";
 import { categoryOf, conditionLabel } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
@@ -23,8 +24,8 @@ export default async function PublicItem({ params }: { params: { username: strin
   const sellerLocation = typeof location === "string" && (user?.id !== car.owner_id || owner?.show_location) ? location : null;
   const value = (values as { item_id: string; value: number }[] | null)?.find((v) => v.item_id === car.id)?.value;
   // Owners always get their values back, so only show it when their setting says others see it too.
-  const showValue = value != null && (user?.id !== car.owner_id || owner?.show_values);
-  const src = photoUrl(car.photo_path);
+  const showValue = value != null && car.status === "owned" && (user?.id !== car.owner_id || owner?.show_values);
+  const lookup = car.is_certified ? certLookupUrl(car.cert_by, car.cert_number) : null;
   const isOwner = user?.id === car.owner_id;
   const path = `/c/${car.owner.username}/${car.id}`;
 
@@ -36,7 +37,7 @@ export default async function PublicItem({ params }: { params: { username: strin
       </div>
       {car.is_hidden && <p className="notice">This item is hidden. Only you can see this page.</p>}
       <div className="carpage">
-        {src ? <img className="photo" src={src} alt={`Photo of ${car.title}`} /> : <div className="photo" style={{ display: "grid", placeItems: "center", color: "var(--muted)" }} title="No photo yet"><ItemPlaceholder width={240} /></div>}
+        <Gallery paths={allPhotos(car)} title={car.title} />
         <div className="side">
           {car.for_sale && car.ebay_url && (
             <section className="forsale-box">
@@ -47,9 +48,27 @@ export default async function PublicItem({ params }: { params: { username: strin
               <p className="hint">Sales happen on eBay. Check the listing, seller feedback and shipping before you buy.</p>
             </section>
           )}
+          {(car.featured || car.status !== "owned" || car.rating) && (
+            <div className="item-flags">
+              {car.featured && <span className="flag grail">★ Grail</span>}
+              {car.status === "wishlist" && <span className="flag want">On the wishlist</span>}
+              {car.status === "sold" && <span className="flag sold">Sold</span>}
+              <Stars value={car.rating} />
+            </div>
+          )}
+          {car.is_certified && (
+            <section className="cert-card">
+              <span className="label">{car.cert_type === "coa" ? "Certificate of authenticity" : "Professionally graded"}</span>
+              <div className="cert-main">
+                {car.cert_type === "graded" && car.cert_grade && <b className="cert-grade">{car.cert_grade}</b>}
+                <span>{car.cert_by ?? (car.cert_type === "coa" ? "COA" : "Graded")}{car.cert_number && <> · <span className="num">#{car.cert_number}</span></>}</span>
+              </div>
+              {lookup && <a className="btn small" href={lookup} target="_blank" rel="noopener noreferrer nofollow">Verify on {car.cert_by?.split(" ")[0]} ↗</a>}
+            </section>
+          )}
           <section className="card">
             <dl className="specs">
-              <dt>Category</dt><dd>{categoryOf(car.category).label}</dd>
+              <dt>Category</dt><dd>{categoryOf(car.category).emoji} {categoryOf(car.category).label}</dd>
               {car.brand && <><dt>{categoryOf(car.category).brandLabel}</dt><dd>{car.brand}</dd></>}
               {categoryOf(car.category).fields.filter((f) => car.attributes?.[f.key]).map((f) => (
                 <Fragment key={f.key}><dt>{f.label}</dt><dd>{car.attributes![f.key]}</dd></Fragment>
@@ -57,9 +76,15 @@ export default async function PublicItem({ params }: { params: { username: strin
               {car.year && <><dt>Year</dt><dd>{car.year}</dd></>}
               {car.condition && <><dt>Condition</dt><dd>{conditionLabel(car.condition)}</dd></>}
               {car.in_package && <><dt>Packaging</dt><dd>{categoryOf(car.category).packagingLabel}</dd></>}
+              {car.quantity > 1 && <><dt>Quantity</dt><dd className="num">{car.quantity}</dd></>}
+              {car.edition && <><dt>Edition</dt><dd>{car.edition}</dd></>}
               {showValue && <><dt>Est. value</dt><dd className="num">{money(Number(value), 2)}</dd></>}
             </dl>
             {car.description && <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{car.description}</p>}
+            {car.provenance && <div><span className="label">Provenance and history</span><p style={{ margin: "4px 0 0", whiteSpace: "pre-wrap" }}>{car.provenance}</p></div>}
+            {car.tags?.length > 0 && (
+              <div className="meta">{car.tags.map((t) => <Link key={t} className="chip tag" href={`/c/${car.owner.username}?tag=${encodeURIComponent(t)}`}>#{t}</Link>)}</div>
+            )}
             {user && !isOwner && <div><ReportButton type="item" id={car.id} /></div>}
           </section>
         </div>

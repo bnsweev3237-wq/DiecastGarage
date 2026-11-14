@@ -6,7 +6,7 @@ import { FREE_ITEM_LIMIT, isActiveMembership } from "@/lib/limits";
 
 export const metadata = { title: "Add an item" };
 
-export default async function NewItem({ searchParams }: { searchParams: { category?: string } }) {
+export default async function NewItem({ searchParams }: { searchParams: { category?: string; status?: string } }) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login?next=/collection/new");
   const [{ count }, { data: m }] = await Promise.all([
@@ -16,7 +16,7 @@ export default async function NewItem({ searchParams }: { searchParams: { catego
   const atLimit = !isActiveMembership(m?.status) && (count ?? 0) >= FREE_ITEM_LIMIT;
   return (
     <main className="wrap" style={{ maxWidth: 760 }}>
-      <div className="head"><div><Link href="/collection">← My collection</Link><h1>Add an item</h1></div></div>
+      <div className="head"><div><Link href="/collection">← My collection</Link><h1>{searchParams.status === "wishlist" ? "Add to your wishlist" : "Add an item"}</h1></div></div>
       {atLimit ? (
         <div className="empty">
           <h3>Your {FREE_ITEM_LIMIT} free spots are full</h3>
@@ -24,7 +24,7 @@ export default async function NewItem({ searchParams }: { searchParams: { catego
           <Link className="btn flag" href="/settings#membership">Become a member</Link>
         </div>
       ) : (
-        <ItemForm userId={user.id} defaultCategory={searchParams.category} />
+        <ItemForm userId={user.id} defaultCategory={searchParams.category} defaultStatus={searchParams.status} />
       )}
     </main>
   );

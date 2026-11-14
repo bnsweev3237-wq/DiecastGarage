@@ -5,8 +5,8 @@ import CompForm from "@/components/CompForm";
 import DeleteItem from "@/components/DeleteItem";
 import { removeComp } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
-import { categoryOf, conditionLabel } from "@/lib/categories";
-import { ebaySoldUrl, facebookUrl, money, searchTerms, signed, valueOf, type Item, type Comp, type Purchase } from "@/lib/items";
+import { conditionLabel } from "@/lib/categories";
+import { certLabel, ebaySoldUrl, facebookUrl, money, searchTerms, signed, totalCost, valueOf, type Item, type Comp, type Purchase } from "@/lib/items";
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +22,11 @@ export default async function EditItem({ params, searchParams }: { params: { id:
   const purchase = c.item_purchases;
   const comps = [...c.comps].sort((a, b) => (b.sold_on ?? "").localeCompare(a.sold_on ?? ""));
   const v = valueOf(purchase, comps);
-  const hasPaid = purchase?.paid != null;
-  const gain = v && hasPaid ? v.value - Number(purchase!.paid) : null;
+  const cost = totalCost(purchase);
+  const extras = cost != null && cost !== Number(purchase!.paid);
+  const sold = c.status === "sold";
+  const soldFor = sold && purchase?.sold_price != null ? Number(purchase.sold_price) : null;
+  const gain = sold ? (soldFor != null && cost != null ? soldFor - cost : null) : v && cost != null ? v.value - cost : null;
   const terms = searchTerms(c);
 
   return (
@@ -37,12 +40,17 @@ export default async function EditItem({ params, searchParams }: { params: { id:
         <ItemForm userId={user.id} item={c} purchase={purchase} />
         <div className="side">
           <section className="card">
-            <h3>Estimated value</h3>
+            <h3>{sold ? "Your sale" : c.status === "wishlist" ? "What it's going for" : "Estimated value"}</h3>
             <div className="est">
-              <div><span className="label">{v?.manual ? "Your value" : "Median sold"}</span><div className="v">{v ? money(v.value, 2) : "—"}</div></div>
-              <div><span className="label">Paid</span><div className="v">{hasPaid ? money(Number(purchase!.paid), 2) : "—"}</div></div>
-              <div><span className="label">Gain / loss</span><div className={`v ${gain == null ? "" : gain >= 0 ? "up" : "down"}`}>{gain == null ? "—" : signed(Math.round(gain))}</div></div>
+              {sold ? <div><span className="label">Sold for</span><div className="v">{soldFor != null ? money(soldFor, 2) : "—"}</div></div>
+                : <div><span className="label">{v?.manual ? (c.status === "wishlist" ? "Target price" : "Your value") : "Median sold"}</span><div className="v">{v ? money(v.value, 2) : "—"}</div></div>}
+              {c.status !== "wishlist" && <div><span className="label">{extras ? "Total cost" : "Paid"}</span><div className="v">{cost != null ? money(cost, 2) : "—"}</div></div>}
+              {c.status !== "wishlist" && <div><span className="label">{sold ? "Profit" : "Gain / loss"}</span><div className={`v ${gain == null ? "" : gain >= 0 ? "up" : "down"}`}>{gain == null ? "—" : signed(Math.round(gain))}</div></div>}
             </div>
+            {extras && <p className="hint">Total cost is {money(Number(purchase!.paid), 2)} paid{purchase!.shipping ? ` + ${money(Number(purchase!.shipping), 2)} shipping` : ""}{purchase!.tax ? ` + ${money(Number(purchase!.tax), 2)} tax` : ""}{purchase!.fees ? ` + ${money(Number(purchase!.fees), 2)} fees` : ""}.</p>}
+            {(purchase?.storage_location || purchase?.acquired_from) && (
+              <p className="hint">{purchase?.acquired_from && <>Got it from {purchase.acquired_from}. </>}{purchase?.storage_location && <>Stored in {purchase.storage_location}.</>}</p>
+            )}
             <p className="hint">
               {v?.est
                 ? `Based on ${v.est.n} sold listing${v.est.n > 1 ? "s" : ""}${v.est.olderOnly ? " (all over a year old, so treat it as rough)" : " from the last 12 months"}${v.est.n >= 5 ? ", with the highest and lowest dropped" : ""}. Range ${money(v.est.low)}–${money(v.est.high)}.${v.manual ? ` Sold listings say ${money(v.est.median, 2)}; your own value is used instead.` : ""}`
@@ -57,7 +65,7 @@ export default async function EditItem({ params, searchParams }: { params: { id:
             </div>
             <p className="hint">
               Searching “{terms}”. eBay shows completed sales with the price in green. Facebook doesn&apos;t publish sold prices, so log listings marked Sold or Pending.
-              Compare like with like: same condition{c.condition ? ` (${conditionLabel(c.condition)})` : ""}{categoryOf(c.category).fields.some((f) => f.key === "grade") ? ", same grade" : ""}, and {c.in_package ? "in its packaging" : "out of its packaging"}.
+              Compare like with like: same condition{c.condition ? ` (${conditionLabel(c.condition)})` : ""}{c.is_certified && c.cert_type === "graded" ? `, same grade (${certLabel(c)})` : ""}, and {c.in_package ? "in its packaging" : "out of its packaging"}.
             </p>
             <div>
               {comps.length ? comps.map((k) => (
