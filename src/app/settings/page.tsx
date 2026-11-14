@@ -3,7 +3,7 @@ import ProfileForm from "@/components/ProfileForm";
 import DeleteAccount from "@/components/DeleteAccount";
 import { InstallSection } from "@/components/InstallApp";
 import { getUser } from "@/lib/supabase/server";
-import { FREE_ITEM_LIMIT, isActiveMembership } from "@/lib/limits";
+import { FREE_ITEM_LIMIT, compActive, compEnds, isActiveMembership, isMember } from "@/lib/limits";
 import { paymentsEnabled } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,9 @@ export default async function Settings({ searchParams }: { searchParams: { membe
     supabase.from("memberships").select("*").eq("user_id", user.id).single(),
     supabase.from("items").select("id", { count: "exact", head: true }).eq("owner_id", user.id),
   ]);
-  const member = isActiveMembership(m?.status);
+  const member = isMember(m);
+  const paid = isActiveMembership(m?.status);
+  const comp = compActive(m);
   const renews = m?.current_period_end ? new Date(m.current_period_end).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
 
   return (
@@ -48,8 +50,14 @@ export default async function Settings({ searchParams }: { searchParams: { membe
         </div>
         {member ? (
           <>
-            <p className="hint">You&apos;re a member{renews ? `. Renews ${renews}` : ""}. You have {count ?? 0} items.</p>
-            <form action="/api/stripe/portal" method="post"><button className="btn" type="submit">Manage or cancel membership</button></form>
+            {comp && (
+              <p className="notice">
+                🎁 You have a <b>complimentary membership</b>{compEnds(m) ? <> through <b>{compEnds(m)}</b></> : <> with <b>no end date</b></>}. Enjoy!
+                {compEnds(m) && !paid && <> After that you keep everything you&apos;ve added, but you&apos;d need a membership to add more past {FREE_ITEM_LIMIT}.</>}
+              </p>
+            )}
+            <p className="hint">You&apos;re a member{paid && renews ? `. Renews ${renews}` : ""}. You have {count ?? 0} items.</p>
+            {paid && <form action="/api/stripe/portal" method="post"><button className="btn" type="submit">Manage or cancel membership</button></form>}
           </>
         ) : (
           <>

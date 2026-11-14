@@ -4,6 +4,8 @@ import Avatar from "@/components/Avatar";
 import ConfirmAction from "@/components/ConfirmAction";
 import SubmitButton from "@/components/SubmitButton";
 import { adminClearProfile, adminDeleteAccount, adminDeleteItem, adminDeleteComment, adminRemoveItemPhoto, adminClearItemDescription } from "@/app/admin/actions";
+import CompMembership from "@/components/admin/CompMembership";
+import { compActive, compEnds, isActiveMembership } from "@/lib/limits";
 import { requireAdmin, when } from "@/lib/admin";
 import { money, photoUrl, valueOf, type Item, type Comp, type Purchase } from "@/lib/items";
 import { NETWORKS } from "@/lib/social";
@@ -42,12 +44,14 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
           <dt>Email</dt><dd>{u?.email} {u?.email_confirmed_at ? "" : <span className="hint">(not confirmed)</span>}</dd>
           <dt>Location</dt><dd>{priv?.location || "—"}</dd>
           <dt>Joined</dt><dd>{when(p.created_at)}{u?.last_sign_in_at && <span className="hint"> · last signed in {when(u.last_sign_in_at)}</span>}</dd>
-          <dt>Plan</dt><dd>{m?.status === "active" || m?.status === "trialing" ? "Member" : "Free"}{m?.status && m.status !== "none" && <span className="hint"> ({m.status})</span>}</dd>
+          <dt>Plan</dt><dd>{isActiveMembership(m?.status) ? "Member (paid)" : compActive(m) ? `Member (complimentary${compEnds(m) ? ` through ${compEnds(m)}` : ", no end date"})` : "Free"}{m?.status && m.status !== "none" && <span className="hint"> · Stripe: {m.status}</span>}{m?.comp_active && !compActive(m) && <span className="hint"> · comp ended {compEnds(m)}</span>}</dd>
           <dt>Collection</dt><dd>{p.is_public ? "Public" : "Private"}</dd>
           <dt>Shows</dt><dd>{[p.show_email && "email", p.show_values && "values", p.show_location && "location", p.show_follows && "follow lists"].filter(Boolean).join(", ") || "nothing optional"}</dd>
           <dt>Comments from</dt><dd>{p.comments_from}</dd>
         </dl>
       </section>
+
+      <CompMembership userId={p.id} username={p.username} active={compActive(m)} granted={!!m?.comp_active} until={m?.comp_until ?? null} paid={isActiveMembership(m?.status)} />
 
       <section className="card">
         <h3>Profile content</h3>

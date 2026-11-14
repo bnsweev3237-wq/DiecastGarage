@@ -111,3 +111,26 @@ export async function adminCloseReport(f: FormData) {
   await logAdminAction(db, adminId, status === "dismissed" ? "dismiss_report" : "resolve_report", str(f, "owner_id") || null, { type: str(f, "target_type") });
   revalidatePath("/admin", "layout");
 }
+
+// Complimentary memberships. The member sees only that they have one and when it ends;
+// who granted it and the reason stay in the admin activity log.
+export async function adminGrantComp(f: FormData) {
+  const { adminId, db } = await requireAdmin();
+  const userId = str(f, "user_id");
+  const forever = str(f, "ends") !== "date";
+  const until = str(f, "comp_until");
+  if (!userId || (!forever && !/^\d{4}-\d{2}-\d{2}$/.test(until))) return;
+  const { data: before } = await db.from("memberships").select("comp_active, comp_until").eq("user_id", userId).maybeSingle();
+  await db.from("memberships").upsert({ user_id: userId, comp_active: true, comp_until: forever ? null : until, updated_at: new Date().toISOString() });
+  await logAdminAction(db, adminId, before?.comp_active ? "update_comp_membership" : "grant_comp_membership", userId,
+    { until: forever ? "no end date" : until, reason: str(f, "reason") || null });
+  refresh();
+}
+
+export async function adminRevokeComp(f: FormData) {
+  const { adminId, db } = await requireAdmin();
+  const userId = str(f, "user_id");
+  await db.from("memberships").update({ comp_active: false, comp_until: null, updated_at: new Date().toISOString() }).eq("user_id", userId);
+  await logAdminAction(db, adminId, "revoke_comp_membership", userId, {});
+  refresh();
+}

@@ -3,7 +3,7 @@ import ItemPlaceholder from "@/components/ItemPlaceholder";
 import { Stars } from "@/components/Stars";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
-import { FREE_ITEM_LIMIT, isActiveMembership } from "@/lib/limits";
+import { FREE_ITEM_LIMIT, isMember } from "@/lib/limits";
 import { certLabel, money, photoUrl, signed, totalCost, valueOf, type Item, type ItemStatus, type Comp, type Purchase } from "@/lib/items";
 import { CATEGORIES, categoryOf, summary } from "@/lib/categories";
 
@@ -25,7 +25,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
   const [{ data }, { data: membership }, { data: me }] = await Promise.all([
     supabase.from("items").select("*, item_purchases(*), comps(*)").eq("owner_id", user.id)
       .order("featured", { ascending: false }).order("created_at", { ascending: false }),
-    supabase.from("memberships").select("status").eq("user_id", user.id).single(),
+    supabase.from("memberships").select("status, comp_active, comp_until").eq("user_id", user.id).single(),
     supabase.from("profiles").select("username, is_public").eq("id", user.id).single(),
   ]);
   const everything = (data ?? []) as Row[];
@@ -36,7 +36,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
   const items = all
     .filter((i) => !searchParams.category || i.category === searchParams.category)
     .filter((i) => !searchParams.tag || (i.tags ?? []).some((t) => t.toLowerCase() === searchParams.tag!.toLowerCase()));
-  const member = isActiveMembership(membership?.status);
+  const member = isMember(membership);
   const atLimit = !member && everything.length >= FREE_ITEM_LIMIT;
   const link = (p: Params) => {
     const q = new URLSearchParams(Object.entries({ status: view === "owned" ? undefined : view, ...p }).filter(([, v]) => v) as [string, string][]);

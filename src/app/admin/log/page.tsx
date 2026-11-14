@@ -7,6 +7,8 @@ const LABELS: Record<string, string> = {
   delete_comment: "Deleted a comment", clear_avatar: "Removed a profile picture", clear_bio: "Cleared About text",
   clear_links: "Removed profile links", delete_account: "Deleted an account",
   resolve_report: "Resolved a report", dismiss_report: "Dismissed a report",
+  grant_comp_membership: "Gave a complimentary membership", update_comp_membership: "Changed a complimentary membership",
+  revoke_comp_membership: "Ended a complimentary membership",
 };
 
 export default async function AdminLog() {
@@ -22,7 +24,7 @@ export default async function AdminLog() {
         {(data ?? []).map((r) => {
           const admin = r.admin as unknown as { username: string } | null;
           const target = r.target as unknown as { id: string; username: string } | null;
-          const detail = (r.detail ?? {}) as { title?: string; body?: string; username?: string; reason?: string };
+          const detail = (r.detail ?? {}) as { title?: string; body?: string; username?: string; reason?: string; until?: string };
           return (
             <div key={r.id} className="admin-row">
               <span className="hint">{when(r.created_at)} · @{admin?.username ?? "former admin"}</span>
@@ -32,6 +34,7 @@ export default async function AdminLog() {
                 {detail.username && <> (@{detail.username})</>}
                 {detail.title && <>: “{detail.title}”</>}
                 {detail.body && <>: “{detail.body}”</>}
+                {detail.until && <> until {detail.until}</>}
                 {detail.reason && <span className="hint"> · Reason: {detail.reason}</span>}
               </span>
             </div>

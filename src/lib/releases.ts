@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.14",
+    date: "2026-11-14",
+    title: "Complimentary memberships",
+    changes: [
+      "Admins can give any collector a free full membership, ending on a date or with no end date, and change or end it any time.",
+      "Collectors with one see it in Settings, with when it ends.",
+    ],
+  },
+  {
     version: "0.13",
     date: "2026-11-14",
     title: "Richer item details",
