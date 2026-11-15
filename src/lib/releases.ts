@@ -15,7 +15,6 @@ export const releases: Release[] = [
       "Block a collector from their page: they can't comment on your pages or follow you, and you won't see their comments. Manage your list in Settings.",
       "Anything reported by 5 different people is hidden until our team reviews it.",
       "Limits on very fast commenting, following, reporting and adding items, and the same long comment can't be pasted all over the site.",
-      "A quick, mostly invisible check on sign-up and sign-in keeps bots out.",
     ],
   },
   {
