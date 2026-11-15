@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { MAX_PHOTOS, photoUrl } from "@/lib/items";
+import { MAX_PHOTOS, THUMB_WIDTH, photoUrl, thumbPath } from "@/lib/items";
+import Thumb from "./Thumb";
 
 async function shrink(file: File, max = 1600, quality = 0.85): Promise<Blob> {
   const bmp = await createImageBitmap(file);
@@ -29,10 +30,13 @@ export default function PhotoInput({ userId, initial, title }: { userId: string;
     let failed = 0;
     for (const file of files) {
       try {
-        const blob = await shrink(file);
+        const [blob, small] = await Promise.all([shrink(file), shrink(file, THUMB_WIDTH, 0.8)]);
         const next = `${userId}/${crypto.randomUUID()}.jpg`;
-        const { error } = await createClient().storage.from("car-photos").upload(next, blob, { contentType: "image/jpeg" });
+        const store = createClient().storage.from("car-photos");
+        const { error } = await store.upload(next, blob, { contentType: "image/jpeg" });
         if (error) throw error;
+        // The small copy for cards and lists. If it fails, pages show the full photo instead.
+        await store.upload(thumbPath(next), small, { contentType: "image/jpeg" });
         added.push(next);
         setPaths((p) => [...p, next]);
       } catch {
@@ -55,7 +59,7 @@ export default function PhotoInput({ userId, initial, title }: { userId: string;
         <div className="thumbs" aria-label="All photos">
           {paths.map((p, i) => (
             <div key={p} className={i === 0 ? "thumb-edit cover" : "thumb-edit"}>
-              <img src={photoUrl(p)!} alt={`Photo ${i + 1}`} />
+              <Thumb path={p} alt={`Photo ${i + 1}`} />
               {i === 0 ? <span className="cover-tag">Cover</span>
                 : <button type="button" className="mini" onClick={() => makeCover(i)} aria-label={`Make photo ${i + 1} the cover`}>★</button>}
               <button type="button" className="mini x" onClick={() => remove(i)} aria-label={`Remove photo ${i + 1}`}>✕</button>

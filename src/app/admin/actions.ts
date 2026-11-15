@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAdminAction, requireAdmin } from "@/lib/admin";
+import { withThumbs } from "@/lib/items";
 
 // Removals are silent: nothing tells the collector, and nothing on the site marks the content as removed.
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -24,7 +25,7 @@ export async function adminDeleteItem(f: FormData) {
   if (!car) return;
   await db.from("items").delete().eq("id", id);
   const files = [car.photo_path, ...(car.photos ?? [])].filter((x): x is string => !!x);
-  if (files.length) await db.storage.from("car-photos").remove(files);
+  if (files.length) await db.storage.from("car-photos").remove(withThumbs(files));
   await closeReports(db, adminId, id);
   await logAdminAction(db, adminId, "delete_item", car.owner_id, { title: car.title, reason: str(f, "reason") || null });
   refresh();
@@ -33,10 +34,12 @@ export async function adminDeleteItem(f: FormData) {
 export async function adminRemoveItemPhoto(f: FormData) {
   const { adminId, db } = await requireAdmin();
   const id = str(f, "id");
-  const { data: car } = await db.from("items").select("owner_id, title, photo_path").eq("id", id).maybeSingle();
+  const { data: car } = await db.from("items").select("owner_id, title, photo_path, photos").eq("id", id).maybeSingle();
   if (!car?.photo_path) return;
-  await db.from("items").update({ photo_path: null }).eq("id", id);
-  await db.storage.from("car-photos").remove([car.photo_path]);
+  // The next photo, if there is one, becomes the cover.
+  const rest = (car.photos ?? []) as string[];
+  await db.from("items").update({ photo_path: rest[0] ?? null, photos: rest.slice(1) }).eq("id", id);
+  await db.storage.from("car-photos").remove(withThumbs([car.photo_path]));
   await logAdminAction(db, adminId, "remove_item_photo", car.owner_id, { title: car.title });
   refresh();
 }
@@ -133,5 +136,14 @@ export async function adminRevokeComp(f: FormData) {
   const userId = str(f, "user_id");
   await db.from("memberships").update({ comp_active: false, comp_until: null, updated_at: new Date().toISOString() }).eq("user_id", userId);
   await logAdminAction(db, adminId, "revoke_comp_membership", userId, {});
+  refresh();
+}
+
+// Makes small copies for photos that don't have one yet, without waiting for the daily job.
+export async function adminMakeThumbs() {
+  const { adminId, db } = await requireAdmin();
+  const { makeMissingThumbs } = await import("@/lib/thumbs");
+  const r = await makeMissingThumbs(db, { limit: 60, budgetMs: 8_000 });
+  if (r.made) await logAdminAction(db, adminId, "make_thumbnails", null, { title: `${r.made} made` });
   refresh();
 }

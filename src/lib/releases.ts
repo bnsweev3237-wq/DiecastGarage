@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.18",
+    date: "2026-11-15",
+    title: "Faster pages with smaller thumbnails",
+    changes: [
+      "Every item photo now gets a small copy for cards, lists and photo strips, so Explore and collection pages load much faster and use far less data.",
+      "Item pages still show the full-size photo.",
+      "Photos added before today get their small copies automatically.",
+    ],
+  },
+  {
     version: "0.17",
     date: "2026-11-15",
     title: "Tidier tag filter",

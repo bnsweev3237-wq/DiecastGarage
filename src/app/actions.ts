@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { paymentsEnabled, stripe } from "@/lib/stripe";
-import { MAX_PHOTOS, MAX_TAGS, STATUSES, isEbayUrl } from "@/lib/items";
+import { MAX_PHOTOS, MAX_TAGS, STATUSES, isEbayUrl, isThumb, withThumbs } from "@/lib/items";
 import { CATEGORIES, CONDITIONS, cleanAttributes } from "@/lib/categories";
 import { NETWORKS, normalizeSocial } from "@/lib/social";
 import { REPORT_REASONS } from "@/lib/reports";
@@ -26,7 +26,7 @@ function num(f: FormData, k: string) {
 function photoList(f: FormData, userId: string) {
   let list: unknown = [];
   try { list = JSON.parse(str(f, "photos") || "[]"); } catch { list = []; }
-  const ok = (Array.isArray(list) ? list : []).filter((x): x is string => typeof x === "string" && x.startsWith(`${userId}/`) && x.length < 200);
+  const ok = (Array.isArray(list) ? list : []).filter((x): x is string => typeof x === "string" && x.startsWith(`${userId}/`) && x.length < 200 && !isThumb(x));
   return [...new Set(ok)].slice(0, MAX_PHOTOS);
 }
 
@@ -137,7 +137,7 @@ export async function updateItem(_: FormState, f: FormData): Promise<FormState> 
   // Delete photos that were removed from the item.
   const kept = new Set([parsed.item.photo_path, ...parsed.item.photos]);
   const gone = [before?.photo_path, ...(before?.photos ?? [])].filter((x): x is string => !!x && !kept.has(x));
-  if (gone.length) await supabase.storage.from("car-photos").remove(gone);
+  if (gone.length) await supabase.storage.from("car-photos").remove(withThumbs(gone));
   revalidatePath(`/collection/${id}`);
   revalidatePath("/collection");
   return { ok: "Saved" };
@@ -150,7 +150,7 @@ export async function deleteItem(f: FormData) {
   const { data } = await supabase.from("items").select("photo_path, photos").eq("id", id).single();
   await supabase.from("items").delete().eq("id", id).eq("owner_id", user.id);
   const files = [data?.photo_path, ...(data?.photos ?? [])].filter((x): x is string => !!x);
-  if (files.length) await supabase.storage.from("car-photos").remove(files);
+  if (files.length) await supabase.storage.from("car-photos").remove(withThumbs(files));
   revalidatePath("/collection");
   redirect("/collection");
 }

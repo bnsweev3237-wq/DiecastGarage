@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { certLabel, money, photoUrl, type Item } from "@/lib/items";
+import { certLabel, money, type Item } from "@/lib/items";
+import Thumb from "./Thumb";
 import { categoryOf, summary } from "@/lib/categories";
 import ItemPlaceholder from "./ItemPlaceholder";
 import { Stars } from "./Stars";
@@ -7,7 +8,6 @@ import { Stars } from "./Stars";
 type Props = { item: Item; owner?: { username: string } | null; value?: number | null };
 
 export default function ItemTile({ item, owner, value }: Props) {
-  const src = photoUrl(item.photo_path);
   const href = owner ? `/c/${owner.username}/${item.id}` : `/collection/${item.id}`;
   const line = summary(item);
   const cat = categoryOf(item.category);
@@ -17,7 +17,7 @@ export default function ItemTile({ item, owner, value }: Props) {
   return (
     <Link href={href} className={cls}>
       <span className="tile-media">
-        {src ? <img className="img" src={src} alt="" loading="lazy" /> : <span className="img" title="No photo yet"><ItemPlaceholder /></span>}
+        {item.photo_path ? <Thumb className="img" path={item.photo_path} /> : <span className="img" title="No photo yet"><ItemPlaceholder /></span>}
         <span className="tag-cat">{cat.emoji} {cat.label}</span>
         {item.featured && <span className="tag-grail" title="Featured">★ Grail</span>}
         {item.status === "wishlist" && <span className="tag-status want">Wishlist</span>}

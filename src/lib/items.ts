@@ -111,6 +111,16 @@ export function photoUrl(path: string | null) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/car-photos/${path}`;
 }
 
+// Every item photo has a small copy for cards and lists, saved next to it as "<name>-t.jpg".
+// Photos from before thumbnails get theirs from the daily job; until then pages fall back to the full photo.
+export const THUMB_WIDTH = 560;
+export const thumbPath = (path: string) => path.replace(/(\.[a-z0-9]+)?$/i, "-t.jpg");
+export const isThumb = (path: string) => /-t\.jpg$/i.test(path);
+export const withThumbs = (paths: string[]) => paths.flatMap((p) => [p, thumbPath(p)]);
+export function thumbUrl(path: string | null) {
+  return path ? photoUrl(thumbPath(path)) : null;
+}
+
 export function avatarUrl(path: string | null) {
   if (!path) return null;
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { makeMissingThumbs } from "@/lib/thumbs";
 
 // Runs once a day (see vercel.json). Deletes photos that were uploaded over a day ago but never
-// saved to an item or profile. Vercel sends the CRON_SECRET it's configured with; anyone else is turned away.
+// saved to an item or profile, then makes small copies for photos that don't have one yet.
+// Vercel sends the CRON_SECRET it's configured with; anyone else is turned away.
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
@@ -26,6 +30,9 @@ export async function GET(req: Request) {
       deleted[bucket] = (deleted[bucket] ?? 0) + (gone?.length ?? 0);
     }
   }
-  console.log("photo cleanup", deleted);
-  return NextResponse.json({ deleted });
+  let thumbs: Awaited<ReturnType<typeof makeMissingThumbs>> | { error: string };
+  try { thumbs = await makeMissingThumbs(db, { limit: 80, budgetMs: 40_000 }); }
+  catch (e) { thumbs = { error: e instanceof Error ? e.message : "failed" }; }
+  console.log("photo cleanup", { deleted, thumbs });
+  return NextResponse.json({ deleted, thumbs });
 }

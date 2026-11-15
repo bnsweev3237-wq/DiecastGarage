@@ -9,6 +9,7 @@ const LABELS: Record<string, string> = {
   resolve_report: "Resolved a report", dismiss_report: "Dismissed a report",
   grant_comp_membership: "Gave a complimentary membership", update_comp_membership: "Changed a complimentary membership",
   revoke_comp_membership: "Ended a complimentary membership",
+  make_thumbnails: "Made photo thumbnails",
 };
 
 export default async function AdminLog() {

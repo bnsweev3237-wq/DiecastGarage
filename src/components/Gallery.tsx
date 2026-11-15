@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { photoUrl } from "@/lib/items";
 import ItemPlaceholder from "./ItemPlaceholder";
+import Thumb from "./Thumb";
 
 // The item page's photos: a big one with thumbnails to switch between them.
 export default function Gallery({ paths, title }: { paths: string[]; title: string }) {
@@ -18,7 +19,7 @@ export default function Gallery({ paths, title }: { paths: string[]; title: stri
         <div className="thumbs">
           {paths.map((p, j) => (
             <button key={p} type="button" className={j === i ? "on" : undefined} onClick={() => setI(j)} aria-label={`Show photo ${j + 1}`}>
-              <img src={photoUrl(p)!} alt="" loading="lazy" />
+              <Thumb path={p} />
             </button>
           ))}
         </div>

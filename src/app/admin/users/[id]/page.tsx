@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import ConfirmAction from "@/components/ConfirmAction";
+import Thumb from "@/components/Thumb";
 import SubmitButton from "@/components/SubmitButton";
 import { adminClearProfile, adminDeleteAccount, adminDeleteItem, adminDeleteComment, adminRemoveItemPhoto, adminClearItemDescription } from "@/app/admin/actions";
 import CompMembership from "@/components/admin/CompMembership";
@@ -75,7 +76,7 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
             return (
               <div key={c.id} className="admin-row car-row">
                 <div className="car">
-                  {src ? <a href={src} target="_blank" rel="noopener noreferrer"><img className="thumb" src={src} alt="" /></a> : <span className="thumb">No photo</span>}
+                  {src ? <a href={src} target="_blank" rel="noopener noreferrer"><Thumb className="thumb" path={c.photo_path!} /></a> : <span className="thumb">No photo</span>}
                   <div className="car-text">
                     <Link className="car-title" href={`/c/${p.username}/${c.id}`}>{c.title}</Link>
                     <div className="meta">

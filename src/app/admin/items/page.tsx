@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ConfirmAction from "@/components/ConfirmAction";
+import Thumb from "@/components/Thumb";
 import { adminDeleteItem, adminRemoveItemPhoto } from "@/app/admin/actions";
 import { requireAdmin, when } from "@/lib/admin";
 import { photoUrl } from "@/lib/items";
@@ -18,7 +19,7 @@ export default async function AdminCars() {
           return (
             <div key={c.id} className="admin-row car-row">
               <div className="car">
-                {src ? <a href={src} target="_blank" rel="noopener noreferrer"><img className="thumb" src={src} alt="" /></a> : <span className="thumb">No photo</span>}
+                {src ? <a href={src} target="_blank" rel="noopener noreferrer"><Thumb className="thumb" path={c.photo_path!} /></a> : <span className="thumb">No photo</span>}
                 <div className="car-text">
                   <Link className="car-title" href={`/c/${owner.username}/${c.id}`}>{c.title}</Link>
                   <div className="meta">

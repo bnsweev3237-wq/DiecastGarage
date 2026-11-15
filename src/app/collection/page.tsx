@@ -1,10 +1,11 @@
 import Link from "next/link";
 import ItemPlaceholder from "@/components/ItemPlaceholder";
+import Thumb from "@/components/Thumb";
 import { Stars } from "@/components/Stars";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { FREE_ITEM_LIMIT, isMember } from "@/lib/limits";
-import { certLabel, money, photoUrl, signed, gainCost, valueOf, type Item, type ItemStatus, type Comp, type Purchase } from "@/lib/items";
+import { certLabel, money, signed, gainCost, valueOf, type Item, type ItemStatus, type Comp, type Purchase } from "@/lib/items";
 import { CATEGORIES, categoryOf, summary } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
@@ -139,12 +140,11 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
             <span className="label r">{view === "sold" ? "Profit" : view === "wishlist" ? "" : "Gain / loss"}</span>
           </div>
           {rows.map(({ c, p, v, tc, gain }) => {
-            const src = photoUrl(c.photo_path);
             const cert = certLabel(c);
             return (
               <Link key={c.id} href={`/collection/${c.id}`} className="row">
                 <div className="car">
-                  {src ? <img className="thumb" src={src} alt="" loading="lazy" /> : <span className="thumb" aria-hidden="true"><ItemPlaceholder width={56} /></span>}
+                  {c.photo_path ? <Thumb className="thumb" path={c.photo_path} /> : <span className="thumb" aria-hidden="true"><ItemPlaceholder width={56} /></span>}
                   <div className="car-text">
                     <div className="car-title">{c.featured && <span className="grail-star" title="Featured">★ </span>}{c.title}{c.quantity > 1 && <span className="qty"> ×{c.quantity}</span>}</div>
                     <div className="meta">
