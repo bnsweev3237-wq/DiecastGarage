@@ -12,14 +12,15 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Search" };
 
 type Row = Item & { owner: { username: string; is_public: boolean } | null };
-type Params = { q?: string; category?: string; sale?: string };
+type Params = { q?: string; category?: string; sale?: string; grails?: string };
 
 export default async function Search({ searchParams }: { searchParams: Params }) {
   const { supabase } = await getUser();
   const words = searchWords(searchParams.q);
   const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
   const saleOnly = searchParams.sale === "1";
-  const searching = words.length > 0 || !!category || saleOnly;
+  const grailsOnly = searchParams.grails === "1";
+  const searching = words.length > 0 || !!category || saleOnly || grailsOnly;
 
   let items: Row[] = [];
   let people: { username: string; avatar_path: string | null; bio: string | null }[] = [];
@@ -29,11 +30,12 @@ export default async function Search({ searchParams }: { searchParams: Params })
       .order("created_at", { ascending: false }).limit(60);
     for (const w of words) q = q.ilike("search_text", `%${w}%`);
     if (category) q = q.eq("category", category);
+    if (grailsOnly) q = q.eq("featured", true);
     q = saleOnly ? q.eq("for_sale", true) : q.neq("status", "sold");
     const [{ data: found }, { data: who }] = await Promise.all([
       q,
       // Usernames are one word, so collectors show up for one-word searches.
-      words.length === 1 && !category && !saleOnly
+      words.length === 1 && !category && !saleOnly && !grailsOnly
         ? supabase.from("profiles").select("username, avatar_path, bio").eq("is_public", true)
             .ilike("username", `%${words[0]}%`).limit(12)
         : Promise.resolve({ data: [] }),
@@ -52,6 +54,7 @@ export default async function Search({ searchParams }: { searchParams: Params })
           <CategoryOptions />
         </select>
         <label className="check"><input type="checkbox" name="sale" value="1" defaultChecked={saleOnly} /> For sale only</label>
+        <label className="check grail-check"><input type="checkbox" name="grails" value="1" defaultChecked={grailsOnly} /> ★ Grails only</label>
         <button className="btn primary" type="submit">Search</button>
       </form>
 
@@ -87,7 +90,7 @@ export default async function Search({ searchParams }: { searchParams: Params })
           ) : (
             <div className="empty">
               <h3>No matches</h3>
-              <p>Try fewer or different words{category ? ", or search all categories" : ""}{saleOnly ? ", or include items that aren't for sale" : ""}.</p>
+              <p>Try fewer or different words{category ? ", or search all categories" : ""}{saleOnly ? ", or include items that aren't for sale" : ""}{grailsOnly ? ", or include items that aren't grails" : ""}.</p>
             </div>
           )}
         </>

@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.22",
+    date: "2026-11-15",
+    title: "Filter by category and grails",
+    changes: [
+      "Collector pages have a search box, a category filter and a Grails only option, alongside the Collection, For sale, Wishlist and Sold tabs.",
+      "My collection has a ★ Grails only button that works with search, categories, tags and sorting.",
+      "The Search page can show grails only.",
+    ],
+  },
+  {
     version: "0.21",
     date: "2026-11-15",
     title: "Free and member plans",

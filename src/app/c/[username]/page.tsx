@@ -8,6 +8,8 @@ import SocialLinks from "@/components/SocialLinks";
 import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
 import { money, type Item } from "@/lib/items";
+import { CATEGORIES, categoryOf } from "@/lib/categories";
+import { matchesAll, searchWords } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +17,7 @@ export async function generateMetadata({ params }: { params: { username: string 
   return { title: `@${params.username}` };
 }
 
-export default async function Collection({ params, searchParams }: { params: { username: string }; searchParams: { filter?: string; tag?: string } }) {
+export default async function Collection({ params, searchParams }: { params: { username: string }; searchParams: { filter?: string; tag?: string; q?: string; category?: string; grails?: string } }) {
   const { supabase, user } = await getUser();
   const { data: profile } = await supabase.from("profiles").select("*").eq("username", params.username.toLowerCase()).maybeSingle();
   if (!profile) notFound();
@@ -47,8 +49,18 @@ export default async function Collection({ params, searchParams }: { params: { u
   const filter = ["sale", "wishlist", "sold"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
   const base = filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : all;
   const tag = searchParams.tag?.toLowerCase();
-  const shown = tag ? base.filter((c) => (c.tags ?? []).some((t) => t.toLowerCase() === tag)) : base;
-  const grails = !filter && !tag ? all.filter((c) => c.featured) : [];
+  const words = searchWords(searchParams.q);
+  const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
+  const grailsOnly = searchParams.grails === "1";
+  const usedCategories = CATEGORIES.filter((c) => base.some((i) => i.category === c.key));
+  const shown = base
+    .filter((c) => !tag || (c.tags ?? []).some((t) => t.toLowerCase() === tag))
+    .filter((c) => !category || c.category === category)
+    .filter((c) => !grailsOnly || c.featured)
+    .filter((c) => matchesAll(words, c.title, c.brand, c.year, c.edition, c.cert_by, c.cert_grade, c.cert_number, c.tags, c.attributes, c.description, categoryOf(c.category).label));
+  const narrowed = !!(tag || category || grailsOnly || words.length);
+  // The Grails row shows above everything else only when nothing is filtered.
+  const grails = !filter && !narrowed ? all.filter((c) => c.featured) : [];
   const forSale = all.filter((c) => c.for_sale).length;
   const name = profile.username;
 
@@ -94,7 +106,23 @@ export default async function Collection({ params, searchParams }: { params: { u
             {wishlist.length > 0 && <Link className={filter === "wishlist" ? "on" : undefined} href={`/c/${profile.username}?filter=wishlist`}>Wishlist ({wishlist.length})</Link>}
             {sold.length > 0 && <Link className={filter === "sold" ? "on" : undefined} href={`/c/${profile.username}?filter=sold`}>Sold ({sold.length})</Link>}
           </nav>
-          {tag && <p className="notice">Showing items tagged <b>#{searchParams.tag}</b>. <Link href={`/c/${profile.username}`}>Show everything</Link></p>}
+          {base.length > 1 && (
+            <form className="filterbar" role="search" action={`/c/${profile.username}`}>
+              {filter && <input type="hidden" name="filter" value={filter} />}
+              {searchParams.tag && <input type="hidden" name="tag" value={searchParams.tag} />}
+              <input type="search" name="q" defaultValue={searchParams.q ?? ""} placeholder={`Search @${name}'s items…`} aria-label="Search these items" />
+              {usedCategories.length > 1 && (
+                <select name="category" defaultValue={category ?? ""} aria-label="Category">
+                  <option value="">All categories</option>
+                  {usedCategories.map((c) => <option key={c.key} value={c.key}>{c.emoji} {c.label} ({base.filter((i) => i.category === c.key).length})</option>)}
+                </select>
+              )}
+              {base.some((c) => c.featured) && <label className="check grail-check"><input type="checkbox" name="grails" value="1" defaultChecked={grailsOnly} /> ★ Grails only</label>}
+              <button className="btn" type="submit">Filter</button>
+              {narrowed && <Link className="btn small" href={`/c/${profile.username}${filter ? `?filter=${filter}` : ""}`}>Clear</Link>}
+            </form>
+          )}
+          {narrowed && <p className="hint">Showing {shown.length} of {base.length}{tag && <> tagged <b>#{searchParams.tag}</b></>}{category && <> in {categoryOf(category).emoji} {categoryOf(category).label}</>}{grailsOnly && <>, grails only</>}{words.length > 0 && <> matching “{searchParams.q}”</>}.</p>}
           {grails.length > 0 && (
             <>
               <div className="sec-head"><h2>★ Grails</h2></div>
