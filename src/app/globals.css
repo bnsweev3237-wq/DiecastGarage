@@ -518,3 +518,11 @@ body > main { flex: 1 0 auto; width: 100%; }
 /* sort menu next to the tag filter */
 .sort-select { display: inline-flex; align-items: center; gap: 8px; flex: none; }
 .sort-select select { width: auto; padding: 7px 34px 7px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+
+/* search */
+.searchbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.searchbar input[type="search"] { flex: 1 1 320px; min-width: 0; font-size: 17px; padding: 13px 18px; border-radius: 999px; border: 2px solid var(--ink); }
+.searchbar select { flex: 0 1 240px; width: auto; }
+.collection-search { flex: 1 1 260px; min-width: 0; display: flex; gap: 8px; }
+.collection-search input { flex: 1; min-width: 0; border-radius: 999px; padding: 8px 16px; }
+.nav-links a.search-link { font-size: 15px; }

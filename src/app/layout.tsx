@@ -57,6 +57,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <NavLinks items={[
               { href: "/", label: "Explore" },
               { href: "/for-sale", label: "For sale" },
+              { href: "/search", label: "🔍 Search" },
               ...(user ? [{ href: "/feed", label: "Following" }, { href: "/collection", label: "My collection" }] : []),
               ...(isAdmin === true ? [{ href: "/admin", label: "Admin" }] : []),
             ]} />

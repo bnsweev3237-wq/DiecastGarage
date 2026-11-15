@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.20",
+    date: "2026-11-15",
+    title: "Search",
+    changes: [
+      "A new Search page, in the menu: find items and collectors across the site by name, set, player, brand, grade, tags and more, with a category filter and a For sale only option.",
+      "Accents don't matter: pokemon finds Pokémon. Every word has to match, so add words to narrow it down.",
+      "Search your own collection, wishlist or sold items from My collection. It also looks at private details like where an item is stored.",
+      "The For sale search now looks at all of an item's details, not just its name.",
+    ],
+  },
+  {
     version: "0.19",
     date: "2026-11-15",
     title: "Sort your collection",

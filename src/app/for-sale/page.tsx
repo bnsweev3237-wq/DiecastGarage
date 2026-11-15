@@ -2,6 +2,7 @@ import ItemTile from "@/components/ItemTile";
 import { getUser } from "@/lib/supabase/server";
 import { type Item } from "@/lib/items";
 import CategoryOptions from "@/components/CategoryOptions";
+import { searchWords } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "For sale" };
@@ -13,7 +14,7 @@ export default async function ForSale({ searchParams }: { searchParams: { catego
   let query = supabase.from("items").select("*, owner:profiles!inner(username, is_public)")
     .eq("for_sale", true).eq("owner.is_public", true).order("created_at", { ascending: false }).limit(60);
   if (searchParams.category) query = query.eq("category", searchParams.category);
-  if (searchParams.q) query = query.ilike("title", `%${searchParams.q.replace(/[%_]/g, "")}%`);
+  for (const w of searchWords(searchParams.q)) query = query.ilike("search_text", `%${w}%`);
   const { data } = await query;
   const rows = (data ?? []) as Row[];
   return (

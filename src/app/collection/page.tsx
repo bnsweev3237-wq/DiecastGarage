@@ -2,6 +2,7 @@ import Link from "next/link";
 import ItemPlaceholder from "@/components/ItemPlaceholder";
 import Thumb from "@/components/Thumb";
 import SortSelect from "@/components/SortSelect";
+import { matchesAll, searchWords } from "@/lib/search";
 import { Stars } from "@/components/Stars";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "My collection" };
 
 type Row = Item & { item_purchases: Purchase | null; comps: Comp[] };
-type Params = { category?: string; status?: string; tag?: string; sort?: string };
+type Params = { category?: string; status?: string; tag?: string; sort?: string; q?: string };
 
 const SORTS = [
   { key: "featured", label: "Grails first, then newest" },
@@ -43,16 +44,20 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
   const everything = (data ?? []) as Row[];
   const view: ItemStatus = VIEWS.some((v) => v.key === searchParams.status) ? (searchParams.status as ItemStatus) : "owned";
   const all = everything.filter((i) => i.status === view);
+  const words = searchWords(searchParams.q);
   const used = CATEGORIES.filter((c) => all.some((i) => i.category === c.key));
   const tags = [...new Set(all.flatMap((i) => i.tags ?? []))].sort((a, b) => a.localeCompare(b));
   const items = all
     .filter((i) => !searchParams.category || i.category === searchParams.category)
-    .filter((i) => !searchParams.tag || (i.tags ?? []).some((t) => t.toLowerCase() === searchParams.tag!.toLowerCase()));
+    .filter((i) => !searchParams.tag || (i.tags ?? []).some((t) => t.toLowerCase() === searchParams.tag!.toLowerCase()))
+    // Your own search also looks at private details, like where it's stored and where you got it.
+    .filter((i) => matchesAll(words, i.title, i.brand, i.year, i.edition, i.cert_by, i.cert_grade, i.cert_number, i.tags, i.attributes,
+      i.description, i.provenance, categoryOf(i.category).label, i.item_purchases?.storage_location, i.item_purchases?.acquired_from));
   const member = isMember(membership);
   const atLimit = !member && everything.length >= FREE_ITEM_LIMIT;
   const sort = SORTS.some((s) => s.key === searchParams.sort) ? searchParams.sort! : "featured";
   const link = (p: Params) => {
-    const q = new URLSearchParams(Object.entries({ status: view === "owned" ? undefined : view, sort: sort === "featured" ? undefined : sort, ...p }).filter(([, v]) => v) as [string, string][]);
+    const q = new URLSearchParams(Object.entries({ status: view === "owned" ? undefined : view, sort: sort === "featured" ? undefined : sort, q: searchParams.q, ...p }).filter(([, v]) => v) as [string, string][]);
     const qs = q.toString();
     return `/collection${qs ? `?${qs}` : ""}`;
   };
@@ -120,6 +125,14 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
       )}
       {all.length > 1 && (
         <div className="tagbar">
+          <form className="collection-search" role="search" action="/collection">
+            {view !== "owned" && <input type="hidden" name="status" value={view} />}
+            {sort !== "featured" && <input type="hidden" name="sort" value={sort} />}
+            {searchParams.category && <input type="hidden" name="category" value={searchParams.category} />}
+            {searchParams.tag && <input type="hidden" name="tag" value={searchParams.tag} />}
+            <input type="search" name="q" defaultValue={searchParams.q ?? ""} placeholder={`Search ${VIEWS.find((v) => v.key === view)!.label.toLowerCase()}…`} aria-label="Search my items" />
+            {searchParams.q && <Link className="btn small" href={link({ category: searchParams.category, tag: searchParams.tag, q: undefined })}>Clear</Link>}
+          </form>
           <SortSelect value={sort} options={SORTS.map((s) => ({ key: s.key, label: s.key === "value" && view === "sold" ? "Highest sale price" : s.label,
             href: link({ category: searchParams.category, tag: searchParams.tag, sort: s.key === "featured" ? undefined : s.key }) }))} />
           {searchParams.tag && <Link className="chip tag on" href={link({ category: searchParams.category })} aria-label={`Stop filtering by ${searchParams.tag}`}>#{searchParams.tag} ✕</Link>}
