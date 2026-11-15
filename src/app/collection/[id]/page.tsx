@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import ItemForm from "@/components/ItemForm";
 import CompForm from "@/components/CompForm";
 import DeleteItem from "@/components/DeleteItem";
+import { MembersBadge } from "@/components/MembersOnly";
+import { isMember } from "@/lib/limits";
 import { removeComp } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
 import { conditionLabel } from "@/lib/categories";
@@ -13,10 +15,12 @@ export const dynamic = "force-dynamic";
 export default async function EditItem({ params, searchParams }: { params: { id: string }; searchParams: { added?: string } }) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
-  const [{ data: car }, { data: me }] = await Promise.all([
+  const [{ data: car }, { data: me }, { data: membership }] = await Promise.all([
     supabase.from("items").select("*, item_purchases(*), comps(*)").eq("id", params.id).eq("owner_id", user.id).maybeSingle(),
     supabase.from("profiles").select("username").eq("id", user.id).single(),
+    supabase.from("memberships").select("status, comp_active, comp_until").eq("user_id", user.id).maybeSingle(),
   ]);
+  const member = isMember(membership);
   if (!car) notFound();
   const c = car as Item & { item_purchases: Purchase | null; comps: Comp[] };
   const purchase = c.item_purchases;
@@ -39,8 +43,9 @@ export default async function EditItem({ params, searchParams }: { params: { id:
       </div>
       {searchParams.added && <p className="msg ok">Added to your collection. Log a few sold listings to estimate its value.</p>}
       <div className="editor">
-        <ItemForm userId={user.id} item={c} purchase={purchase} />
+        <ItemForm userId={user.id} member={member} item={c} purchase={purchase} />
         <div className="side">
+          {member ? <>
           <section className="card">
             <h3>{sold ? "Your sale" : c.status === "wishlist" ? "What it's going for" : "Estimated value"}</h3>
             <div className="est">
@@ -86,6 +91,24 @@ export default async function EditItem({ params, searchParams }: { params: { id:
             </div>
             <CompForm itemId={c.id} />
           </section>
+          </> : (
+            <section className="card members-teaser">
+              <div className="card-title"><h3>What&apos;s it worth?</h3><MembersBadge /></div>
+              <div className="est blurred" aria-hidden="true">
+                <div><span className="label">Median sold</span><div className="v">$1,234</div></div>
+                <div><span className="label">Paid</span><div className="v">$999</div></div>
+                <div><span className="label">Gain / loss</span><div className="v up">+$235</div></div>
+              </div>
+              <ul className="members-list">
+                <li>Log real sold listings from eBay and Facebook Marketplace</li>
+                <li>See an estimated value, updated as you add sales</li>
+                <li>Track what you paid, plus shipping, tax and fees if you like</li>
+                <li>See your gain or loss, and your profit when you sell</li>
+                <li>List items for sale, with up to 8 photos each</li>
+              </ul>
+              <a className="btn flag" href="/settings#membership">Become a member</a>
+            </section>
+          )}
           <DeleteItem id={c.id} />
         </div>
       </div>

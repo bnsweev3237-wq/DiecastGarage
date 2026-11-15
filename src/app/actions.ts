@@ -8,6 +8,7 @@ import { paymentsEnabled, stripe } from "@/lib/stripe";
 import { MAX_PHOTOS, MAX_TAGS, STATUSES, isEbayUrl, isThumb, withThumbs } from "@/lib/items";
 import { CATEGORIES, CONDITIONS, cleanAttributes } from "@/lib/categories";
 import { NETWORKS, normalizeSocial } from "@/lib/social";
+import { FREE_ITEM_LIMIT, FREE_PHOTO_LIMIT } from "@/lib/limits";
 import { REPORT_REASONS } from "@/lib/reports";
 
 export type FormState = { error?: string; ok?: string } | undefined;
@@ -41,9 +42,11 @@ function tagList(raw: string) {
   return out.slice(0, MAX_TAGS);
 }
 
-function parseItem(f: FormData, userId: string) {
+// Free accounts: no for-sale listings, one photo (or what the item already had), and no money fields.
+// The database enforces the same rules (supabase/migrations/0014_free_plan.sql).
+function parseItem(f: FormData, userId: string, member: boolean, extraPhotosBefore = 0) {
   const status = STATUSES.some((x) => x.key === str(f, "status")) ? str(f, "status") : "owned";
-  const forSale = status === "owned" && f.get("for_sale") === "on";
+  const forSale = member && status === "owned" && f.get("for_sale") === "on";
   const ebayUrl = optStr(f, "ebay_url");
   const category = CATEGORIES.some((c) => c.key === str(f, "category")) ? str(f, "category") : "other";
   if (!str(f, "title")) return { error: "Give the item a name." };
@@ -54,7 +57,7 @@ function parseItem(f: FormData, userId: string) {
   const certType = str(f, "cert_type") === "coa" ? "coa" : "graded";
   const rating = Number(str(f, "rating"));
   const quantity = Math.round(Number(str(f, "quantity") || "1"));
-  const photos = photoList(f, userId);
+  const photos = photoList(f, userId).slice(0, member ? undefined : Math.max(FREE_PHOTO_LIMIT, 1 + extraPhotosBefore));
   return {
     item: {
       title: str(f, "title").slice(0, 160),
@@ -85,7 +88,10 @@ function parseItem(f: FormData, userId: string) {
       provenance: optStr(f, "provenance")?.slice(0, 2000) ?? null,
       tags: tagList(str(f, "tags")),
     },
-    purchase: {
+    purchase: !member ? {
+      acquired_from: optStr(f, "acquired_from")?.slice(0, 100) ?? null,
+      storage_location: optStr(f, "storage_location")?.slice(0, 100) ?? null,
+    } : {
       paid: num(f, "paid"),
       shipping: num(f, "shipping"),
       tax: num(f, "tax"),
@@ -103,9 +109,18 @@ function parseItem(f: FormData, userId: string) {
   };
 }
 
+async function isMemberNow(supabase: Awaited<ReturnType<typeof getUser>>["supabase"], userId: string) {
+  const { data } = await supabase.rpc("is_member", { uid: userId });
+  return data === true;
+}
+
 const dbError = (message: string) =>
   message.includes("FREE_LIMIT")
-    ? "Free accounts can keep up to 5 items. Become a member in Settings to add more."
+    ? `Free accounts can keep up to ${FREE_ITEM_LIMIT} items. Become a member in Settings to add more.`
+    : message.includes("MEMBERS_ONLY_SALE")
+      ? "Listing items for sale is for members. Become a member in Settings."
+    : message.includes("MEMBERS_ONLY_PHOTOS")
+      ? `Free accounts get ${FREE_PHOTO_LIMIT} photo per item. Become a member in Settings for up to 8.`
     : message.includes("for_sale_only_when_owned")
       ? "Only items in your collection can be for sale."
       : message.includes("for_sale_needs_ebay_link")
@@ -115,7 +130,7 @@ const dbError = (message: string) =>
 export async function createItem(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
-  const parsed = parseItem(f, user.id);
+  const parsed = parseItem(f, user.id, await isMemberNow(supabase, user.id));
   if ("error" in parsed) return { error: parsed.error };
   const { data, error } = await supabase.from("items").insert(parsed.item).select("id").single();
   if (error) return { error: dbError(error.message) };
@@ -128,9 +143,9 @@ export async function updateItem(_: FormState, f: FormData): Promise<FormState> 
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
   const id = str(f, "id");
-  const parsed = parseItem(f, user.id);
-  if ("error" in parsed) return { error: parsed.error };
   const { data: before } = await supabase.from("items").select("photo_path, photos").eq("id", id).single();
+  const parsed = parseItem(f, user.id, await isMemberNow(supabase, user.id), before?.photos?.length ?? 0);
+  if ("error" in parsed) return { error: parsed.error };
   const { error } = await supabase.from("items").update(parsed.item).eq("id", id).eq("owner_id", user.id);
   if (error) return { error: dbError(error.message) };
   await supabase.from("item_purchases").upsert({ item_id: id, ...parsed.purchase });
@@ -159,6 +174,7 @@ export async function addComp(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
   const carId = str(f, "item_id");
+  if (!(await isMemberNow(supabase, user.id))) return { error: "Tracking values is for members. Become a member in Settings." };
   const price = num(f, "price");
   if (!price) return { error: "Enter what it sold for." };
   const note = str(f, "note");

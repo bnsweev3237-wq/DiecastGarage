@@ -1,5 +1,8 @@
-// Keep in sync with enforce_item_limit() in supabase/migrations/0006_items_and_categories.sql.
-export const FREE_ITEM_LIMIT = 5;
+// The free plan. Keep in sync with supabase/migrations/0014_free_plan.sql.
+// Free: up to 25 items, 1 photo each, no for-sale listings, no money features
+// (purchase prices, values, gain or loss, sales). Members get all of it.
+export const FREE_ITEM_LIMIT = 25;
+export const FREE_PHOTO_LIMIT = 1;
 
 export type MembershipRow = { status?: string | null; comp_active?: boolean | null; comp_until?: string | null } | null | undefined;
 

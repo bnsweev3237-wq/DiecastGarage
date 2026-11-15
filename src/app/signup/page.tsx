@@ -44,7 +44,7 @@ export default function SignUp() {
     <main className="wrap auth">
       <form className="card" onSubmit={onSubmit}>
         <h2>Join theCollectorHQ</h2>
-        <p className="hint">Free for up to {FREE_ITEM_LIMIT} items. Become a member any time for an unlimited collection.</p>
+        <p className="hint">Free for up to {FREE_ITEM_LIMIT} items. Become a member any time for unlimited items, more photos, values and selling.</p>
         <div className="field"><label className="label" htmlFor="full_name">Full name</label><input id="full_name" name="full_name" maxLength={100} autoComplete="name" />
           <span className="hint">Private. Only you see it.</span></div>
         <div className="field"><label className="label" htmlFor="username">Username</label><input id="username" name="username" required minLength={3} maxLength={20} autoComplete="username" placeholder="pitroad_pete" />

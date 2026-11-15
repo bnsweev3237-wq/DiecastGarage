@@ -3,6 +3,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { MAX_PHOTOS, THUMB_WIDTH, photoUrl, thumbPath } from "@/lib/items";
 import Thumb from "./Thumb";
+import { MembersBadge } from "./MembersOnly";
 
 async function shrink(file: File, max = 1600, quality = 0.85): Promise<Blob> {
   const bmp = await createImageBitmap(file);
@@ -16,10 +17,13 @@ async function shrink(file: File, max = 1600, quality = 0.85): Promise<Blob> {
 
 // Up to 8 photos, uploaded straight to storage under the user's own folder. The first one is the cover.
 // The form saves the list of paths; photos removed here are deleted from storage when the item is saved.
-export default function PhotoInput({ userId, initial, title }: { userId: string; initial: string[]; title: string }) {
+// max: how many photos this account may keep (free accounts get 1; members get MAX_PHOTOS).
+export default function PhotoInput({ userId, initial, title, max = MAX_PHOTOS }: { userId: string; initial: string[]; title: string; max?: number }) {
   const [paths, setPaths] = useState<string[]>(initial);
   const [status, setStatus] = useState("");
-  const room = MAX_PHOTOS - paths.length;
+  const limit = Math.min(max, MAX_PHOTOS);
+  const room = limit - paths.length;
+  const locked = limit < MAX_PHOTOS;
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const files = [...(e.target.files ?? [])].slice(0, room);
@@ -66,12 +70,14 @@ export default function PhotoInput({ userId, initial, title }: { userId: string;
             </div>
           ))}
           {room > 0 && <label className="thumb-add" htmlFor="photo" aria-label="Add more photos">+</label>}
+          {locked && room <= 0 && <span className="thumb-add thumb-locked" title="Members can add up to 8 photos">🔒</span>}
         </div>
       )}
       <div className="actions">
-        <label className="btn small" htmlFor="photo">{paths.length ? "Add more photos" : "Choose photos"}</label>
-        <input id="photo" type="file" accept="image/*" multiple hidden onChange={onPick} disabled={room <= 0} />
-        <span className="hint" role="status">{status || `${paths.length} of ${MAX_PHOTOS}. Front, back, flaws and certificates help.`}</span>
+        {room > 0 && <label className="btn small" htmlFor="photo">{paths.length ? "Add more photos" : limit === 1 ? "Choose a photo" : "Choose photos"}</label>}
+        <input id="photo" type="file" accept="image/*" multiple={limit > 1} hidden onChange={onPick} disabled={room <= 0} />
+        <span className="hint" role="status">{status || (locked ? `${paths.length} of ${limit} photo${limit > 1 ? "s" : ""} on the free plan.` : `${paths.length} of ${MAX_PHOTOS}. Front, back, flaws and certificates help.`)}</span>
+        {locked && <MembersBadge label="Up to 8 photos with a membership" />}
       </div>
     </div>
   );

@@ -56,7 +56,7 @@ Estimated values are based on sold listings that you or others logged, or on a v
 
 ## 7. Memberships and payments
 
-- **Free accounts** can keep up to 5 items. A **membership** removes that limit.
+- **Free accounts** can keep up to 25 items, with one photo per item. A **membership** removes the item limit, allows up to 8 photos per item, and adds features such as purchase and value tracking and for-sale listings.
 - **Billing.** Memberships are billed in advance on a recurring basis (for example, monthly) at the price shown when you join, and they **renew automatically** until you cancel. Payments are processed by Stripe; we don't store your card details.
 - **Cancelling.** You can cancel any time in Settings. Your membership stays active until the end of the period you've paid for, and isn't renewed after that.
 - **Refunds.** Payments aren't refundable for partial periods, except where the law requires it. [CHECK THE CONSUMER LAWS WHERE YOU AND YOUR MEMBERS LIVE.]

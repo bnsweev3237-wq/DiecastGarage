@@ -2,6 +2,7 @@ import Link from "next/link";
 import ItemPlaceholder from "@/components/ItemPlaceholder";
 import Thumb from "@/components/Thumb";
 import SortSelect from "@/components/SortSelect";
+import { MembersNote } from "@/components/MembersOnly";
 import { matchesAll, searchWords } from "@/lib/search";
 import { Stars } from "@/components/Stars";
 import { redirect } from "next/navigation";
@@ -133,7 +134,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
             <input type="search" name="q" defaultValue={searchParams.q ?? ""} placeholder={`Search ${VIEWS.find((v) => v.key === view)!.label.toLowerCase()}…`} aria-label="Search my items" />
             {searchParams.q && <Link className="btn small" href={link({ category: searchParams.category, tag: searchParams.tag, q: undefined })}>Clear</Link>}
           </form>
-          <SortSelect value={sort} options={SORTS.map((s) => ({ key: s.key, label: s.key === "value" && view === "sold" ? "Highest sale price" : s.label,
+          <SortSelect value={sort} options={SORTS.filter((s) => member || s.key !== "value").map((s) => ({ key: s.key, label: s.key === "value" && view === "sold" ? "Highest sale price" : s.label,
             href: link({ category: searchParams.category, tag: searchParams.tag, sort: s.key === "featured" ? undefined : s.key }) }))} />
           {searchParams.tag && <Link className="chip tag on" href={link({ category: searchParams.category })} aria-label={`Stop filtering by ${searchParams.tag}`}>#{searchParams.tag} ✕</Link>}
           {tags.length > 0 && <details className="tag-drop">
@@ -147,7 +148,18 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
         </div>
       )}
 
-      {view === "owned" && (
+      {!member && view !== "wishlist" && (
+        <MembersNote>Members see what their collection cost, what it&apos;s worth from real sold listings, and their gain or loss{view === "sold" ? " and profit" : ""}.</MembersNote>
+      )}
+      {!member && view !== "wishlist" && (
+        <section className="totals locked-totals" aria-label="Collection totals">
+          <div className="total"><span className="label">{view === "sold" ? "Sold" : "Items"}</span><span className="v num">{items.length}</span><span className="n">{pieces !== items.length ? `${pieces} pieces` : "in this list"}</span></div>
+          {(view === "sold" ? ["Total cost", "Sold for", "Profit"] : ["Cost", "Est. value", "Gain / loss"]).map((l) => (
+            <div key={l} className="total locked"><span className="label">{l}</span><span className="v num">🔒 $•••</span><span className="n">Members</span></div>
+          ))}
+        </section>
+      )}
+      {member && view === "owned" && (
         <section className="totals" aria-label="Collection totals">
           <div className="total"><span className="label">Items</span><span className="v num">{items.length}</span><span className="n">{pieces !== items.length ? `${pieces} pieces · ` : ""}{valued} valued</span></div>
           <div className="total"><span className="label">Cost</span><span className="v num">{money(cost)}</span><span className="n">paid, plus extras you chose</span></div>
@@ -157,7 +169,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
             <span className="n">{valued && gainBase ? `${((gain / gainBase) * 100).toFixed(0)}% vs. what it cost` : "on valued items"}</span></div>
         </section>
       )}
-      {view === "sold" && (
+      {member && view === "sold" && (
         <section className="totals" aria-label="Sales totals">
           <div className="total"><span className="label">Sold</span><span className="v num">{items.length}</span><span className="n">items</span></div>
           <div className="total"><span className="label">Total cost</span><span className="v num">{money(cost)}</span><span className="n">paid, plus extras you chose</span></div>
@@ -197,6 +209,9 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
                     </div>
                   </div>
                 </div>
+                {!member ? <>
+                  {[0, 1, 2].map((k) => <div key={k} className="r"><span className="label mlabel">{k === 0 ? "Cost" : k === 1 ? "Value" : "Gain"}</span>{view === "wishlist" && k !== 1 ? null : <span className="lock-cell" title="Members">🔒</span>}</div>)}
+                </> : <>
                 <div className="r"><span className="label mlabel">{view === "wishlist" ? "" : "Cost"}</span><span className="num">{view === "wishlist" ? "" : tc != null ? money(tc, 2) : "—"}</span></div>
                 <div className="r"><span className="label mlabel">{view === "sold" ? "Sold" : "Value"}</span>
                   <span className="num">{view === "sold" ? (p?.sold_price != null ? money(Number(p.sold_price), 2) : "—") : v ? money(v.value, 2) : "—"}</span>
@@ -205,6 +220,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
                   {view === "wishlist" ? null : gain == null
                     ? <span className="pill none">{view === "sold" ? "add both prices" : v ? "no price paid" : "needs sold listings"}</span>
                     : <span className={`pill ${gain >= 0 ? "up" : "down"}`}>{signed(Math.round(gain))}</span>}</div>
+                </>}
               </Link>
             );
           })}

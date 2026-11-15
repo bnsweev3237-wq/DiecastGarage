@@ -24,7 +24,7 @@ export default async function NewItem({ searchParams }: { searchParams: { catego
           <Link className="btn flag" href="/settings#membership">Become a member</Link>
         </div>
       ) : (
-        <ItemForm userId={user.id} defaultCategory={searchParams.category} defaultStatus={searchParams.status} />
+        <ItemForm userId={user.id} member={isMember(m)} defaultCategory={searchParams.category} defaultStatus={searchParams.status} />
       )}
     </main>
   );

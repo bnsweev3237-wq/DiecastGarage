@@ -41,11 +41,11 @@ export default async function Settings({ searchParams }: { searchParams: { membe
         <div className="plan">
           <div className={member ? "" : "on"}>
             <span className="label">Free</span>
-            <ul><li>Up to {FREE_ITEM_LIMIT} items</li><li>Value tracking, follows and comments</li></ul>
+            <ul><li>Up to {FREE_ITEM_LIMIT} items</li><li>1 photo per item</li><li>Grading details, ratings, tags, wishlist</li><li>Follows, comments and search</li></ul>
           </div>
           <div className={member ? "on" : ""}>
             <span className="label">Member</span>
-            <ul><li>Unlimited items</li><li>Everything in Free</li></ul>
+            <ul><li>Unlimited items</li><li>Up to 8 photos per item</li><li>Track what you paid, shipping, tax and fees</li><li>Estimated values from real sold listings</li><li>Gain or loss, and profit when you sell</li><li>List items for sale with your eBay link</li><li>Everything in Free</li></ul>
           </div>
         </div>
         {member ? (

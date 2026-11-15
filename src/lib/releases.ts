@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.21",
+    date: "2026-11-15",
+    title: "Free and member plans",
+    changes: [
+      "Free accounts now keep up to 25 items (up from 5), with one photo per item.",
+      "Members get unlimited items, up to 8 photos each, and all the money features: what you paid, estimated values from sold listings, gain or loss, profit on sales, and listing items for sale.",
+      "Free accounts can see every member feature, marked with a lock, so it's clear what membership adds.",
+      "If a membership ends, everything already saved stays. You just can't add more of the member-only details.",
+    ],
+  },
+  {
     version: "0.20",
     date: "2026-11-15",
     title: "Search",

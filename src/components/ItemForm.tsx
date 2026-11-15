@@ -9,10 +9,12 @@ import PhotoInput from "./PhotoInput";
 import { StarInput } from "./Stars";
 import SubmitButton from "./SubmitButton";
 import FormMessage from "./FormMessage";
+import { MembersBadge, MembersNote } from "./MembersOnly";
+import { FREE_PHOTO_LIMIT } from "@/lib/limits";
 
-type Props = { userId: string; item?: Item; purchase?: Purchase | null; defaultCategory?: string; defaultStatus?: string };
+type Props = { userId: string; member: boolean; item?: Item; purchase?: Purchase | null; defaultCategory?: string; defaultStatus?: string };
 
-export default function ItemForm({ userId, item, purchase, defaultCategory, defaultStatus }: Props) {
+export default function ItemForm({ userId, member, item, purchase, defaultCategory, defaultStatus }: Props) {
   const isNew = !item;
   const [state, action] = useFormState<FormState, FormData>(isNew ? createItem : updateItem, undefined);
   const [category, setCategory] = useState(item?.category ?? defaultCategory ?? "cards");
@@ -43,7 +45,7 @@ export default function ItemForm({ userId, item, purchase, defaultCategory, defa
 
       <div className="card-title"><h3>The item</h3></div>
       <div className="grid2">
-        <PhotoInput userId={userId} initial={item ? allPhotos(item) : []} title={title} />
+        <PhotoInput userId={userId} initial={item ? allPhotos(item) : []} title={title} max={member ? undefined : Math.max(FREE_PHOTO_LIMIT, item ? allPhotos(item).length : 0)} />
         <div className="field full"><label className="label" htmlFor="category">Category</label>
           <select id="category" name="category" value={category} onChange={(e) => setCategory(e.target.value)}>
             <CategoryOptions />
@@ -126,38 +128,49 @@ export default function ItemForm({ userId, item, purchase, defaultCategory, defa
       </div>
 
       <div className="card-title"><h3>{status === "wishlist" ? "Hunting for it" : "Purchase"}</h3><span className="hint">Only you can see this</span></div>
-      <div className="grid2">
-        {status !== "wishlist" && <>
-          <div className="field"><label className="label" htmlFor="paid">Price paid ($)</label>
-            <input id="paid" name="paid" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.paid ?? ""} placeholder="0.00" /></div>
-          <div className="field"><label className="label" htmlFor="purchased_at">Date bought</label>
-            <input id="purchased_at" name="purchased_at" type="date" defaultValue={purchase?.purchased_at ?? ""} /></div>
-          {([["shipping", "Shipping", "0.00"], ["tax", "Tax", "0.00"], ["fees", "Fees", "grading, buyer's premium"]] as const).map(([key, label, ph]) => (
-            <div className="field" key={key}><label className="label" htmlFor={key}>{label} ($)</label>
-              <input id={key} name={key} type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.[key] ?? ""} placeholder={ph} />
-              <label className="check small" htmlFor={`include_${key}`}>
-                <input id={`include_${key}`} name={`include_${key}`} type="checkbox" defaultChecked={purchase?.[`include_${key}`] ?? false} /> Include in gain/loss calculations
-              </label></div>
-          ))}
+      {!member && (
+        <MembersNote>Members track what they paid, estimated value from sold listings, gain or loss, and profit when they sell.</MembersNote>
+      )}
+      {/* Money fields. Free accounts see them, locked; a disabled fieldset also keeps them out of the form. */}
+      <fieldset className={member ? "plain-set" : "plain-set locked-set"} disabled={!member}>
+        <div className="grid2">
+          {status !== "wishlist" && <>
+            <div className="field"><label className="label" htmlFor="paid">Price paid ($){!member && <MembersBadge />}</label>
+              <input id="paid" name="paid" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.paid ?? ""} placeholder="0.00" /></div>
+            <div className="field"><label className="label" htmlFor="purchased_at">Date bought</label>
+              <input id="purchased_at" name="purchased_at" type="date" defaultValue={purchase?.purchased_at ?? ""} /></div>
+            {([["shipping", "Shipping", "0.00"], ["tax", "Tax", "0.00"], ["fees", "Fees", "grading, buyer's premium"]] as const).map(([key, label, ph]) => (
+              <div className="field" key={key}><label className="label" htmlFor={key}>{label} ($)</label>
+                <input id={key} name={key} type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.[key] ?? ""} placeholder={ph} />
+                <label className="check small" htmlFor={`include_${key}`}>
+                  <input id={`include_${key}`} name={`include_${key}`} type="checkbox" defaultChecked={purchase?.[`include_${key}`] ?? false} /> Include in gain/loss calculations
+                </label></div>
+            ))}
+          </>}
+          <div className="field"><label className="label" htmlFor="manual_value">{status === "wishlist" ? "Target price ($)" : "Your value ($)"}{!member && <MembersBadge />}</label>
+            <input id="manual_value" name="manual_value" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.manual_value ?? ""} placeholder="optional override" /></div>
+          <div className="field"><label className="label" htmlFor="search_terms">Search words for sold listings</label>
+            <input id="search_terms" name="search_terms" maxLength={200} defaultValue={item?.search_terms ?? ""} placeholder="Uses the name and details if blank" /></div>
+        </div>
+        {status === "sold" && (
+          <div className="grid2 soldbox">
+            <div className="field"><label className="label" htmlFor="sold_price">Sold for ($){!member && <MembersBadge />}</label>
+              <input id="sold_price" name="sold_price" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.sold_price ?? ""} placeholder="0.00" /></div>
+            <div className="field"><label className="label" htmlFor="sold_at">Date sold</label>
+              <input id="sold_at" name="sold_at" type="date" defaultValue={purchase?.sold_at ?? ""} /></div>
+            <p className="hint span-all">Only you see the sale price and your profit. Others just see that it sold.</p>
+          </div>
+        )}
+      </fieldset>
+      {!member && item?.search_terms && <input type="hidden" name="search_terms" value={item.search_terms} />}
+
+      {status !== "wishlist" && (
+        <div className="grid2">
           <div className="field"><label className="label" htmlFor="acquired_from">Where I got it</label>
             <input id="acquired_from" name="acquired_from" maxLength={100} list="sources" defaultValue={purchase?.acquired_from ?? ""} placeholder="eBay, card show, trade" />
             <datalist id="sources">{["eBay", "Facebook Marketplace", "Card or toy show", "Local shop", "Auction house", "Garage or estate sale", "Trade", "Gift", "Inherited", "Pulled from a pack"].map((x) => <option key={x} value={x} />)}</datalist></div>
           <div className="field"><label className="label" htmlFor="storage_location">Where it&apos;s stored</label>
             <input id="storage_location" name="storage_location" maxLength={100} defaultValue={purchase?.storage_location ?? ""} placeholder="Binder 3, garage shelf B" /></div>
-        </>}
-        <div className="field"><label className="label" htmlFor="manual_value">{status === "wishlist" ? "Target price ($)" : "Your value ($)"}</label>
-          <input id="manual_value" name="manual_value" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.manual_value ?? ""} placeholder="optional override" /></div>
-        <div className="field"><label className="label" htmlFor="search_terms">Search words for sold listings</label>
-          <input id="search_terms" name="search_terms" maxLength={200} defaultValue={item?.search_terms ?? ""} placeholder="Uses the name and details if blank" /></div>
-      </div>
-
-      {status === "sold" && (
-        <div className="grid2 soldbox">
-          <div className="field"><label className="label" htmlFor="sold_price">Sold for ($)</label>
-            <input id="sold_price" name="sold_price" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.sold_price ?? ""} placeholder="0.00" /></div>
-          <div className="field"><label className="label" htmlFor="sold_at">Date sold</label>
-            <input id="sold_at" name="sold_at" type="date" defaultValue={purchase?.sold_at ?? ""} /></div>
-          <p className="hint span-all">Only you see the sale price and your profit. Others just see that it sold.</p>
         </div>
       )}
 
@@ -167,10 +180,11 @@ export default function ItemForm({ userId, item, purchase, defaultCategory, defa
       </div>
 
       {owned && (
-        <div className="forsale-box">
-          <label className="check" htmlFor="for_sale"><input id="for_sale" name="for_sale" type="checkbox" checked={forSale}
-            onChange={(e) => setForSale(e.target.checked)} /> Mark this item for sale</label>
-          {forSale && (
+        <div className={member ? "forsale-box" : "forsale-box locked-set"}>
+          <label className="check" htmlFor="for_sale"><input id="for_sale" name="for_sale" type="checkbox" checked={member && forSale} disabled={!member}
+            onChange={(e) => setForSale(e.target.checked)} /> Mark this item for sale {!member && <MembersBadge />}</label>
+          {!member && <span className="hint">Members can list items for sale with a link to their eBay listing, and show up on the For sale page.</span>}
+          {member && forSale && (
             <div className="grid2">
               <div className="field full"><label className="label" htmlFor="ebay_url">eBay listing link (required)</label>
                 <input id="ebay_url" name="ebay_url" type="url" required value={ebay} onChange={(e) => setEbay(e.target.value)}
@@ -184,7 +198,7 @@ export default function ItemForm({ userId, item, purchase, defaultCategory, defa
           )}
         </div>
       )}
-      {(!owned || !forSale) && item?.ebay_url && <input type="hidden" name="ebay_url" value={item.ebay_url} />}
+      {(!owned || !forSale || !member) && item?.ebay_url && <input type="hidden" name="ebay_url" value={item.ebay_url} />}
 
       <FormMessage state={state} />
       <div className="actions"><SubmitButton>{isNew ? (status === "wishlist" ? "Add to my wishlist" : "Add to my collection") : "Save changes"}</SubmitButton></div>
