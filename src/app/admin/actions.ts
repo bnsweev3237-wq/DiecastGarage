@@ -20,10 +20,11 @@ async function closeReports(db: Awaited<ReturnType<typeof requireAdmin>>["db"], 
 export async function adminDeleteItem(f: FormData) {
   const { adminId, db } = await requireAdmin();
   const id = str(f, "id");
-  const { data: car } = await db.from("items").select("owner_id, title, photo_path").eq("id", id).maybeSingle();
+  const { data: car } = await db.from("items").select("owner_id, title, photo_path, photos").eq("id", id).maybeSingle();
   if (!car) return;
   await db.from("items").delete().eq("id", id);
-  if (car.photo_path) await db.storage.from("car-photos").remove([car.photo_path]);
+  const files = [car.photo_path, ...(car.photos ?? [])].filter((x): x is string => !!x);
+  if (files.length) await db.storage.from("car-photos").remove(files);
   await closeReports(db, adminId, id);
   await logAdminAction(db, adminId, "delete_item", car.owner_id, { title: car.title, reason: str(f, "reason") || null });
   refresh();

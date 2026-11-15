@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.16",
+    date: "2026-11-15",
+    title: "Tidier photo storage",
+    changes: [
+      "Photos that were uploaded but never saved to an item or profile are now cleaned up automatically once a day, after they're a day old.",
+      "When an admin removes an item, all of its photos are deleted, not just the cover.",
+    ],
+  },
+  {
     version: "0.15",
     date: "2026-11-14",
     title: "You choose what counts in gain and loss",
