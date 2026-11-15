@@ -501,3 +501,16 @@ body > main { flex: 1 0 auto; width: 100%; }
 .tile.featured .tag-cat { max-width: calc(100% - 96px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .check.small { font-size: 13px; font-weight: 600; color: var(--muted); gap: 8px; }
 .check.small input { width: 16px; height: 16px; }
+
+/* tag filter, folded away in a dropdown */
+.tagbar { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.tag-drop { flex: 1 1 260px; min-width: 0; }
+.tag-drop summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; padding: 7px 14px; border: 1.5px solid var(--line);
+  border-radius: 999px; font-weight: 700; font-size: 14px; color: var(--ink); background: var(--panel); user-select: none; }
+.tag-drop summary::-webkit-details-marker { display: none; }
+.tag-drop summary::after { content: "▾"; font-size: 12px; transition: transform .15s ease; }
+.tag-drop[open] summary::after { transform: rotate(180deg); }
+.tag-drop summary:hover, .tag-drop[open] summary { border-color: var(--ink); }
+.tag-drop summary span { color: var(--muted); font-weight: 600; }
+.tag-drop .meta { margin-top: 10px; padding: 14px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--panel); box-shadow: var(--shadow);
+  max-height: 320px; overflow-y: auto; }

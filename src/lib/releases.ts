@@ -4,6 +4,14 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.17",
+    date: "2026-11-15",
+    title: "Tidier tag filter",
+    changes: [
+      "In My collection, your tags now sit behind a Filter by tag dropdown instead of filling the page. The tag you're filtering by stays visible, with an ✕ to clear it.",
+    ],
+  },
+  {
     version: "0.16",
     date: "2026-11-15",
     title: "Tidier photo storage",

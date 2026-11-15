@@ -96,12 +96,17 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
         </nav>
       )}
       {tags.length > 0 && (
-        <nav className="meta" aria-label="Filter by tag">
-          {searchParams.tag && <Link className="chip tag on" href={link({ category: searchParams.category })}>#{searchParams.tag} ✕</Link>}
-          {tags.filter((t) => t.toLowerCase() !== searchParams.tag?.toLowerCase()).map((t) => (
-            <Link key={t} className="chip tag" href={link({ category: searchParams.category, tag: t })}>#{t}</Link>
-          ))}
-        </nav>
+        <div className="tagbar">
+          {searchParams.tag && <Link className="chip tag on" href={link({ category: searchParams.category })} aria-label={`Stop filtering by ${searchParams.tag}`}>#{searchParams.tag} ✕</Link>}
+          <details className="tag-drop">
+            <summary>{searchParams.tag ? "Change tag" : "Filter by tag"} <span className="num">({tags.length})</span></summary>
+            <nav className="meta" aria-label="Filter by tag">
+              {tags.filter((t) => t.toLowerCase() !== searchParams.tag?.toLowerCase()).map((t) => (
+                <Link key={t} className="chip tag" href={link({ category: searchParams.category, tag: t })}>#{t}</Link>
+              ))}
+            </nav>
+          </details>
+        </div>
       )}
 
       {view === "owned" && (
