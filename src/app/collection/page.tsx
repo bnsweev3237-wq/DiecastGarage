@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ItemPlaceholder from "@/components/ItemPlaceholder";
 import Thumb from "@/components/Thumb";
+import SortSelect from "@/components/SortSelect";
 import { Stars } from "@/components/Stars";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
@@ -12,7 +13,17 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "My collection" };
 
 type Row = Item & { item_purchases: Purchase | null; comps: Comp[] };
-type Params = { category?: string; status?: string; tag?: string };
+type Params = { category?: string; status?: string; tag?: string; sort?: string };
+
+const SORTS = [
+  { key: "featured", label: "Grails first, then newest" },
+  { key: "modified", label: "Last modified" },
+  { key: "added", label: "Recently added" },
+  { key: "oldest", label: "Oldest added" },
+  { key: "name", label: "Name, A to Z" },
+  { key: "value", label: "Highest value" },
+] as const;
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const VIEWS: { key: ItemStatus; label: string }[] = [
   { key: "owned", label: "Collection" },
@@ -39,8 +50,9 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
     .filter((i) => !searchParams.tag || (i.tags ?? []).some((t) => t.toLowerCase() === searchParams.tag!.toLowerCase()));
   const member = isMember(membership);
   const atLimit = !member && everything.length >= FREE_ITEM_LIMIT;
+  const sort = SORTS.some((s) => s.key === searchParams.sort) ? searchParams.sort! : "featured";
   const link = (p: Params) => {
-    const q = new URLSearchParams(Object.entries({ status: view === "owned" ? undefined : view, ...p }).filter(([, v]) => v) as [string, string][]);
+    const q = new URLSearchParams(Object.entries({ status: view === "owned" ? undefined : view, sort: sort === "featured" ? undefined : sort, ...p }).filter(([, v]) => v) as [string, string][]);
     const qs = q.toString();
     return `/collection${qs ? `?${qs}` : ""}`;
   };
@@ -64,6 +76,16 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
     return { c, p, v, tc, gain: v && tc != null ? v.value - tc : null };
   });
   const gain = gainVal - gainBase;
+  // Featured is the order the database returns: grails first, then newest added.
+  const byValue = (r: (typeof rows)[number]) => (view === "sold" ? r.p?.sold_price : r.v?.value) ?? -1;
+  const sorters: Record<string, (a: (typeof rows)[number], b: (typeof rows)[number]) => number> = {
+    modified: (a, b) => b.c.updated_at.localeCompare(a.c.updated_at),
+    added: (a, b) => b.c.created_at.localeCompare(a.c.created_at),
+    oldest: (a, b) => a.c.created_at.localeCompare(b.c.created_at),
+    name: (a, b) => a.c.title.localeCompare(b.c.title, undefined, { numeric: true, sensitivity: "base" }),
+    value: (a, b) => Number(byValue(b)) - Number(byValue(a)),
+  };
+  if (sorters[sort]) rows.sort(sorters[sort]);
 
   return (
     <main className="wrap">
@@ -96,17 +118,19 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
           {used.map((c) => <Link key={c.key} className={searchParams.category === c.key ? "on" : undefined} href={link({ category: c.key, tag: searchParams.tag })}>{c.emoji} {c.label} ({all.filter((i) => i.category === c.key).length})</Link>)}
         </nav>
       )}
-      {tags.length > 0 && (
+      {all.length > 1 && (
         <div className="tagbar">
+          <SortSelect value={sort} options={SORTS.map((s) => ({ key: s.key, label: s.key === "value" && view === "sold" ? "Highest sale price" : s.label,
+            href: link({ category: searchParams.category, tag: searchParams.tag, sort: s.key === "featured" ? undefined : s.key }) }))} />
           {searchParams.tag && <Link className="chip tag on" href={link({ category: searchParams.category })} aria-label={`Stop filtering by ${searchParams.tag}`}>#{searchParams.tag} ✕</Link>}
-          <details className="tag-drop">
+          {tags.length > 0 && <details className="tag-drop">
             <summary>{searchParams.tag ? "Change tag" : "Filter by tag"} <span className="num">({tags.length})</span></summary>
             <nav className="meta" aria-label="Filter by tag">
               {tags.filter((t) => t.toLowerCase() !== searchParams.tag?.toLowerCase()).map((t) => (
                 <Link key={t} className="chip tag" href={link({ category: searchParams.category, tag: t })}>#{t}</Link>
               ))}
             </nav>
-          </details>
+          </details>}
         </div>
       )}
 
@@ -155,6 +179,8 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
                       {summary(c) && <span className="hint">{summary(c)}</span>}
                       <Stars value={c.rating} small />
                       {p?.storage_location && <span className="hint">📦 {p.storage_location}</span>}
+                      {sort === "modified" && <span className="hint">Edited {shortDate(c.updated_at)}</span>}
+                      {(sort === "added" || sort === "oldest") && <span className="hint">Added {shortDate(c.created_at)}</span>}
                     </div>
                   </div>
                 </div>

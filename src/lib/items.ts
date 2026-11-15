@@ -16,6 +16,7 @@ export type Item = {
   ebay_url: string | null;
   asking_price: number | null;
   created_at: string;
+  updated_at: string;
   status: ItemStatus;
   featured: boolean;
   rating: number | null;

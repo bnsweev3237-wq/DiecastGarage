@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.19",
+    date: "2026-11-15",
+    title: "Sort your collection",
+    changes: [
+      "Sort My collection by last modified, recently added, oldest added, name, or highest value. Grails first is still the default.",
+      "When sorting by date, each item shows when it was last edited or added.",
+    ],
+  },
+  {
     version: "0.18",
     date: "2026-11-15",
     title: "Faster pages with smaller thumbnails",
