@@ -6,11 +6,16 @@ export const releases: Release[] = [
   {
     version: "0.23",
     date: "2026-11-15",
-    title: "Keeping deals safe",
+    title: "Safer community",
     changes: [
       "Item details, tags, comments, About text and location can no longer include web links or website names, email addresses, phone numbers, or payment apps like Venmo, Zelle, PayPal and Cash App.",
       "Links still belong in their own places: the eBay listing field for items for sale, and your profile links in Settings.",
+      "Profanity and slurs are blocked too, in item details, comments, profiles and usernames.",
       "If something is blocked, you'll see which field and why, so it's easy to fix.",
+      "Block a collector from their page: they can't comment on your pages or follow you, and you won't see their comments. Manage your list in Settings.",
+      "Anything reported by 5 different people is hidden until our team reviews it.",
+      "Limits on very fast commenting, following, reporting and adding items, and the same long comment can't be pasted all over the site.",
+      "A quick, mostly invisible check on sign-up and sign-in keeps bots out.",
     ],
   },
   {

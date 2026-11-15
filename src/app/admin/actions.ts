@@ -112,6 +112,9 @@ export async function adminCloseReport(f: FormData) {
   const targetId = str(f, "target_id");
   await db.from("reports").update({ status, resolved_by: adminId, resolved_at: new Date().toISOString() })
     .eq("target_id", targetId).eq("status", "open");
+  // Whatever was auto-hidden after 5 reports comes back once an admin has looked at it.
+  const table = { item: "items", comment: "comments", profile: "profiles" }[str(f, "target_type")];
+  if (table) await db.from(table).update({ under_review: false }).eq("id", targetId);
   await logAdminAction(db, adminId, status === "dismissed" ? "dismiss_report" : "resolve_report", str(f, "owner_id") || null, { type: str(f, "target_type") });
   revalidatePath("/admin", "layout");
 }

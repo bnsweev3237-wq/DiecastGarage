@@ -36,7 +36,7 @@ export default async function Search({ searchParams }: { searchParams: Params })
       q,
       // Usernames are one word, so collectors show up for one-word searches.
       words.length === 1 && !category && !saleOnly && !grailsOnly
-        ? supabase.from("profiles").select("username, avatar_path, bio").eq("is_public", true)
+        ? supabase.from("profiles").select("username, avatar_path, bio").eq("is_public", true).eq("under_review", false)
             .ilike("username", `%${words[0]}%`).limit(12)
         : Promise.resolve({ data: [] }),
     ]);

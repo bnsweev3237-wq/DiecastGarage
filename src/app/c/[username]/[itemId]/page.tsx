@@ -36,6 +36,7 @@ export default async function PublicItem({ params }: { params: { username: strin
         {isOwner && <Link className="btn" href={`/collection/${car.id}`}>Edit item</Link>}
       </div>
       {car.is_hidden && <p className="notice">This item is hidden. Only you can see this page.</p>}
+      {car.under_review && <p className="notice">This item is hidden from other collectors while our team reviews reports about it.</p>}
       <div className="carpage">
         <Gallery paths={allPhotos(car)} title={car.title} />
         <div className="side">

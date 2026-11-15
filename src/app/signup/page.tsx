@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Turnstile, { TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/Turnstile";
+import { contentProblem } from "@/lib/content-rules";
 import { createClient } from "@/lib/supabase/client";
 import { FREE_ITEM_LIMIT } from "@/lib/limits";
 import { LEGAL_PAGES_LIVE, TERMS_VERSION } from "@/lib/legal-flags";
@@ -9,6 +11,7 @@ export default function SignUp() {
   const [error, setError] = useState("");
   const [sentTo, setSentTo] = useState("");
   const [busy, setBusy] = useState(false);
+  const human = useRef<TurnstileHandle>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -17,6 +20,9 @@ export default function SignUp() {
     const email = String(f.get("email")).trim();
     const password = String(f.get("password"));
     if (!/^[a-z0-9_]{3,20}$/.test(username)) return setError("Usernames are 3–20 letters, numbers or underscores.");
+    if (contentProblem(username.replace(/_/g, " "))) return setError("Pick a different username. Usernames can't include website names, phone numbers, payment apps or offensive words.");
+    const captchaToken = human.current?.token();
+    if (TURNSTILE_SITE_KEY && !captchaToken) return setError("Please wait a moment while we check you're not a bot, then try again.");
     setBusy(true); setError("");
     const supabase = createClient();
     const { data: taken } = await supabase.from("profiles").select("id").eq("username", username).maybeSingle();
@@ -26,10 +32,12 @@ export default function SignUp() {
       options: {
         data: { username, full_name: String(f.get("full_name")).trim() || null, ...(LEGAL_PAGES_LIVE ? { terms_version: TERMS_VERSION } : {}) },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/collection`,
+        captchaToken,
       },
     });
     setBusy(false);
-    if (error) return setError(error.message);
+    human.current?.reset(); // each check works once
+    if (error) return setError(/captcha/i.test(error.message) ? "We couldn't confirm you're not a bot. Try again." : error.message);
     setSentTo(email);
   }
 
@@ -57,6 +65,7 @@ export default function SignUp() {
             <span>I&apos;m 13 or older and agree to the <Link href="/terms" target="_blank">Terms of Service</Link> and <Link href="/privacy" target="_blank">Privacy Policy</Link></span></label>
         )}
         {error && <p className="msg error" role="alert">{error}</p>}
+        <Turnstile ref={human} />
         <button className="btn primary" type="submit" disabled={busy}>{busy ? "Creating account…" : "Create account"}</button>
         <p className="hint">Already a member? <Link href="/login">Sign in</Link></p>
       </form>

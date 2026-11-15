@@ -41,6 +41,7 @@ export default async function EditItem({ params, searchParams }: { params: { id:
         <div><Link href="/collection">← My collection</Link><h1>{c.title}</h1></div>
         {me && <Link className="btn" href={`/c/${me.username}/${c.id}`}>View public page</Link>}
       </div>
+      {c.under_review && <p className="notice">This item is hidden from other collectors while our team reviews reports about it. You can still edit it.</p>}
       {searchParams.added && <p className="msg ok">Added to your collection. Log a few sold listings to estimate its value.</p>}
       <div className="editor">
         <ItemForm userId={user.id} member={member} item={c} purchase={purchase} />

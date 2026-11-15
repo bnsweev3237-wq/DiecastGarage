@@ -30,10 +30,10 @@ export default async function Explore({ searchParams }: { searchParams: { delete
   if (category) itemsQuery = itemsQuery.eq("category", category);
   const [{ data: items }, { data: collectors }, { count: itemCount }, { count: collectorCount }, { count: saleCount }] = await Promise.all([
     itemsQuery,
-    supabase.from("profiles").select("username, avatar_path, items(count)").eq("is_public", true)
+    supabase.from("profiles").select("username, avatar_path, items(count)").eq("is_public", true).eq("under_review", false)
       .order("created_at", { ascending: false }).limit(12),
     supabase.from("items").select("id, owner:profiles!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("is_hidden", false).eq("status", "owned"),
-    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_public", true),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_public", true).eq("under_review", false),
     supabase.from("items").select("id, owner:profiles!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("for_sale", true).eq("is_hidden", false),
   ]);
   const rows = (items ?? []) as Row[];

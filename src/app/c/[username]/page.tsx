@@ -6,6 +6,8 @@ import FollowButton from "@/components/FollowButton";
 import Avatar from "@/components/Avatar";
 import SocialLinks from "@/components/SocialLinks";
 import ReportButton from "@/components/ReportButton";
+import ConfirmAction from "@/components/ConfirmAction";
+import { blockUser, unblockUser } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
 import { money, type Item } from "@/lib/items";
 import { CATEGORIES, categoryOf } from "@/lib/categories";
@@ -22,9 +24,11 @@ export default async function Collection({ params, searchParams }: { params: { u
   const { data: profile } = await supabase.from("profiles").select("*").eq("username", params.username.toLowerCase()).maybeSingle();
   if (!profile) notFound();
   const isOwner = user?.id === profile.id;
-  const canView = profile.is_public || isOwner;
+  // A profile reported by 5 people is hidden from others until an admin reviews it.
+  const underReview = profile.under_review && !isOwner;
+  const canView = (profile.is_public && !profile.under_review) || isOwner;
 
-  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }] = await Promise.all([
+  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }] = await Promise.all([
     // Counts come from a function so they stay right even when some follow lists are private.
     supabase.rpc("follow_counts", { p_profile: profile.id }).single(),
     user ? supabase.from("follows").select("followee_id").eq("follower_id", user.id).eq("followee_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
@@ -33,6 +37,7 @@ export default async function Collection({ params, searchParams }: { params: { u
     supabase.rpc("profile_email", { p_profile: profile.id }),
     canView ? supabase.rpc("item_values", { p_owner: profile.id }) : Promise.resolve({ data: [] }),
     supabase.rpc("profile_location", { p_profile: profile.id }),
+    user && !isOwner ? supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id).eq("blocked_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   const valueByCar = new Map(((values ?? []) as { item_id: string; value: number }[]).map((v) => [v.item_id, Number(v.value)]));
   // Owners get their hidden items back from the database; leave them out so this page matches what others see.
@@ -69,7 +74,7 @@ export default async function Collection({ params, searchParams }: { params: { u
       <section className="band">
         <div className="band-in">
           <div className="car" style={{ alignItems: "center", flexWrap: "wrap" }}>
-            <Avatar path={profile.avatar_path} username={name} />
+            <Avatar path={underReview ? null : profile.avatar_path} username={name} />
             <div className="car-text" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <h1>@{name}</h1>
               <span className="muted">
@@ -77,12 +82,16 @@ export default async function Collection({ params, searchParams }: { params: { u
                 {typeof location === "string" && (!isOwner || profile.show_location) && <> · {location}</>}
                 {typeof email === "string" && (!isOwner || profile.show_email) && <> · <a href={`mailto:${email}`}>{email}</a></>}
               </span>
-              {profile.bio && <p style={{ margin: 0, maxWidth: "60ch", color: "var(--band-muted)" }}>{profile.bio}</p>}
-              <SocialLinks profile={profile} />
+              {profile.bio && !underReview && <p style={{ margin: 0, maxWidth: "60ch", color: "var(--band-muted)" }}>{profile.bio}</p>}
+              {!underReview && <SocialLinks profile={profile} />}
               <div className="actions" style={{ marginTop: 6 }}>
                 {isOwner ? <Link className="btn small" href="/settings">Edit profile &amp; privacy</Link>
-                  : profile.is_public && <FollowButton signedIn={!!user} followeeId={profile.id} username={profile.username} following={!!myFollow} />}
+                  : profile.is_public && !myBlock && !underReview && <FollowButton signedIn={!!user} followeeId={profile.id} username={profile.username} following={!!myFollow} />}
                 {user && !isOwner && <ReportButton type="profile" id={profile.id} />}
+                {user && !isOwner && (myBlock
+                  ? <form action={unblockUser}><input type="hidden" name="user_id" value={profile.id} /><button className="btn small" type="submit">Unblock</button></form>
+                  : <ConfirmAction action={blockUser} fields={{ user_id: profile.id }} label="Block"
+                      confirmText={`Block @${name}? They won't be able to comment on your pages or follow you, and you won't see their comments. They aren't told.`} />)}
               </div>
             </div>
           </div>
@@ -96,7 +105,11 @@ export default async function Collection({ params, searchParams }: { params: { u
       </section>
 
     <main className="wrap">
-      {!canView ? (
+      {myBlock && <p className="notice">You&apos;ve blocked @{name}. They can&apos;t comment on your pages or follow you, and you won&apos;t see their comments. <Link href="/settings#blocked">Manage blocked collectors</Link></p>}
+      {isOwner && profile.under_review && <p className="notice">Your profile is hidden from other collectors while our team reviews reports about it. You can still use the site as usual.</p>}
+      {underReview ? (
+        <div className="empty"><h3>This profile is being reviewed</h3><p>It&apos;s hidden for now while our team takes a look.</p></div>
+      ) : !canView ? (
         <div className="empty"><h3>This collection is private</h3><p>@{name} has chosen to keep their collection to themselves.</p></div>
       ) : (
         <>

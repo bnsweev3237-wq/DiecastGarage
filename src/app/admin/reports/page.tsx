@@ -21,9 +21,9 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
   for (const r of reports) groups.set(r.target_id, [...(groups.get(r.target_id) ?? []), r]);
   const ids = (t: string) => [...new Set(reports.filter((r) => r.target_type === t).map((r) => r.target_id))];
   const [{ data: cars }, { data: comments }, { data: profiles }] = await Promise.all([
-    db.from("items").select("id, title, description, photo_path, owner:profiles(id, username)").in("id", ids("item")),
-    db.from("comments").select("id, body, item_id, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)").in("id", ids("comment")),
-    db.from("profiles").select("id, username, bio").in("id", ids("profile")),
+    db.from("items").select("id, title, description, photo_path, under_review, owner:profiles(id, username)").in("id", ids("item")),
+    db.from("comments").select("id, body, item_id, under_review, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)").in("id", ids("comment")),
+    db.from("profiles").select("id, username, bio, under_review").in("id", ids("profile")),
   ]);
   const car = new Map((cars ?? []).map((c) => [c.id, c]));
   const comment = new Map((comments ?? []).map((c) => [c.id, c]));
@@ -49,6 +49,7 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
           <section className="card" key={targetId}>
             <div className="card-title">
               <h3>Reported {first.target_type} · {rs.length} report{rs.length > 1 ? "s" : ""}</h3>
+              {(c?.under_review || k?.under_review || p?.under_review) && <span className="chip sale">Auto-hidden: 5+ people reported it. Closing the report brings it back unless you remove it.</span>}
               <span className="hint">{when(first.created_at)}</span>
             </div>
 

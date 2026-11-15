@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
 import DeleteAccount from "@/components/DeleteAccount";
 import { InstallSection } from "@/components/InstallApp";
 import { getUser } from "@/lib/supabase/server";
+import { unblockUser } from "@/app/actions";
 import { FREE_ITEM_LIMIT, compActive, compEnds, isActiveMembership, isMember } from "@/lib/limits";
 import { paymentsEnabled } from "@/lib/stripe";
 
@@ -12,11 +14,12 @@ export const metadata = { title: "Settings" };
 export default async function Settings({ searchParams }: { searchParams: { membership?: string } }) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login?next=/settings");
-  const [{ data: profile }, { data: priv }, { data: m }, { count }] = await Promise.all([
+  const [{ data: profile }, { data: priv }, { data: m }, { count }, { data: blocked }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("profile_private").select("full_name, location").eq("id", user.id).maybeSingle(),
     supabase.from("memberships").select("*").eq("user_id", user.id).single(),
     supabase.from("items").select("id", { count: "exact", head: true }).eq("owner_id", user.id),
+    supabase.from("blocks").select("blocked_id, created_at, blocked:profiles!blocks_blocked_id_fkey(username)").eq("blocker_id", user.id).order("created_at", { ascending: false }),
   ]);
   const member = isMember(m);
   const paid = isActiveMembership(m?.status);
@@ -35,6 +38,24 @@ export default async function Settings({ searchParams }: { searchParams: { membe
         showFollows={profile?.show_follows ?? true}
         userId={user.id} username={profile?.username ?? ""} avatarPath={profile?.avatar_path ?? null}
         links={{ facebook_url: profile?.facebook_url, x_url: profile?.x_url, instagram_url: profile?.instagram_url, ebay_url: profile?.ebay_url }} />
+
+      <section className="card" id="blocked">
+        <h3>Blocked collectors</h3>
+        <p className="hint">People you block can&apos;t comment on your pages or follow you, and you won&apos;t see their comments. They aren&apos;t told. Block someone from their collection page.</p>
+        {blocked?.length ? (
+          <div className="admin-table">
+            {blocked.map((b) => {
+              const who = (b.blocked as unknown as { username: string } | null)?.username;
+              return (
+                <div key={b.blocked_id} className="admin-row">
+                  <span>{who ? <Link href={`/c/${who}`}>@{who}</Link> : "A deleted account"}</span>
+                  <form action={unblockUser}><input type="hidden" name="user_id" value={b.blocked_id} /><button className="btn small" type="submit">Unblock</button></form>
+                </div>
+              );
+            })}
+          </div>
+        ) : <p className="hint">You haven&apos;t blocked anyone.</p>}
+      </section>
 
       <section className="card" id="membership">
         <h3>Membership</h3>

@@ -10,7 +10,7 @@ type Props = { profileId: string; itemId?: string; path: string };
 export default async function Comments({ profileId, itemId, path }: Props) {
   const { supabase, user } = await getUser();
   let q = supabase.from("comments")
-    .select("id, body, created_at, author_id, author:profiles!comments_author_id_fkey(username, avatar_path)")
+    .select("id, body, created_at, author_id, under_review, author:profiles!comments_author_id_fkey(username, avatar_path)")
     .eq("profile_id", profileId).order("created_at", { ascending: false }).limit(100);
   q = itemId ? q.eq("item_id", itemId) : q.is("item_id", null);
   const [{ data }, { data: allowed }, { data: owner }] = await Promise.all([
@@ -22,7 +22,7 @@ export default async function Comments({ profileId, itemId, path }: Props) {
     ? `@${owner.username} has turned off comments.`
     : `@${owner?.username} only allows comments from collectors they follow.`;
   const comments = (data ?? []) as unknown as {
-    id: string; body: string; created_at: string; author_id: string; author: { username: string; avatar_path: string | null } | null;
+    id: string; body: string; created_at: string; author_id: string; under_review: boolean; author: { username: string; avatar_path: string | null } | null;
   }[];
   return (
     <section className="card">
@@ -45,6 +45,7 @@ export default async function Comments({ profileId, itemId, path }: Props) {
               {user && user.id !== c.author_id && <ReportButton type="comment" id={c.id} />}
             </div>
             <p>{c.body}</p>
+            {c.under_review && <p className="hint">Only you can see this comment while our team reviews reports about it.</p>}
           </div>
         ))}
         {!comments.length && <p className="hint">No comments yet.</p>}

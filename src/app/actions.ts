@@ -204,6 +204,23 @@ export async function removeComp(f: FormData) {
   revalidatePath("/collection");
 }
 
+// Blocking: the blocked collector can't comment on your pages or follow you, and you stop seeing their
+// comments. They aren't told. Enforced in the database (supabase/migrations/0016_moderation.sql).
+export async function blockUser(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const blocked = str(f, "user_id");
+  if (blocked && blocked !== user.id) await supabase.from("blocks").insert({ blocked_id: blocked });
+  revalidatePath("/", "layout");
+}
+
+export async function unblockUser(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", str(f, "user_id"));
+  revalidatePath("/", "layout");
+}
+
 export async function toggleFollow(f: FormData) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
@@ -288,7 +305,7 @@ export async function submitReport(_: FormState, f: FormData): Promise<FormState
     target_type: type, target_id: str(f, "target_id"), reason, details: str(f, "details").slice(0, 1000) || null,
   });
   // A duplicate means they already reported it and it's still open, which is fine to treat as sent.
-  if (error && !error.message.includes("reports_one_open")) return { error: "Couldn't send that report. Try again." };
+  if (error && !error.message.includes("reports_one_open")) return { error: contentDbMessage(error.message) ?? "Couldn't send that report. Try again." };
   return { ok: "Thanks. We'll take a look." };
 }
 
