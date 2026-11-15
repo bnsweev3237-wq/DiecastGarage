@@ -6,10 +6,11 @@ import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { paymentsEnabled, stripe } from "@/lib/stripe";
 import { MAX_PHOTOS, MAX_TAGS, STATUSES, isEbayUrl, isThumb, withThumbs } from "@/lib/items";
-import { CATEGORIES, CONDITIONS, cleanAttributes } from "@/lib/categories";
+import { CATEGORIES, CONDITIONS, categoryOf, cleanAttributes } from "@/lib/categories";
 import { NETWORKS, normalizeSocial } from "@/lib/social";
 import { FREE_ITEM_LIMIT, FREE_PHOTO_LIMIT } from "@/lib/limits";
 import { REPORT_REASONS } from "@/lib/reports";
+import { checkFields, contentDbMessage } from "@/lib/content-rules";
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
@@ -53,6 +54,12 @@ function parseItem(f: FormData, userId: string, member: boolean, extraPhotosBefo
   if (forSale && !ebayUrl) return { error: "Add the eBay listing link to mark this item for sale." };
   if (forSale && ebayUrl && !isEbayUrl(ebayUrl))
     return { error: "The for-sale link must be an eBay listing that starts with https://www.ebay.com/ (or another eBay site)." };
+  const blocked = checkFields([
+    ["the name", str(f, "title")], ["the brand", str(f, "brand")], ["the year", str(f, "year")], ["the edition", str(f, "edition")],
+    ["the description", str(f, "description")], ["provenance", str(f, "provenance")], ["tags", str(f, "tags")],
+    ...categoryOf(category).fields.map((fd) => [fd.label.toLowerCase(), str(f, `a_${fd.key}`)] as [string, string]),
+  ]);
+  if (blocked) return { error: blocked };
   const certified = f.get("is_certified") === "on";
   const certType = str(f, "cert_type") === "coa" ? "coa" : "graded";
   const rating = Number(str(f, "rating"));
@@ -115,7 +122,7 @@ async function isMemberNow(supabase: Awaited<ReturnType<typeof getUser>>["supaba
 }
 
 const dbError = (message: string) =>
-  message.includes("FREE_LIMIT")
+  contentDbMessage(message) ?? (message.includes("FREE_LIMIT")
     ? `Free accounts can keep up to ${FREE_ITEM_LIMIT} items. Become a member in Settings to add more.`
     : message.includes("MEMBERS_ONLY_SALE")
       ? "Listing items for sale is for members. Become a member in Settings."
@@ -125,7 +132,7 @@ const dbError = (message: string) =>
       ? "Only items in your collection can be for sale."
       : message.includes("for_sale_needs_ebay_link")
       ? "The for-sale link must be an eBay listing."
-      : "Couldn't save. Check your connection and try again.";
+      : "Couldn't save. Check your connection and try again.");
 
 export async function createItem(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
@@ -216,10 +223,12 @@ export async function addComment(_: FormState, f: FormData): Promise<FormState> 
   const body = str(f, "body");
   if (!body) return { error: "Write something first." };
   if (body.length > 1000) return { error: "Keep comments under 1,000 characters." };
+  const blocked = checkFields([["comments", body]]);
+  if (blocked) return { error: blocked };
   const { error } = await supabase.from("comments").insert({
     profile_id: str(f, "profile_id"), item_id: optStr(f, "item_id"), body,
   });
-  if (error) return { error: "Couldn't post your comment. Try again." };
+  if (error) return { error: contentDbMessage(error.message) ?? "Couldn't post your comment. Try again." };
   revalidatePath(str(f, "path"));
   return { ok: "Posted" };
 }
@@ -239,6 +248,8 @@ export async function updateProfile(_: FormState, f: FormData): Promise<FormStat
     if (r.error) return { error: r.error };
     links[n.key] = r.url;
   }
+  const blocked = checkFields([["your About text", str(f, "bio")], ["your location", str(f, "location")]]);
+  if (blocked) return { error: blocked };
   const avatarPath = optStr(f, "avatar_path");
   const { data: before } = await supabase.from("profiles").select("avatar_path").eq("id", user.id).single();
   const [{ error }, { error: privateError }] = await Promise.all([
@@ -259,7 +270,7 @@ export async function updateProfile(_: FormState, f: FormData): Promise<FormStat
       location: str(f, "location").slice(0, 60) || null,
     }),
   ]);
-  if (error || privateError) return { error: "Couldn't save your profile. Try again." };
+  if (error || privateError) return { error: contentDbMessage((error ?? privateError)!.message) ?? "Couldn't save your profile. Try again." };
   if (before?.avatar_path && before.avatar_path !== avatarPath)
     await supabase.storage.from("avatars").remove([before.avatar_path]);
   revalidatePath("/", "layout");

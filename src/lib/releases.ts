@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.23",
+    date: "2026-11-15",
+    title: "Keeping deals safe",
+    changes: [
+      "Item details, tags, comments, About text and location can no longer include web links or website names, email addresses, phone numbers, or payment apps like Venmo, Zelle, PayPal and Cash App.",
+      "Links still belong in their own places: the eBay listing field for items for sale, and your profile links in Settings.",
+      "If something is blocked, you'll see which field and why, so it's easy to fix.",
+    ],
+  },
+  {
     version: "0.22",
     date: "2026-11-15",
     title: "Filter by category and grails",

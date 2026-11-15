@@ -41,7 +41,8 @@ theCollectorHQ only works if collectors can trust each other. Don't post or do a
 9. **Misrepresenting an item**: passing off fakes, reprints, customs, reproductions or altered items as genuine originals, or lying about an item's condition, grade, packaging, edition or authenticity.
 10. **Content that infringes someone's rights**, such as copyrighted photos or trademarks used to mislead.
 11. **Harmful links or code**: malware, or links designed to trick people.
-12. **Interfering with the site**: scraping data in bulk, getting around privacy settings or limits, or trying to access accounts or areas you aren't allowed to.
+12. **Contact details or off-site deals** in public text: web links or website names, email addresses, phone numbers, or payment apps such as Venmo, Zelle, PayPal or Cash App. Use the eBay listing and profile link fields for links. The site blocks most of these automatically.
+13. **Interfering with the site**: scraping data in bulk, getting around privacy settings or limits, or trying to access accounts or areas you aren't allowed to.
 
 ## 5. Buying and selling
 
