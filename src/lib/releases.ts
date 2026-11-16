@@ -9,6 +9,7 @@ export const releases: Release[] = [
     title: "Box column and condition adjustment",
     changes: [
       "My collection has a Box column showing which items are in their original box or packaging.",
+      "Saving changes to an item takes you back to My collection, with a note saying what was saved.",
       "Members can set a condition adjustment on an item: a percent taken off the sold-listing estimate for wear, damage or missing parts. Your gain or loss and totals use the adjusted value.",
     ],
   },

@@ -164,7 +164,8 @@ export async function updateItem(_: FormState, f: FormData): Promise<FormState> 
   if (gone.length) await supabase.storage.from("car-photos").remove(withThumbs(gone));
   revalidatePath(`/collection/${id}`);
   revalidatePath("/collection");
-  return { ok: "Saved" };
+  // Back to the list, which shows a "Saved" message.
+  redirect(`/collection?saved=${encodeURIComponent(parsed.item.title.slice(0, 80))}`);
 }
 
 export async function deleteItem(f: FormData) {
