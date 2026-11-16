@@ -85,7 +85,7 @@ export default async function Collection({ params, searchParams }: { params: { u
               {profile.bio && !underReview && <p style={{ margin: 0, maxWidth: "60ch", color: "var(--band-muted)" }}>{profile.bio}</p>}
               {!underReview && <SocialLinks profile={profile} />}
               <div className="actions" style={{ marginTop: 6 }}>
-                {isOwner ? <Link className="btn small" href="/settings">Edit profile &amp; privacy</Link>
+                {isOwner ? <><Link className="btn small primary" href="/collection/new">+ Add an item</Link><Link className="btn small" href="/settings">Edit profile &amp; privacy</Link></>
                   : profile.is_public && !myBlock && !underReview && <FollowButton signedIn={!!user} followeeId={profile.id} username={profile.username} following={!!myFollow} />}
                 {user && !isOwner && <ReportButton type="profile" id={profile.id} />}
                 {user && !isOwner && (myBlock
