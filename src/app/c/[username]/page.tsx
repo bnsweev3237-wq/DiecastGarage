@@ -7,6 +7,7 @@ import Avatar from "@/components/Avatar";
 import SocialLinks from "@/components/SocialLinks";
 import ReportButton from "@/components/ReportButton";
 import ConfirmAction from "@/components/ConfirmAction";
+import SetCard, { summarize } from "@/components/SetCard";
 import { blockUser, unblockUser } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
 import { money, type Item } from "@/lib/items";
@@ -28,7 +29,7 @@ export default async function Collection({ params, searchParams }: { params: { u
   const underReview = profile.under_review && !isOwner;
   const canView = (profile.is_public && !profile.under_review) || isOwner;
 
-  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }] = await Promise.all([
+  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }] = await Promise.all([
     // Counts come from a function so they stay right even when some follow lists are private.
     supabase.rpc("follow_counts", { p_profile: profile.id }).single(),
     user ? supabase.from("follows").select("followee_id").eq("follower_id", user.id).eq("followee_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
@@ -38,7 +39,10 @@ export default async function Collection({ params, searchParams }: { params: { u
     canView ? supabase.rpc("item_values", { p_owner: profile.id }) : Promise.resolve({ data: [] }),
     supabase.rpc("profile_location", { p_profile: profile.id }),
     user && !isOwner ? supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id).eq("blocked_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
+    canView ? supabase.from("sets").select("id, name, category, is_public, set_entries(have)").eq("owner_id", profile.id).order("updated_at", { ascending: false }) : Promise.resolve({ data: [] }),
   ]);
+  // Only public sets show here, so the owner sees what everyone else sees.
+  const sets = summarize(((setRows ?? []) as Parameters<typeof summarize>[0]).filter((s) => s.is_public));
   const valueByCar = new Map(((values ?? []) as { item_id: string; value: number }[]).map((v) => [v.item_id, Number(v.value)]));
   // Owners get their hidden items back from the database; leave them out so this page matches what others see.
   const mine = (cars ?? []) as Item[];
@@ -51,8 +55,8 @@ export default async function Collection({ params, searchParams }: { params: { u
   const all = visible.filter((c) => c.status === "owned");
   const wishlist = visible.filter((c) => c.status === "wishlist");
   const sold = visible.filter((c) => c.status === "sold");
-  const filter = ["sale", "wishlist", "sold"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
-  const base = filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : all;
+  const filter = ["sale", "wishlist", "sold", "sets"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
+  const base = filter === "sets" ? [] : filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : all;
   const tag = searchParams.tag?.toLowerCase();
   const words = searchWords(searchParams.q);
   const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
@@ -118,7 +122,9 @@ export default async function Collection({ params, searchParams }: { params: { u
             {forSale > 0 && <Link className={filter === "sale" ? "on" : undefined} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>}
             {wishlist.length > 0 && <Link className={filter === "wishlist" ? "on" : undefined} href={`/c/${profile.username}?filter=wishlist`}>Wishlist ({wishlist.length})</Link>}
             {sold.length > 0 && <Link className={filter === "sold" ? "on" : undefined} href={`/c/${profile.username}?filter=sold`}>Sold ({sold.length})</Link>}
+            {sets.length > 0 && <Link className={filter === "sets" ? "on" : undefined} href={`/c/${profile.username}?filter=sets`}>📋 Sets ({sets.length})</Link>}
           </nav>
+          {filter === "sets" && <section className="set-grid">{sets.map((s) => <SetCard key={s.id} s={s} />)}</section>}
           {base.length > 1 && (
             <form className="filterbar" role="search" action={`/c/${profile.username}`}>
               {filter && <input type="hidden" name="filter" value={filter} />}
@@ -148,7 +154,7 @@ export default async function Collection({ params, searchParams }: { params: { u
           )}
           {shown.length > grails.length ? (
             <section className="gallery">{shown.filter((c) => !grails.includes(c)).map((c) => <ItemTile key={c.id} item={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</section>
-          ) : grails.length ? null : (
+          ) : grails.length || filter === "sets" ? null : (
             <div className="empty"><h3>Nothing here yet</h3>{isOwner && <Link className="btn primary" href="/collection/new">+ Add an item</Link>}</div>
           )}
           <Comments profileId={profile.id} path={`/c/${profile.username}`} />

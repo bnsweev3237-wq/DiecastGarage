@@ -299,6 +299,163 @@ export async function toggleFavorite(f: FormData): Promise<FormState> {
   return { ok: f.get("saved") === "1" ? "Removed" : "Saved" };
 }
 
+// Spreadsheet import. Rows arrive already matched to our columns (see src/lib/item-columns.ts) and
+// each one goes through the same checks as the Add an item form. Photos aren't imported.
+export type ImportResult = { error?: string; added?: number; failed?: { row: number; title: string; error: string }[]; stopped?: string } | undefined;
+
+export async function importItems(_: ImportResult, f: FormData): Promise<ImportResult> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  let rows: Record<string, string>[] = [];
+  try { rows = JSON.parse(str(f, "rows")); } catch { return { error: "Couldn't read that file. Try saving it as CSV again." }; }
+  if (!Array.isArray(rows) || !rows.length) return { error: "There are no rows to import." };
+  if (rows.length > 500) return { error: "Import up to 500 rows at a time. Split the file and import it in parts." };
+  const member = await isMemberNow(supabase, user.id);
+  const fallbackCategory = CATEGORIES.some((c) => c.key === str(f, "default_category")) ? str(f, "default_category") : "other";
+  const n = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const yes = (s?: string) => /^(y|yes|true|1|x|✓|boxed|sealed)$/i.test((s ?? "").trim());
+  const failed: { row: number; title: string; error: string }[] = [];
+  let added = 0, stopped: string | undefined;
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const fd = new FormData();
+    const want = n(r.category ?? "");
+    const cat = want ? CATEGORIES.find((c) => n(c.key) === want || n(c.label) === want) ?? CATEGORIES.find((c) => n(c.label).startsWith(want)) : undefined;
+    const condition = CONDITIONS.find(([k, label]) => n(k) === n(r.condition ?? "") || n(label) === n(r.condition ?? ""));
+    const status = /wish/i.test(r.status ?? "") ? "wishlist" : /sold/i.test(r.status ?? "") ? "sold" : "owned";
+    const certType = /coa|certificate|authentic/i.test(r.cert_type ?? "") ? "coa" : "graded";
+    const certified = !!(r.cert_by || r.cert_grade || r.cert_number || /grad|coa|cert|yes/i.test(r.cert_type ?? ""));
+    const plain: Record<string, string | undefined> = {
+      title: r.title, category: cat?.key ?? fallbackCategory, brand: r.brand, year: r.year, condition: condition?.[0],
+      quantity: r.quantity?.replace(/[^0-9]/g, ""), edition: r.edition, status, description: r.description, provenance: r.provenance,
+      tags: r.tags, rating: r.rating?.replace(/[^1-5]/g, "").slice(0, 1), acquired_from: r.acquired_from, storage_location: r.storage_location,
+      cert_type: certType, cert_by: r.cert_by, cert_grade: r.cert_grade, cert_number: r.cert_number,
+    };
+    for (const [k, v] of Object.entries(plain)) if (v) fd.set(k, v);
+    for (const k of ["paid", "shipping", "tax", "fees", "manual_value", "sold_price", "condition_adjustment"])
+      if (r[k]) fd.set(k, r[k].replace(/[^0-9.]/g, ""));
+    for (const k of ["purchased_at", "sold_at"]) if (r[k]) {
+      const d = new Date(r[k]);
+      if (!Number.isNaN(d.getTime())) fd.set(k, d.toISOString().slice(0, 10));
+    }
+    if (yes(r.in_package)) fd.set("in_package", "on");
+    if (yes(r.is_hidden)) fd.set("is_hidden", "on");
+    if (yes(r.featured)) fd.set("featured", "on");
+    if (certified) fd.set("is_certified", "on");
+    for (const [k, v] of Object.entries(r)) if (k.startsWith("a_") && v) fd.set(k, v);
+
+    const parsed = parseItem(fd, user.id, member);
+    if ("error" in parsed) { failed.push({ row: i + 2, title: r.title || "(no name)", error: parsed.error ?? "Couldn't read this row." }); continue; }
+    const { data, error } = await supabase.from("items").insert(parsed.item).select("id").single();
+    if (error) {
+      const msg = dbError(error.message);
+      if (error.message.includes("FREE_LIMIT") || error.message.includes("RATE_LIMIT_ITEMS")) { stopped = msg; break; }
+      failed.push({ row: i + 2, title: r.title || "(no name)", error: msg });
+      continue;
+    }
+    await supabase.from("item_purchases").insert({ item_id: data.id, ...parsed.purchase });
+    added++;
+  }
+  revalidatePath("/collection");
+  return { added, failed, stopped };
+}
+
+// ---------- set checklists ----------
+const setLines = (raw: string) => raw.split(/\r?\n/).map((l) => l.trim().replace(/\s+/g, " ").slice(0, 200)).filter(Boolean);
+
+export async function createSet(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const name = str(f, "name").slice(0, 120);
+  if (!name) return { error: "Give the set a name." };
+  const lines = setLines(str(f, "lines"));
+  if (lines.length > 2000) return { error: "A set can have up to 2,000 lines." };
+  const blocked = checkFields([["the set name", name], ["the description", str(f, "description")]]);
+  if (blocked) return { error: blocked };
+  const { data, error } = await supabase.from("sets").insert({
+    name, description: optStr(f, "description")?.slice(0, 1000) ?? null, is_public: f.get("is_public") === "on",
+    category: CATEGORIES.some((c) => c.key === str(f, "category")) ? str(f, "category") : null,
+  }).select("id").single();
+  if (error) return { error: error.message.includes("SET_LIMIT") ? "You can have up to 100 sets." : contentDbMessage(error.message) ?? "Couldn't create the set. Try again." };
+  for (let i = 0; i < lines.length; i += 500)
+    await supabase.from("set_entries").insert(lines.slice(i, i + 500).map((label, j) => ({ set_id: data.id, position: i + j + 1, label })));
+  redirect(`/sets/${data.id}?new=1`);
+}
+
+export async function updateSet(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const id = str(f, "id");
+  const blocked = checkFields([["the set name", str(f, "name")], ["the description", str(f, "description")]]);
+  if (blocked) return { error: blocked };
+  const { error } = await supabase.from("sets").update({
+    name: str(f, "name").slice(0, 120) || "Untitled set", description: optStr(f, "description")?.slice(0, 1000) ?? null,
+    is_public: f.get("is_public") === "on",
+    category: CATEGORIES.some((c) => c.key === str(f, "category")) ? str(f, "category") : null,
+  }).eq("id", id).eq("owner_id", user.id);
+  if (error) return { error: contentDbMessage(error.message) ?? "Couldn't save. Try again." };
+  const more = setLines(str(f, "more_lines"));
+  if (more.length) {
+    const { data: last } = await supabase.from("set_entries").select("position").eq("set_id", id).order("position", { ascending: false }).limit(1).maybeSingle();
+    const start = (last?.position ?? 0) + 1;
+    const { error: e2 } = await supabase.from("set_entries").insert(more.map((label, j) => ({ set_id: id, position: start + j, label })));
+    if (e2) return { error: e2.message.includes("SET_ENTRY_LIMIT") ? "A set can have up to 2,000 lines." : "Saved, but couldn't add the new lines." };
+  }
+  revalidatePath(`/sets/${id}`);
+  return { ok: more.length ? `Saved and added ${more.length} line${more.length === 1 ? "" : "s"}.` : "Saved" };
+}
+
+export async function deleteSet(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  await supabase.from("sets").delete().eq("id", str(f, "id")).eq("owner_id", user.id);
+  revalidatePath("/sets");
+  redirect("/sets");
+}
+
+// Tick or untick a line, or remove a line. Unticking also unlinks any item.
+export async function setEntryHave(f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) return { error: "Sign in first." };
+  const id = str(f, "entry_id");
+  const { error } = str(f, "remove") === "1"
+    ? await supabase.from("set_entries").delete().eq("id", id)
+    : await supabase.from("set_entries").update(f.get("have") === "1" ? { have: true } : { have: false, item_id: null }).eq("id", id);
+  if (error) return { error: "Couldn't save that. Try again." };
+  revalidatePath(`/sets/${str(f, "set_id")}`);
+  return { ok: "Saved" };
+}
+
+// Ticks off lines that match items you own: every word of the line has to appear in the item's details.
+export async function autoMatchSet(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const id = str(f, "id");
+  const { data: set } = await supabase.from("sets").select("id, category").eq("id", id).eq("owner_id", user.id).maybeSingle();
+  if (!set) return { error: "Couldn't find that set." };
+  const [{ data: entries }, { data: items }] = await Promise.all([
+    supabase.from("set_entries").select("id, label, item_id").eq("set_id", id),
+    (() => { let q = supabase.from("items").select("id, search_text").eq("owner_id", user.id).eq("status", "owned"); if (set.category) q = q.eq("category", set.category); return q; })(),
+  ]);
+  const words = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(/\s+/).map((w) => w.replace(/^[^a-z0-9#]+|[^a-z0-9]+$/g, "")).filter(Boolean);
+  const used = new Set((entries ?? []).map((e) => e.item_id).filter(Boolean));
+  let matched = 0;
+  for (const e of entries ?? []) {
+    if (e.item_id) continue;
+    const need = words(e.label);
+    if (!need.length) continue;
+    const hit = (items ?? []).find((i) => !used.has(i.id) && need.every((w) => (i.search_text ?? "").includes(w)));
+    if (hit) {
+      used.add(hit.id);
+      await supabase.from("set_entries").update({ item_id: hit.id, have: true }).eq("id", e.id);
+      matched++;
+    }
+  }
+  revalidatePath(`/sets/${id}`);
+  return { ok: matched ? `Matched ${matched} line${matched === 1 ? "" : "s"} to items in your collection.` : "No new matches. Lines match when every word appears in one of your items." };
+}
+
 // Rate someone else's item from 1 to 5 stars, or 0 to take your rating back.
 // The database checks who may rate and keeps the item's totals (supabase/migrations/0017_ratings.sql).
 export async function rateItem(f: FormData): Promise<FormState> {

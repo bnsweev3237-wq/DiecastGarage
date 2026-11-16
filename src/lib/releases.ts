@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.31",
+    date: "2026-11-16",
+    title: "Spreadsheet import and export, and set checklists",
+    changes: [
+      "Import: add up to 500 items at a time from a CSV spreadsheet. We match the columns for you, and you can adjust them before importing.",
+      "Export: download your whole collection as a spreadsheet, including your private details, for a backup or your records.",
+      "📋 Sets: make a checklist for a set or series you're working on, tick off what you have, and see what's missing. Match my items ticks off pieces already in your collection.",
+      "Public sets show on your collection page under a Sets tab, so other collectors can see what you're hunting for.",
+    ],
+  },
+  {
     version: "0.30",
     date: "2026-11-16",
     title: "Faster adding, bulk edit, saved items and more notifications",
