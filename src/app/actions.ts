@@ -204,6 +204,23 @@ export async function removeComp(f: FormData) {
   revalidatePath("/collection");
 }
 
+// Beta testers' feedback goes to the admin Feedback page. Only testers can send it (the database checks too).
+export async function sendFeedback(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) return { error: "Sign in to send feedback." };
+  const message = str(f, "message");
+  if (!message) return { error: "Write something first." };
+  const { error } = await supabase.from("feedback").insert({
+    kind: ["bug", "idea", "other"].includes(str(f, "kind")) ? str(f, "kind") : "other",
+    message: message.slice(0, 2000),
+    page: str(f, "page").slice(0, 300) || null,
+    device: str(f, "device").slice(0, 300) || null,
+  });
+  if (error) return { error: error.message.includes("RATE_LIMIT_FEEDBACK") ? "That's a lot of feedback today. Thank you! Try again tomorrow." : "Couldn't send that. Try again." };
+  revalidatePath("/admin", "layout");
+  return { ok: "Sent" };
+}
+
 // Rate someone else's item from 1 to 5 stars, or 0 to take your rating back.
 // The database checks who may rate and keeps the item's totals (supabase/migrations/0017_ratings.sql).
 export async function rateItem(f: FormData): Promise<FormState> {

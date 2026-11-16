@@ -150,3 +150,19 @@ export async function adminMakeThumbs() {
   if (r.made) await logAdminAction(db, adminId, "make_thumbnails", null, { title: `${r.made} made` });
   refresh();
 }
+
+// Beta testers get the Send feedback button.
+export async function adminSetBetaTester(f: FormData) {
+  const { adminId, db } = await requireAdmin();
+  const userId = str(f, "user_id");
+  const on = str(f, "on") === "1";
+  await db.from("profiles").update({ is_beta_tester: on }).eq("id", userId);
+  await logAdminAction(db, adminId, on ? "add_beta_tester" : "remove_beta_tester", userId, {});
+  refresh();
+}
+
+export async function adminSetFeedbackStatus(f: FormData) {
+  await requireAdmin().then(({ db }) =>
+    db.from("feedback").update({ status: str(f, "status") === "done" ? "done" : "open" }).eq("id", str(f, "id")));
+  revalidatePath("/admin", "layout");
+}

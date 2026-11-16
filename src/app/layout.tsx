@@ -3,6 +3,7 @@ import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
 import Logo from "@/components/Logo";
 import { InstallBanner, ServiceWorker } from "@/components/InstallApp";
+import FeedbackButton from "@/components/FeedbackButton";
 import { getUser } from "@/lib/supabase/server";
 import { currentVersion } from "@/lib/releases";
 import { LEGAL_PAGES_LIVE } from "@/lib/legal-flags";
@@ -35,7 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { supabase, user } = await getUser();
   const [{ data: me }, { data: isAdmin }] = user
     ? await Promise.all([
-        supabase.from("profiles").select("username").eq("id", user.id).single(),
+        supabase.from("profiles").select("username, is_beta_tester").eq("id", user.id).single(),
         supabase.rpc("is_admin"),
       ])
     : [{ data: null }, { data: false }];
@@ -78,6 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </nav>
         {children}
         <InstallBanner />
+        {me?.is_beta_tester && <FeedbackButton />}
         <ServiceWorker />
         <footer className="footer">
           <div className="footer-in">

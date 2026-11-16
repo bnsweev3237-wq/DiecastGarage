@@ -4,6 +4,7 @@ import Avatar from "@/components/Avatar";
 import ConfirmAction from "@/components/ConfirmAction";
 import Thumb from "@/components/Thumb";
 import SubmitButton from "@/components/SubmitButton";
+import { adminSetBetaTester } from "@/app/admin/actions";
 import { adminClearProfile, adminDeleteAccount, adminDeleteItem, adminDeleteComment, adminRemoveItemPhoto, adminClearItemDescription } from "@/app/admin/actions";
 import CompMembership from "@/components/admin/CompMembership";
 import { compActive, compEnds, isActiveMembership } from "@/lib/limits";
@@ -50,6 +51,15 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
           <dt>Shows</dt><dd>{[p.show_email && "email", p.show_values && "values", p.show_location && "location", p.show_follows && "follow lists"].filter(Boolean).join(", ") || "nothing optional"}</dd>
           <dt>Comments from</dt><dd>{p.comments_from}</dd>
         </dl>
+      </section>
+
+      <section className="card">
+        <div className="card-title"><h3>Beta tester</h3>{p.is_beta_tester ? <span className="chip sale">Beta tester</span> : <span className="chip box">No</span>}</div>
+        <p className="hint">Beta testers see a 💬 Feedback button on every page. What they send shows up under Feedback.</p>
+        <form action={adminSetBetaTester}>
+          <input type="hidden" name="user_id" value={p.id} /><input type="hidden" name="on" value={p.is_beta_tester ? "0" : "1"} />
+          <SubmitButton className={p.is_beta_tester ? "btn small" : "btn small primary"} pending="Saving…">{p.is_beta_tester ? "Remove beta tester" : "Make beta tester"}</SubmitButton>
+        </form>
       </section>
 
       <CompMembership userId={p.id} username={p.username} active={compActive(m)} granted={!!m?.comp_active} until={m?.comp_until ?? null} paid={isActiveMembership(m?.status)} />

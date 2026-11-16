@@ -10,6 +10,7 @@ const LABELS: Record<string, string> = {
   grant_comp_membership: "Gave a complimentary membership", update_comp_membership: "Changed a complimentary membership",
   revoke_comp_membership: "Ended a complimentary membership",
   make_thumbnails: "Made photo thumbnails",
+  add_beta_tester: "Made a beta tester", remove_beta_tester: "Removed a beta tester",
 };
 
 export default async function AdminLog() {

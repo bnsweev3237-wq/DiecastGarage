@@ -566,3 +566,15 @@ body > main { flex: 1 0 auto; width: 100%; }
 .sort-toggle { display: flex; gap: 4px; background: var(--chip); padding: 4px; border-radius: 999px; }
 .sort-toggle a { padding: 6px 14px; border-radius: 999px; font-weight: 800; font-size: 14px; color: var(--muted); text-decoration: none; }
 .sort-toggle a.on { background: var(--ink); color: var(--bg); }
+
+/* beta feedback */
+.feedback { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 40;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.feedback-fab { border: 2px solid #121212; background: var(--accent); color: #121212; font-weight: 800; font-size: 15px; padding: 10px 16px;
+  border-radius: 999px; cursor: pointer; box-shadow: 4px 4px 0 #121212; }
+.feedback-fab:hover { transform: translateY(-2px); }
+.feedback-panel { width: min(380px, calc(100vw - 32px)); box-shadow: 0 18px 50px rgb(0 0 0 / .25); }
+.feedback-panel .kinds { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.feedback-panel .kinds label { padding: 8px; font-size: 13px; text-align: center; }
+.feedback-panel textarea { min-height: 110px; }
+@media (prefers-reduced-motion: reduce) { .feedback-fab:hover { transform: none; } }

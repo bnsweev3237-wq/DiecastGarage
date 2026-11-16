@@ -6,7 +6,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: { q?:
   const { db } = await requireAdmin();
   const q = (searchParams.q ?? "").trim().toLowerCase();
   const [{ data: profiles }, { data: auth }, { data: members }, { data: carRows }] = await Promise.all([
-    db.from("profiles").select("id, username, is_public, created_at").order("created_at", { ascending: false }),
+    db.from("profiles").select("id, username, is_public, is_beta_tester, created_at").order("created_at", { ascending: false }),
     db.auth.admin.listUsers({ perPage: 1000 }),
     db.from("memberships").select("user_id, status, comp_active, comp_until"),
     db.from("items").select("owner_id"),
@@ -27,7 +27,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: { q?:
         <div className="admin-row head"><span className="label">Collector</span><span className="label">Email</span><span className="label">Items</span><span className="label">Plan</span><span className="label">Joined</span></div>
         {rows.map((p) => (
           <Link key={p.id} href={`/admin/users/${p.id}`} className="admin-row">
-            <span>@{p.username}{!p.is_public && <span className="hint"> · private</span>}</span>
+            <span>@{p.username}{p.is_beta_tester && <span className="chip sale" style={{ marginLeft: 6 }}>Beta</span>}{!p.is_public && <span className="hint"> · private</span>}</span>
             <span className="hint">{email.get(p.id)}</span>
             <span className="num">{cars.get(p.id) ?? 0}</span>
             <span>{plan.get(p.id) ?? "Free"}</span>

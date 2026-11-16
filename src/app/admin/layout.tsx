@@ -6,7 +6,10 @@ export const metadata = { title: "Admin", robots: { index: false, follow: false 
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { db } = await requireAdmin();
-  const { count: openReports } = await db.from("reports").select("*", { count: "exact", head: true }).eq("status", "open");
+  const [{ count: openReports }, { count: openFeedback }] = await Promise.all([
+    db.from("reports").select("*", { count: "exact", head: true }).eq("status", "open"),
+    db.from("feedback").select("*", { count: "exact", head: true }).eq("status", "open"),
+  ]);
   return (
     <main className="wrap">
       <div className="head">
@@ -18,6 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <nav className="actions" aria-label="Admin sections">
         <Link className="btn small" href="/admin">Overview</Link>
         <Link className={`btn small${openReports ? " flag" : ""}`} href="/admin/reports">Reports{openReports ? ` (${openReports})` : ""}</Link>
+        <Link className={`btn small${openFeedback ? " primary" : ""}`} href="/admin/feedback">Feedback{openFeedback ? ` (${openFeedback})` : ""}</Link>
         <Link className="btn small" href="/admin/users">Users</Link>
         <Link className="btn small" href="/admin/items">Items</Link>
         <Link className="btn small" href="/admin/comments">Comments</Link>
