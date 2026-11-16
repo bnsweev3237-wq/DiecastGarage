@@ -34,12 +34,13 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { supabase, user } = await getUser();
-  const [{ data: me }, { data: isAdmin }] = user
+  const [{ data: me }, { data: isAdmin }, { count: unread }] = user
     ? await Promise.all([
         supabase.from("profiles").select("username, is_beta_tester").eq("id", user.id).single(),
         supabase.rpc("is_admin"),
+        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("read_at", null),
       ])
-    : [{ data: null }, { data: false }];
+    : [{ data: null }, { data: false }, { count: 0 }];
   return (
     <html lang="en">
       <head>
@@ -65,6 +66,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="nav-right">
               {user ? (
                 <>
+                  <Link className={unread ? "bell has-new" : "bell"} href="/notifications" aria-label={unread ? `Notifications, ${unread} new` : "Notifications"}>
+                    <span aria-hidden="true">🔔</span>{!!unread && <span className="bell-count">{unread > 99 ? "99+" : unread}</span>}
+                  </Link>
                   {me && <Link className="btn small" href={`/c/${me.username}`}>My page</Link>}
                   <Link className="btn small" href="/settings">Settings</Link>
                 </>

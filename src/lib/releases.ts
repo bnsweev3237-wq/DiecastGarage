@@ -6,11 +6,14 @@ export const releases: Release[] = [
   {
     version: "0.26",
     date: "2026-11-16",
-    title: "Beta feedback, password reset and Petroliana",
+    title: "Notifications, replies, beta feedback and more",
     changes: [
       "Beta testers have a 💬 Feedback button on every page to report bugs and share ideas. It notes which page you were on, so we can find the problem fast.",
       "Forgot your password? There's now a link on the sign-in page to get a reset email and choose a new one.",
       "New category: ⛽ Petroliana, for gas and oil signs, pump globes, oil cans and more.",
+      "Reply directly to comments. Replies show under the comment they answer.",
+      "Notifications: a 🔔 at the top shows how many new comments and replies you have. Click it to see them all.",
+      "Optional emails for notifications. Turn them on or off in Settings → Notifications.",
     ],
   },
   {

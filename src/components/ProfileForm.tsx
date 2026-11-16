@@ -18,6 +18,7 @@ type Props = {
   showLocation: boolean;
   commentsFrom: string;
   defaultCategory: string | null;
+  emailNotifications: boolean;
   showFollows: boolean;
   userId: string;
   username: string;
@@ -25,7 +26,7 @@ type Props = {
   links: Partial<Record<SocialKey, string | null>>;
 };
 
-export default function ProfileForm({ fullName, email, bio, isPublic, showEmail, showValues, location, showLocation, commentsFrom, showFollows, userId, username, avatarPath, links, defaultCategory }: Props) {
+export default function ProfileForm({ fullName, email, bio, isPublic, showEmail, showValues, location, showLocation, commentsFrom, showFollows, userId, username, avatarPath, links, defaultCategory, emailNotifications }: Props) {
   const [state, action] = useFormState<FormState, FormData>(updateProfile, undefined);
   return (
     <form action={action} className="card">
@@ -48,6 +49,11 @@ export default function ProfileForm({ fullName, email, bio, isPublic, showEmail,
           <CategoryOptions />
         </select>
         <span className="hint">The category menu is set to this when you add an item. You can still change it on each item.</span></div>
+
+      <h3 id="notifications">Notifications</h3>
+      <div className="field">
+        <label className="check" htmlFor="email_notifications"><input id="email_notifications" name="email_notifications" type="checkbox" defaultChecked={emailNotifications} /> Email me when someone comments on my collection or items, or replies to me</label>
+        <span className="hint">You&apos;ll always see them under the 🔔 at the top. Emails go to your sign-in address, at most one every 10 minutes.</span></div>
 
       <h3>Links</h3>
       <p className="hint">Shown on your public page. Paste a link or just type your username.</p>

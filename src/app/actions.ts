@@ -11,6 +11,7 @@ import { NETWORKS, normalizeSocial } from "@/lib/social";
 import { FREE_ITEM_LIMIT, FREE_PHOTO_LIMIT } from "@/lib/limits";
 import { REPORT_REASONS } from "@/lib/reports";
 import { checkFields, contentDbMessage } from "@/lib/content-rules";
+import { emailNotifications } from "@/lib/notify-email";
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
@@ -280,10 +281,12 @@ export async function addComment(_: FormState, f: FormData): Promise<FormState> 
   if (body.length > 1000) return { error: "Keep comments under 1,000 characters." };
   const blocked = checkFields([["comments", body]]);
   if (blocked) return { error: blocked };
-  const { error } = await supabase.from("comments").insert({
-    profile_id: str(f, "profile_id"), item_id: optStr(f, "item_id"), body,
-  });
-  if (error) return { error: contentDbMessage(error.message) ?? "Couldn't post your comment. Try again." };
+  const { data: posted, error } = await supabase.from("comments").insert({
+    profile_id: str(f, "profile_id"), item_id: optStr(f, "item_id"), parent_id: optStr(f, "parent_id"), body,
+  }).select("id").single();
+  if (error) return { error: contentDbMessage(error.message) ?? (error.message.includes("REPLY_WRONG_PAGE") ? "That comment isn't on this page anymore." : "Couldn't post your comment. Try again.") };
+  // Email the people this notified, if they asked for emails. Never blocks the comment.
+  try { await emailNotifications(posted.id); } catch { /* emails are best effort */ }
   revalidatePath(str(f, "path"));
   return { ok: "Posted" };
 }
@@ -324,6 +327,7 @@ export async function updateProfile(_: FormState, f: FormData): Promise<FormStat
       id: user.id,
       full_name: str(f, "full_name").slice(0, 100) || null,
       location: str(f, "location").slice(0, 60) || null,
+      email_notifications: f.get("email_notifications") === "on",
     }),
   ]);
   if (error || privateError) return { error: contentDbMessage((error ?? privateError)!.message) ?? "Couldn't save your profile. Try again." };

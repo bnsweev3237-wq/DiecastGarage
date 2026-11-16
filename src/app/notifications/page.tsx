@@ -1,0 +1,61 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import Avatar from "@/components/Avatar";
+import { getUser } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Notifications" };
+
+type Row = {
+  id: string; kind: string; item_id: string | null; read_at: string | null; created_at: string; comment_id: string;
+  actor: { username: string; avatar_path: string | null } | null; owner: { username: string } | null;
+  item: { title: string } | null; comment: { body: string } | null;
+};
+
+function ago(iso: string) {
+  const m = Math.round((Date.now() - Date.parse(iso)) / 60_000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m} min ago`;
+  if (m < 24 * 60) return `${Math.round(m / 60)} hr ago`;
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+export default async function Notifications() {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login?next=/notifications");
+  const { data } = await supabase.from("notifications")
+    .select("id, kind, item_id, read_at, created_at, comment_id, actor:profiles!notifications_actor_id_fkey(username, avatar_path), owner:profiles!notifications_profile_id_fkey(username), item:items(title), comment:comments(body)")
+    .eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
+  const rows = (data ?? []) as unknown as Row[];
+  // Opening this page counts as reading them; they stay highlighted this time so you can see what's new.
+  if (rows.some((r) => !r.read_at)) await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("user_id", user.id).is("read_at", null);
+
+  return (
+    <main className="wrap" style={{ maxWidth: 760 }}>
+      <div className="head">
+        <div><h1>Notifications</h1><p>Comments on your collection and replies to you. <Link href="/settings#notifications">Email settings</Link></p></div>
+      </div>
+      {rows.length ? (
+        <section className="notif-list">
+          {rows.map((n) => {
+            const actor = n.actor?.username ?? "someone";
+            const href = `/c/${n.owner?.username}${n.item_id ? `/${n.item_id}` : ""}#comment-${n.comment_id}`;
+            return (
+              <Link key={n.id} href={href} className={n.read_at ? "notif" : "notif unread"}>
+                <Avatar path={n.actor?.avatar_path ?? null} username={actor} size="small" />
+                <span className="notif-text">
+                  <span><b>@{actor}</b> {n.kind === "reply" ? "replied to your comment" : n.kind === "comment_item" ? <>commented on <b>{n.item?.title ?? "your item"}</b></> : "commented on your collection"}</span>
+                  {n.comment?.body && <span className="notif-quote">“{n.comment.body.slice(0, 160)}{n.comment.body.length > 160 ? "…" : ""}”</span>}
+                  <span className="hint">{ago(n.created_at)}</span>
+                </span>
+                {!n.read_at && <span className="notif-dot" aria-label="New" />}
+              </Link>
+            );
+          })}
+        </section>
+      ) : (
+        <div className="empty"><span className="empty-emoji" aria-hidden="true">🔔</span><h3>No notifications yet</h3><p>When someone comments on your collection or items, or replies to you, it shows up here.</p></div>
+      )}
+    </main>
+  );
+}
