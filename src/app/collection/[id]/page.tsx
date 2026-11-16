@@ -9,17 +9,20 @@ import { removeComp } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
 import { conditionLabel } from "@/lib/categories";
 import { certLabel, ebaySoldUrl, facebookUrl, money, searchTerms, signed, gainCost, leftOutExtras, valueOf, type Item, type Comp, type Purchase } from "@/lib/items";
+import { checkQueries } from "@/lib/report-error";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditItem({ params, searchParams }: { params: { id: string }; searchParams: { added?: string } }) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
-  const [{ data: car }, { data: me }, { data: membership }] = await Promise.all([
+  const loaded = await Promise.all([
     supabase.from("items").select("*, item_purchases(*), comps(*)").eq("id", params.id).eq("owner_id", user.id).maybeSingle(),
     supabase.from("profiles").select("username").eq("id", user.id).single(),
     supabase.from("memberships").select("status, comp_active, comp_until").eq("user_id", user.id).maybeSingle(),
   ]);
+  await checkQueries("Edit item", `/collection/${params.id}`, loaded, user.id);
+  const [{ data: car }, { data: me }, { data: membership }] = loaded;
   const member = isMember(membership);
   if (!car) notFound();
   const c = car as Item & { item_purchases: Purchase | null; comps: Comp[] };

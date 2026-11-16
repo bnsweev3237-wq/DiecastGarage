@@ -3,6 +3,7 @@ import { getUser } from "@/lib/supabase/server";
 import { type Item } from "@/lib/items";
 import CategoryOptions from "@/components/CategoryOptions";
 import { searchWords } from "@/lib/search";
+import { checkQueries } from "@/lib/report-error";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "For sale" };
@@ -15,7 +16,9 @@ export default async function ForSale({ searchParams }: { searchParams: { catego
     .eq("for_sale", true).eq("owner.is_public", true).order("created_at", { ascending: false }).limit(60);
   if (searchParams.category) query = query.eq("category", searchParams.category);
   for (const w of searchWords(searchParams.q)) query = query.ilike("search_text", `%${w}%`);
-  const { data } = await query;
+  const loadedOne = await query;
+  await checkQueries("For sale", "/for-sale", [loadedOne], undefined);
+  const { data } = loadedOne;
   const rows = (data ?? []) as Row[];
   return (
     <main className="wrap">

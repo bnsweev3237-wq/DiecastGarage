@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.33";
+export const HELP_UPDATED_FOR = "0.34";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -141,6 +141,14 @@ export const HELP: HelpSection[] = [
       "- **Your full name, what you paid and your gain or loss are always private.**",
       "- **Forgot your password?** Use the link on the [sign-in page](/login). Open the reset email in the same browser you asked from.",
       "- **Delete your account** at the bottom of Settings. It permanently deletes everything.",
+    ],
+  },
+  {
+    id: "trouble", emoji: "🔧", title: "If something isn't working",
+    body: [
+      "If a page runs into a problem, you'll see a **Something went wrong on this page** message. Our team is told automatically, with the page you were on, so you don't need to report it.",
+      "- Click **Try again**, or **Go to Explore** and try once more a little later.",
+      "- If it keeps happening, beta testers can add details with the **💬 Feedback** button, or use the Report link if it's about someone's content.",
     ],
   },
   {

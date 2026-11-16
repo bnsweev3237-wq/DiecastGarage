@@ -735,3 +735,7 @@ body > main { flex: 1 0 auto; width: 100%; }
 .help-section ul { padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
 .help-section { scroll-margin-top: 90px; }
 .bell span[aria-hidden] { font-weight: 900; font-family: var(--f-display); font-size: 18px; }
+
+/* admin errors */
+.error-item h3 { font-size: 17px; font-family: var(--f-body); font-weight: 800; overflow-wrap: anywhere; }
+.error-detail { margin: 0; padding: 10px 12px; background: var(--soft); border-radius: 8px; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 200px; overflow: auto; }

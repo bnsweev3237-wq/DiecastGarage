@@ -10,15 +10,18 @@ import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
 import { allPhotos, certLookupUrl, money, type Item } from "@/lib/items";
 import { categoryOf, conditionLabel } from "@/lib/categories";
+import { checkQueries } from "@/lib/report-error";
 
 export const dynamic = "force-dynamic";
 
 export default async function PublicItem({ params }: { params: { username: string; itemId: string } }) {
   const { supabase, user } = await getUser();
-  const { data } = await supabase.from("items").select("*, owner:profiles!cars_owner_id_fkey(id, username)").eq("id", params.itemId).maybeSingle();
+  const loadedOne = await supabase.from("items").select("*, owner:profiles!cars_owner_id_fkey(id, username)").eq("id", params.itemId).maybeSingle();
+  await checkQueries("Item page (item)", `/c/${params.username}/${params.itemId}`, [loadedOne], user?.id);
+  const { data } = loadedOne;
   const car = data as (Item & { owner: { id: string; username: string } }) | null;
   if (!car || car.owner.username !== params.username.toLowerCase()) notFound();
-  const [{ data: values }, { data: owner }, { data: location }, { data: myRating }, { data: mySave }] = await Promise.all([
+  const loaded = await Promise.all([
     supabase.rpc("item_values", { p_owner: car.owner_id }),
     supabase.from("profiles").select("show_values, show_location").eq("id", car.owner_id).single(),
     supabase.rpc("profile_location", { p_profile: car.owner_id }),
@@ -29,6 +32,8 @@ export default async function PublicItem({ params }: { params: { username: strin
       ? supabase.from("favorites").select("item_id").eq("item_id", car.id).eq("user_id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
+  await checkQueries("Item page", `/c/${params.username}/${params.itemId}`, loaded, user?.id);
+  const [{ data: values }, { data: owner }, { data: location }, { data: myRating }, { data: mySave }] = loaded;
   const sellerLocation = typeof location === "string" && (user?.id !== car.owner_id || owner?.show_location) ? location : null;
   const value = (values as { item_id: string; value: number }[] | null)?.find((v) => v.item_id === car.id)?.value;
   // Owners always get their values back, so only show it when their setting says others see it too.

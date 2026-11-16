@@ -185,3 +185,11 @@ export async function adminSetFeedbackStatus(f: FormData) {
     db.from("feedback").update({ status, status_changed_at: new Date().toISOString() }).eq("id", str(f, "id")));
   revalidatePath("/admin", "layout");
 }
+
+// Errors: mark one or all open errors resolved. If it happens again, it opens as a new error.
+export async function adminResolveErrors(f: FormData) {
+  const { db } = await requireAdmin();
+  const q = db.from("app_errors").update({ status: "resolved" }).eq("status", "open");
+  await (str(f, "all") === "1" ? q : q.eq("id", str(f, "id")));
+  revalidatePath("/admin", "layout");
+}

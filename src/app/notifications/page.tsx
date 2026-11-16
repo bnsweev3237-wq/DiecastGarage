@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import { getUser } from "@/lib/supabase/server";
+import { checkQueries } from "@/lib/report-error";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Notifications" };
@@ -24,9 +25,11 @@ function ago(iso: string) {
 export default async function Notifications() {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login?next=/notifications");
-  const { data } = await supabase.from("notifications")
+  const loadedOne = await supabase.from("notifications")
     .select("id, kind, item_id, read_at, created_at, comment_id, subject, message, stars, actor:profiles!notifications_actor_id_fkey(username, avatar_path), owner:profiles!notifications_profile_id_fkey(username), item:items(title), comment:comments(body)")
     .eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
+  await checkQueries("Notifications", "/notifications", [loadedOne], user.id);
+  const { data } = loadedOne;
   const rows = (data ?? []) as unknown as Row[];
   // Opening this page counts as reading them; they stay highlighted this time so you can see what's new.
   if (rows.some((r) => !r.read_at)) await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("user_id", user.id).is("read_at", null);

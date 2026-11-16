@@ -11,6 +11,7 @@ import { getUser } from "@/lib/supabase/server";
 import { FREE_ITEM_LIMIT, isMember } from "@/lib/limits";
 import { certLabel, money, signed, gainCost, valueOf, type Item, type ItemStatus, type Comp, type Purchase } from "@/lib/items";
 import { CATEGORIES, categoryOf, summary } from "@/lib/categories";
+import { checkQueries } from "@/lib/report-error";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "My collection" };
@@ -37,13 +38,15 @@ const VIEWS: { key: ItemStatus; label: string }[] = [
 export default async function MyCollection({ searchParams }: { searchParams: Params }) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login?next=/collection");
-  const [{ data }, { data: membership }, { data: me }, { data: snaps }] = await Promise.all([
+  const loaded = await Promise.all([
     supabase.from("items").select("*, item_purchases(*), comps(*)").eq("owner_id", user.id)
       .order("featured", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("memberships").select("status, comp_active, comp_until").eq("user_id", user.id).single(),
     supabase.from("profiles").select("username, is_public").eq("id", user.id).single(),
     supabase.from("collection_snapshots").select("day, value, cost").eq("owner_id", user.id).gte("day", new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10)).order("day"),
   ]);
+  await checkQueries("My collection", "/collection", loaded, user.id);
+  const [{ data }, { data: membership }, { data: me }, { data: snaps }] = loaded;
   const everything = (data ?? []) as Row[];
   const view: ItemStatus = VIEWS.some((v) => v.key === searchParams.status) ? (searchParams.status as ItemStatus) : "owned";
   const all = everything.filter((i) => i.status === view);

@@ -1,0 +1,16 @@
+{
+  "_about": "Shared by the app tests (tests/unit/content-rules.test.ts) and the database tests (tests/db/run.sh), so both rule sets are checked against the same examples.",
+  "blocked": {
+    "link": ["Visit mysite.com for more", "www.example.net", "https://x.y", "cards dot com", "ebay [.] com/itm", "shop at cardshop.store"],
+    "email": ["email me bob@gmail.com", "bob (at) gmail"],
+    "phone": ["Call 555-123-4567", "(312) 555 0199", "+1 312.555.0199", "text 3125550199"],
+    "payment": ["Venmo me", "pay via Cash App", "$cardking", "paypal f&f", "zelle only"],
+    "language": ["what the f*ck", "this is sh!t", "Assholes", "you bitch"]
+  },
+  "allowed": [
+    "1999 Pokémon Base Set Charizard 4/102", "1:24 #3 Goodwrench Monte Carlo", "PSA 10 cert 12345678", "St. Louis Cardinals 1982",
+    "Hot Wheels 2023 Mainline 123/250", "UPC 012345678905", "Jr. Dale Earnhardt", "Vol. 2 No. 3", "Polka dot comforter", "$25 shipped",
+    "Sold 1999-2003, model 1234", "Air Jordan 1 DZ5485-612", "Approx. 1950s", "Mr.T doll", "Box 3, shelf B", "Scunthorpe United",
+    "Moby Dick first edition", "Dick Trickle #8", "bastard sword", "shiitake", "Hancock", "spice rack", "flame retardant", "Cocker spaniel figurine"
+  ]
+}

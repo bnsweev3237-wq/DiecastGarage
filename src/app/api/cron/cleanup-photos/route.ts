@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { makeMissingThumbs } from "@/lib/thumbs";
+import { reportError } from "@/lib/report-error";
+import { runSiteCheck } from "@/lib/site-check";
 
 // Runs once a day (see vercel.json). Deletes photos that were uploaded over a day ago but never
 // saved to an item or profile, then makes small copies for photos that don't have one yet.
@@ -16,7 +18,7 @@ export async function GET(req: Request) {
 
   const db = createAdminClient();
   const { data, error } = await db.rpc("orphan_photos", { p_min_age: "1 day", p_limit: 1000 });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { await reportError({ source: "job", message: `Photo cleanup failed: ${error.message}`, path: "daily job" }); return NextResponse.json({ error: error.message }, { status: 500 }); }
 
   const byBucket = new Map<string, string[]>();
   for (const row of (data ?? []) as { bucket: string; name: string }[])
@@ -31,10 +33,13 @@ export async function GET(req: Request) {
     }
   }
   // Record each member's collection value for the Value over time chart.
-  const { data: snapshots } = await db.rpc("take_collection_snapshots");
+  const { data: snapshots, error: snapErr } = await db.rpc("take_collection_snapshots");
+  if (snapErr) await reportError({ source: "job", message: `Value snapshots failed: ${snapErr.message}`, path: "daily job" });
+  // Check the main public pages still load for visitors.
+  const siteCheck = await runSiteCheck();
   let thumbs: Awaited<ReturnType<typeof makeMissingThumbs>> | { error: string };
   try { thumbs = await makeMissingThumbs(db, { limit: 80, budgetMs: 40_000 }); }
   catch (e) { thumbs = { error: e instanceof Error ? e.message : "failed" }; }
-  console.log("daily job", { deleted, thumbs, snapshots });
-  return NextResponse.json({ deleted, thumbs, snapshots });
+  console.log("daily job", { deleted, thumbs, snapshots, siteCheck });
+  return NextResponse.json({ deleted, thumbs, snapshots, siteCheck });
 }

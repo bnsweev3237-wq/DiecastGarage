@@ -4,6 +4,7 @@ import NavLinks from "@/components/NavLinks";
 import Logo from "@/components/Logo";
 import { InstallBanner, ServiceWorker } from "@/components/InstallApp";
 import FeedbackButton from "@/components/FeedbackButton";
+import ErrorReporter from "@/components/ErrorReporter";
 import { getUser } from "@/lib/supabase/server";
 import { currentVersion } from "@/lib/releases";
 import { LEGAL_PAGES_LIVE } from "@/lib/legal-flags";
@@ -86,6 +87,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <InstallBanner />
         {me?.is_beta_tester && <FeedbackButton />}
         <ServiceWorker />
+        <ErrorReporter />
         <footer className="footer">
           <div className="footer-in">
             <span>theCollectorHQ · <span className="num">v{currentVersion}</span> test version</span>

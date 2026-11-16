@@ -13,6 +13,7 @@ import { getUser } from "@/lib/supabase/server";
 import { money, type Item } from "@/lib/items";
 import { CATEGORIES, categoryOf } from "@/lib/categories";
 import { matchesAll, searchWords } from "@/lib/search";
+import { checkQueries } from "@/lib/report-error";
 
 export const dynamic = "force-dynamic";
 
@@ -22,14 +23,16 @@ export async function generateMetadata({ params }: { params: { username: string 
 
 export default async function Collection({ params, searchParams }: { params: { username: string }; searchParams: { filter?: string; tag?: string; q?: string; category?: string; grails?: string } }) {
   const { supabase, user } = await getUser();
-  const { data: profile } = await supabase.from("profiles").select("*").eq("username", params.username.toLowerCase()).maybeSingle();
+  const loadedOne = await supabase.from("profiles").select("*").eq("username", params.username.toLowerCase()).maybeSingle();
+  await checkQueries("Collector page (profile)", `/c/${params.username}`, [loadedOne], user?.id);
+  const { data: profile } = loadedOne;
   if (!profile) notFound();
   const isOwner = user?.id === profile.id;
   // A profile reported by 5 people is hidden from others until an admin reviews it.
   const underReview = profile.under_review && !isOwner;
   const canView = (profile.is_public && !profile.under_review) || isOwner;
 
-  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }] = await Promise.all([
+  const loaded = await Promise.all([
     // Counts come from a function so they stay right even when some follow lists are private.
     supabase.rpc("follow_counts", { p_profile: profile.id }).single(),
     user ? supabase.from("follows").select("followee_id").eq("follower_id", user.id).eq("followee_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
@@ -41,6 +44,8 @@ export default async function Collection({ params, searchParams }: { params: { u
     user && !isOwner ? supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id).eq("blocked_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
     canView ? supabase.from("sets").select("id, name, category, is_public, set_entries(have)").eq("owner_id", profile.id).order("updated_at", { ascending: false }) : Promise.resolve({ data: [] }),
   ]);
+  await checkQueries("Collector page", `/c/${params.username}`, loaded, user?.id);
+  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }] = loaded;
   // Only public sets show here, so the owner sees what everyone else sees.
   const sets = summarize(((setRows ?? []) as Parameters<typeof summarize>[0]).filter((s) => s.is_public));
   const valueByCar = new Map(((values ?? []) as { item_id: string; value: number }[]).map((v) => [v.item_id, Number(v.value)]));
