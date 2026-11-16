@@ -568,8 +568,8 @@ body > main { flex: 1 0 auto; width: 100%; }
 .sort-toggle a.on { background: var(--ink); color: var(--bg); }
 
 /* beta feedback */
-.feedback { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 40;
-  display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.feedback { position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 40;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
 .feedback-fab { border: 2px solid #121212; background: var(--accent); color: #121212; font-weight: 800; font-size: 15px; padding: 10px 16px;
   border-radius: 999px; cursor: pointer; box-shadow: 4px 4px 0 #121212; }
 .feedback-fab:hover { transform: translateY(-2px); }
