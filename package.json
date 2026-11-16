@@ -1,7 +1,7 @@
 {
   "name": "thecollectorhq",
   "private": true,
-  "version": "0.33.0",
+  "version": "0.33.1",
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/check-help.mjs && next build",
