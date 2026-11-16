@@ -25,7 +25,7 @@ const fmt = (n: number | null) => (n ?? 0).toLocaleString("en-US");
 export default async function Explore({ searchParams }: { searchParams: { deleted?: string; category?: string; sort?: string } }) {
   const { supabase, user } = await getUser();
   const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
-  let itemsQuery = supabase.from("items").select("*, owner:profiles!inner(username, is_public)")
+  let itemsQuery = supabase.from("items").select("*, owner:profiles!cars_owner_id_fkey!inner(username, is_public)")
     .eq("owner.is_public", true).eq("status", "owned");
   // Top rated first by default: the weighted rating score, then newest. "Newest" sorts by date only.
   const newest = searchParams.sort === "new";
@@ -34,11 +34,11 @@ export default async function Explore({ searchParams }: { searchParams: { delete
   if (category) itemsQuery = itemsQuery.eq("category", category);
   const [{ data: items }, { data: collectors }, { count: itemCount }, { count: collectorCount }, { count: saleCount }] = await Promise.all([
     itemsQuery,
-    supabase.from("profiles").select("username, avatar_path, items(count)").eq("is_public", true).eq("under_review", false)
+    supabase.from("profiles").select("username, avatar_path, items!cars_owner_id_fkey(count)").eq("is_public", true).eq("under_review", false)
       .order("created_at", { ascending: false }).limit(12),
-    supabase.from("items").select("id, owner:profiles!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("is_hidden", false).eq("status", "owned"),
+    supabase.from("items").select("id, owner:profiles!cars_owner_id_fkey!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("is_hidden", false).eq("status", "owned"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_public", true).eq("under_review", false),
-    supabase.from("items").select("id, owner:profiles!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("for_sale", true).eq("is_hidden", false),
+    supabase.from("items").select("id, owner:profiles!cars_owner_id_fkey!inner(is_public)", { count: "exact", head: true }).eq("owner.is_public", true).eq("for_sale", true).eq("is_hidden", false),
   ]);
   const rows = (items ?? []) as Row[];
   const people = (collectors ?? []) as unknown as Collector[];

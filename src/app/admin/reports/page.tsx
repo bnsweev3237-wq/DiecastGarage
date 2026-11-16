@@ -21,7 +21,7 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
   for (const r of reports) groups.set(r.target_id, [...(groups.get(r.target_id) ?? []), r]);
   const ids = (t: string) => [...new Set(reports.filter((r) => r.target_type === t).map((r) => r.target_id))];
   const [{ data: cars }, { data: comments }, { data: profiles }] = await Promise.all([
-    db.from("items").select("id, title, description, photo_path, under_review, owner:profiles(id, username)").in("id", ids("item")),
+    db.from("items").select("id, title, description, photo_path, under_review, owner:profiles!cars_owner_id_fkey(id, username)").in("id", ids("item")),
     db.from("comments").select("id, body, item_id, under_review, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)").in("id", ids("comment")),
     db.from("profiles").select("id, username, bio, under_review").in("id", ids("profile")),
   ]);

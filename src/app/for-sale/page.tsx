@@ -11,7 +11,7 @@ type Row = Item & { owner: { username: string } | null };
 
 export default async function ForSale({ searchParams }: { searchParams: { category?: string; q?: string } }) {
   const { supabase } = await getUser();
-  let query = supabase.from("items").select("*, owner:profiles!inner(username, is_public)")
+  let query = supabase.from("items").select("*, owner:profiles!cars_owner_id_fkey!inner(username, is_public)")
     .eq("for_sale", true).eq("owner.is_public", true).order("created_at", { ascending: false }).limit(60);
   if (searchParams.category) query = query.eq("category", searchParams.category);
   for (const w of searchWords(searchParams.q)) query = query.ilike("search_text", `%${w}%`);

@@ -16,7 +16,7 @@ export default async function Feed() {
     .select("followee:profiles!follows_followee_id_fkey(id, username)").eq("follower_id", user.id);
   const people = (follows ?? []).map((f) => f.followee as unknown as { id: string; username: string });
   const { data } = people.length
-    ? await supabase.from("items").select("*, owner:profiles(username)")
+    ? await supabase.from("items").select("*, owner:profiles!cars_owner_id_fkey(username)")
         .in("owner_id", people.map((p) => p.id)).order("created_at", { ascending: false }).limit(60)
     : { data: [] };
   const rows = (data ?? []) as Row[];

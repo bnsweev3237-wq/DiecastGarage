@@ -7,7 +7,7 @@ import { photoUrl } from "@/lib/items";
 
 export default async function AdminCars() {
   const { db } = await requireAdmin();
-  const { data } = await db.from("items").select("id, title, photo_path, is_hidden, for_sale, created_at, owner:profiles(id, username)")
+  const { data } = await db.from("items").select("id, title, photo_path, is_hidden, for_sale, created_at, owner:profiles!cars_owner_id_fkey(id, username)")
     .order("created_at", { ascending: false }).limit(200);
   return (
     <section className="card">

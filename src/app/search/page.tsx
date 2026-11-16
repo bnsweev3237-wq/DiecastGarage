@@ -25,7 +25,7 @@ export default async function Search({ searchParams }: { searchParams: Params })
   let items: Row[] = [];
   let people: { username: string; avatar_path: string | null; bio: string | null }[] = [];
   if (searching) {
-    let q = supabase.from("items").select("*, owner:profiles!inner(username, is_public)")
+    let q = supabase.from("items").select("*, owner:profiles!cars_owner_id_fkey!inner(username, is_public)")
       .eq("owner.is_public", true).eq("is_hidden", false)
       .order("created_at", { ascending: false }).limit(60);
     for (const w of words) q = q.ilike("search_text", `%${w}%`);

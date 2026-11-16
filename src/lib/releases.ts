@@ -12,6 +12,7 @@ export const releases: Release[] = [
       "Items show their average collector rating and how many people rated them.",
       "Explore now shows top-rated items first, with a Newest option. Rankings use a weighted average, so a single 5-star rating can't jump an item straight to the top.",
       "Your own My rating on your items stays separate and is labelled Owner's rating.",
+      "Fix (0.24.1): Explore, item pages, For sale, Following and Search show items again.",
     ],
   },
   {

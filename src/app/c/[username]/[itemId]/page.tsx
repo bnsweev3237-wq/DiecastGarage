@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PublicItem({ params }: { params: { username: string; itemId: string } }) {
   const { supabase, user } = await getUser();
-  const { data } = await supabase.from("items").select("*, owner:profiles(id, username)").eq("id", params.itemId).maybeSingle();
+  const { data } = await supabase.from("items").select("*, owner:profiles!cars_owner_id_fkey(id, username)").eq("id", params.itemId).maybeSingle();
   const car = data as (Item & { owner: { id: string; username: string } }) | null;
   if (!car || car.owner.username !== params.username.toLowerCase()) notFound();
   const [{ data: values }, { data: owner }, { data: location }, { data: myRating }] = await Promise.all([
