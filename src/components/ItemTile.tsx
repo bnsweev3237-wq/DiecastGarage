@@ -29,7 +29,9 @@ export default function ItemTile({ item, owner, value }: Props) {
       <div className="body">
         <div className="car-title">{item.title}{item.quantity > 1 && <span className="qty"> ×{item.quantity}</span>}</div>
         {line && <div className="specline">{line}</div>}
-        {item.rating && <Stars value={item.rating} small />}
+        {item.rating_count > 0 && (
+          <div className="community-rating"><Stars value={Math.round(Number(item.rating_avg))} small /> <b className="num">{Number(item.rating_avg).toFixed(1)}</b> <span className="hint">({item.rating_count})</span></div>
+        )}
         {item.is_hidden && <div className="meta"><span className="chip box">Hidden</span></div>}
         {value != null && item.status === "owned" && <div className="by">Est. value <span className="num">{money(value, 2)}</span></div>}
         {owner && <div className="by">@{owner.username}</div>}

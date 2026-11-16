@@ -18,6 +18,9 @@ export type Item = {
   created_at: string;
   updated_at: string;
   under_review?: boolean;
+  rating_count: number;
+  rating_avg: number | null;
+  rating_score: number;
   status: ItemStatus;
   featured: boolean;
   rating: number | null;

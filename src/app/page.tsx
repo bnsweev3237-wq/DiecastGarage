@@ -22,11 +22,15 @@ const STICKERS = [
 
 const fmt = (n: number | null) => (n ?? 0).toLocaleString("en-US");
 
-export default async function Explore({ searchParams }: { searchParams: { deleted?: string; category?: string } }) {
+export default async function Explore({ searchParams }: { searchParams: { deleted?: string; category?: string; sort?: string } }) {
   const { supabase, user } = await getUser();
   const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
   let itemsQuery = supabase.from("items").select("*, owner:profiles!inner(username, is_public)")
-    .eq("owner.is_public", true).eq("status", "owned").order("created_at", { ascending: false }).limit(24);
+    .eq("owner.is_public", true).eq("status", "owned");
+  // Top rated first by default: the weighted rating score, then newest. "Newest" sorts by date only.
+  const newest = searchParams.sort === "new";
+  itemsQuery = (newest ? itemsQuery : itemsQuery.order("rating_score", { ascending: false }))
+    .order("created_at", { ascending: false }).limit(24);
   if (category) itemsQuery = itemsQuery.eq("category", category);
   const [{ data: items }, { data: collectors }, { count: itemCount }, { count: collectorCount }, { count: saleCount }] = await Promise.all([
     itemsQuery,
@@ -83,7 +87,7 @@ export default async function Explore({ searchParams }: { searchParams: { delete
         <nav className="cats" aria-label="Browse by category">
           <Link className={!category ? "on" : undefined} href="/"><span className="cat-emoji">🔥</span>Everything</Link>
           {[...(picked && picked.group !== "popular" ? [picked] : []), ...categoriesIn("popular")].map((c) => (
-            <Link key={c.key} className={category === c.key ? "on" : undefined} href={`/?category=${c.key}`}>
+            <Link key={c.key} className={category === c.key ? "on" : undefined} href={`/?category=${c.key}${newest ? "&sort=new" : ""}`}>
               <span className="cat-emoji">{c.emoji}</span>{c.label}
             </Link>
           ))}
@@ -91,8 +95,11 @@ export default async function Explore({ searchParams }: { searchParams: { delete
         </nav>
 
         <div className="sec-head">
-          <h2>{picked ? <>{picked.emoji} {picked.label}</> : "Just added"}</h2>
-          <Link href="/for-sale">Shop items for sale →</Link>
+          <h2>{picked ? <>{picked.emoji} {picked.label}</> : newest ? "Just added" : "Top rated"}</h2>
+          <nav className="sort-toggle" aria-label="Sort">
+            <Link className={!newest ? "on" : undefined} href={category ? `/?category=${category}` : "/"}>★ Top rated</Link>
+            <Link className={newest ? "on" : undefined} href={category ? `/?category=${category}&sort=new` : "/?sort=new"}>Newest</Link>
+          </nav>
         </div>
         {rows.length ? (
           <section className="gallery" aria-label="Recently added items">

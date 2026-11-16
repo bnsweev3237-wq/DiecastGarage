@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.24",
+    date: "2026-11-16",
+    title: "Rate other collectors' items",
+    changes: [
+      "Rate any other collector's item from 1 to 5 stars on its page. Click your star again to take it back, or pick another to change it.",
+      "Items show their average collector rating and how many people rated them.",
+      "Explore now shows top-rated items first, with a Newest option. Rankings use a weighted average, so a single 5-star rating can't jump an item straight to the top.",
+      "Your own My rating on your items stays separate and is labelled Owner's rating.",
+    ],
+  },
+  {
     version: "0.23",
     date: "2026-11-15",
     title: "Safer community",

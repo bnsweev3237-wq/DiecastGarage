@@ -204,6 +204,27 @@ export async function removeComp(f: FormData) {
   revalidatePath("/collection");
 }
 
+// Rate someone else's item from 1 to 5 stars, or 0 to take your rating back.
+// The database checks who may rate and keeps the item's totals (supabase/migrations/0017_ratings.sql).
+export async function rateItem(f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) return { error: "Sign in to rate items." };
+  const itemId = str(f, "item_id");
+  const stars = Math.round(Number(str(f, "stars")));
+  const { error } = stars >= 1 && stars <= 5
+    ? await supabase.from("item_ratings").upsert({ item_id: itemId, rater_id: user.id, stars })
+    : await supabase.from("item_ratings").delete().eq("item_id", itemId).eq("rater_id", user.id);
+  if (error) return {
+    error: error.message.includes("RATING_OWN_ITEM") ? "You can't rate your own items."
+      : error.message.includes("RATE_LIMIT_RATINGS") ? "You've rated a lot of items today. Try again tomorrow."
+      : error.message.includes("BLOCKED") || error.message.includes("RATING_NOT_ALLOWED") ? "You can't rate this item."
+      : "Couldn't save your rating. Try again.",
+  };
+  revalidatePath(str(f, "path"));
+  revalidatePath("/");
+  return { ok: stars ? "Thanks for rating!" : "Rating removed" };
+}
+
 // Blocking: the blocked collector can't comment on your pages or follow you, and you stop seeing their
 // comments. They aren't told. Enforced in the database (supabase/migrations/0016_moderation.sql).
 export async function blockUser(f: FormData) {
