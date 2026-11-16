@@ -191,6 +191,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
         <section className="list">
           <div className="row headrow">
             <span className="label">Item</span>
+            <span className="label c">Box</span>
             <span className="label r">{view === "wishlist" ? "" : "Cost"}</span>
             <span className="label r">{view === "sold" ? "Sold for" : view === "wishlist" ? "Going for" : "Est. value"}</span>
             <span className="label r">{view === "sold" ? "Profit" : view === "wishlist" ? "" : "Gain / loss"}</span>
@@ -215,6 +216,10 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
                       {(sort === "added" || sort === "oldest") && <span className="hint">Added {shortDate(c.created_at)}</span>}
                     </div>
                   </div>
+                </div>
+                <div className="c" title={categoryOf(c.category).packagingLabel}>
+                  <span className="label mlabel">Box</span>
+                  {c.in_package ? <span className="box-yes" aria-label={`Yes: ${categoryOf(c.category).packagingLabel}`}>✓</span> : <span className="box-no" aria-label="No">—</span>}
                 </div>
                 {!member ? <>
                   {[0, 1, 2].map((k) => <div key={k} className="r"><span className="label mlabel">{k === 0 ? "Cost" : k === 1 ? "Value" : "Gain"}</span>{view === "wishlist" && k !== 1 ? null : <span className="lock-cell" title="Members">🔒</span>}</div>)}

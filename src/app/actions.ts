@@ -113,6 +113,7 @@ function parseItem(f: FormData, userId: string, member: boolean, extraPhotosBefo
       include_shipping: f.get("include_shipping") === "on",
       include_tax: f.get("include_tax") === "on",
       include_fees: f.get("include_fees") === "on",
+      condition_adjustment: (() => { const n = num(f, "condition_adjustment"); return n == null ? null : Math.min(95, n); })(),
     },
   };
 }

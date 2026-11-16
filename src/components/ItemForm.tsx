@@ -149,6 +149,11 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
           </>}
           <div className="field"><label className="label" htmlFor="manual_value">{status === "wishlist" ? "Target price ($)" : "Your value ($)"}{!member && <MembersBadge />}</label>
             <input id="manual_value" name="manual_value" type="number" min="0" step="0.01" inputMode="decimal" defaultValue={purchase?.manual_value ?? ""} placeholder="optional override" /></div>
+          {status !== "wishlist" && (
+            <div className="field"><label className="label" htmlFor="condition_adjustment">Condition adjustment (%)</label>
+              <input id="condition_adjustment" name="condition_adjustment" type="number" min="0" max="95" step="1" inputMode="numeric" defaultValue={purchase?.condition_adjustment ?? ""} placeholder="e.g. 15" />
+              <span className="hint">Takes this percent off the sold-listing estimate for wear, damage or missing parts. Not used when you enter your own value.</span></div>
+          )}
           <div className="field"><label className="label" htmlFor="search_terms">Search words for sold listings</label>
             <input id="search_terms" name="search_terms" maxLength={200} defaultValue={item?.search_terms ?? ""} placeholder="Uses the name and details if blank" /></div>
         </div>

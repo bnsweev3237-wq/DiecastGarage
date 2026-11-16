@@ -51,7 +51,7 @@ export default async function EditItem({ params, searchParams }: { params: { id:
             <h3>{sold ? "Your sale" : c.status === "wishlist" ? "What it's going for" : "Estimated value"}</h3>
             <div className="est">
               {sold ? <div><span className="label">Sold for</span><div className="v">{soldFor != null ? money(soldFor, 2) : "—"}</div></div>
-                : <div><span className="label">{v?.manual ? (c.status === "wishlist" ? "Target price" : "Your value") : "Median sold"}</span><div className="v">{v ? money(v.value, 2) : "—"}</div></div>}
+                : <div><span className="label">{v?.manual ? (c.status === "wishlist" ? "Target price" : "Your value") : v?.adjustment ? "After condition" : "Median sold"}</span><div className="v">{v ? money(v.value, 2) : "—"}</div></div>}
               {c.status !== "wishlist" && <div><span className="label">{extras ? "Cost" : "Paid"}</span><div className="v">{cost != null ? money(cost, 2) : "—"}</div></div>}
               {c.status !== "wishlist" && <div><span className="label">{sold ? "Profit" : "Gain / loss"}</span><div className={`v ${gain == null ? "" : gain >= 0 ? "up" : "down"}`}>{gain == null ? "—" : signed(Math.round(gain))}</div></div>}
             </div>
@@ -59,6 +59,9 @@ export default async function EditItem({ params, searchParams }: { params: { id:
             {c.status !== "wishlist" && leftOut.length > 0 && <p className="hint">Not counted in {sold ? "profit" : "gain or loss"}: {leftOut.map((x) => `${money(x.amount, 2)} ${x.label}`).join(", ")}. Tick “Include in gain/loss calculations” on the item to count {leftOut.length > 1 ? "them" : "it"}.</p>}
             {(purchase?.storage_location || purchase?.acquired_from) && (
               <p className="hint">{purchase?.acquired_from && <>Got it from {purchase.acquired_from}. </>}{purchase?.storage_location && <>Stored in {purchase.storage_location}.</>}</p>
+            )}
+            {v && !v.manual && v.adjustment > 0 && v.est && (
+              <p className="hint">Median sold {money(v.est.median, 2)} − {v.adjustment}% condition adjustment = <b>{money(v.value, 2)}</b>.</p>
             )}
             <p className="hint">
               {v?.est

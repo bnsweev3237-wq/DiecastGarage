@@ -51,6 +51,7 @@ export type Purchase = {
   acquired_from: string | null; storage_location: string | null;
   sold_price: number | null; sold_at: string | null;
   include_shipping: boolean; include_tax: boolean; include_fees: boolean;
+  condition_adjustment: number | null;
 };
 
 // The extras a collector can choose to count toward gain or loss and profit. All are off by default,
@@ -153,10 +154,14 @@ export function estimate(comps: Comp[]) {
   return { median, low: prices[0], high: prices[prices.length - 1], n: use.length, olderOnly: !recent.length };
 }
 
+// The item's value: your own value if you typed one, otherwise the sold-listing estimate minus your
+// condition adjustment (the percent to take off for wear, damage or missing parts). Same rule as
+// item_values() in supabase/migrations/0024_condition_adjustment.sql.
 export function valueOf(purchase: Purchase | null, comps: Comp[]) {
-  if (purchase?.manual_value != null) return { value: Number(purchase.manual_value), manual: true, est: estimate(comps) };
+  const adjustment = Number(purchase?.condition_adjustment ?? 0);
+  if (purchase?.manual_value != null) return { value: Number(purchase.manual_value), manual: true, est: estimate(comps), adjustment: 0 };
   const est = estimate(comps);
-  return est ? { value: est.median, manual: false, est } : null;
+  return est ? { value: est.median * (1 - adjustment / 100), manual: false, est, adjustment } : null;
 }
 
 // What to search for on eBay and Facebook when looking up sold listings.

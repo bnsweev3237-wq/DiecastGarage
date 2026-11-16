@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.29",
+    date: "2026-11-16",
+    title: "Box column and condition adjustment",
+    changes: [
+      "My collection has a Box column showing which items are in their original box or packaging.",
+      "Members can set a condition adjustment on an item: a percent taken off the sold-listing estimate for wear, damage or missing parts. Your gain or loss and totals use the adjusted value.",
+    ],
+  },
+  {
     version: "0.28",
     date: "2026-11-16",
     title: "Notices from the team",
