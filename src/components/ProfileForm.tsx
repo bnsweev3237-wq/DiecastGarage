@@ -4,6 +4,7 @@ import { updateProfile, type FormState } from "@/app/actions";
 import SubmitButton from "./SubmitButton";
 import FormMessage from "./FormMessage";
 import AvatarInput from "./AvatarInput";
+import CategoryOptions from "./CategoryOptions";
 import { NETWORKS, type SocialKey } from "@/lib/social";
 
 type Props = {
@@ -16,6 +17,7 @@ type Props = {
   location: string | null;
   showLocation: boolean;
   commentsFrom: string;
+  defaultCategory: string | null;
   showFollows: boolean;
   userId: string;
   username: string;
@@ -23,7 +25,7 @@ type Props = {
   links: Partial<Record<SocialKey, string | null>>;
 };
 
-export default function ProfileForm({ fullName, email, bio, isPublic, showEmail, showValues, location, showLocation, commentsFrom, showFollows, userId, username, avatarPath, links }: Props) {
+export default function ProfileForm({ fullName, email, bio, isPublic, showEmail, showValues, location, showLocation, commentsFrom, showFollows, userId, username, avatarPath, links, defaultCategory }: Props) {
   const [state, action] = useFormState<FormState, FormData>(updateProfile, undefined);
   return (
     <form action={action} className="card">
@@ -38,6 +40,14 @@ export default function ProfileForm({ fullName, email, bio, isPublic, showEmail,
       <div className="field"><label className="label" htmlFor="bio">About you</label>
         <textarea id="bio" name="bio" maxLength={500} defaultValue={bio ?? ""} placeholder="What you collect, favorite drivers, years you're hunting…" />
         <span className="hint">Shown on your public page.</span></div>
+
+      <h3>Adding items</h3>
+      <div className="field"><label className="label" htmlFor="default_category">Start new items in this category</label>
+        <select id="default_category" name="default_category" defaultValue={defaultCategory ?? ""}>
+          <option value="">No preference (Trading cards)</option>
+          <CategoryOptions />
+        </select>
+        <span className="hint">The category menu is set to this when you add an item. You can still change it on each item.</span></div>
 
       <h3>Links</h3>
       <p className="hint">Shown on your public page. Paste a link or just type your username.</p>

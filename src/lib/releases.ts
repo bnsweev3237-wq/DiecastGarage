@@ -4,6 +4,14 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.25",
+    date: "2026-11-16",
+    title: "Your default category",
+    changes: [
+      "Pick the category new items start in, under Settings → Adding items. The category menu is set to it every time you add an item, and you can still change it per item.",
+    ],
+  },
+  {
     version: "0.24",
     date: "2026-11-16",
     title: "Rate other collectors' items",

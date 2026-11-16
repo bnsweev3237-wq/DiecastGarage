@@ -301,6 +301,7 @@ export async function updateProfile(_: FormState, f: FormData): Promise<FormStat
       show_location: f.get("show_location") === "on",
       show_follows: f.get("show_follows") === "on",
       comments_from: ["everyone", "following", "nobody"].includes(str(f, "comments_from")) ? str(f, "comments_from") : "everyone",
+      default_category: CATEGORIES.some((c) => c.key === str(f, "default_category")) ? str(f, "default_category") : null,
     }).eq("id", user.id),
     supabase.from("profile_private").upsert({
       id: user.id,
