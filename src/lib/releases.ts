@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.30",
+    date: "2026-11-16",
+    title: "Faster adding, bulk edit, saved items and more notifications",
+    changes: [
+      "＋ Add another like this: start a new item from one you already have, with all its details filled in.",
+      "Bulk edit: tick items in My collection and add or remove tags, move them to a category, set where they're stored, hide or show them, or mark them boxed, all at once.",
+      "♡ Save other collectors' items to your private Saved list, from My collection.",
+      "New notifications: when someone follows you, rates one of your items, or when a collector you follow adds new items.",
+    ],
+  },
+  {
     version: "0.29",
     date: "2026-11-16",
     title: "Box column and condition adjustment",

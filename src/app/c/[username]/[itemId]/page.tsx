@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Comments from "@/components/Comments";
 import Gallery from "@/components/Gallery";
 import RateItem from "@/components/RateItem";
+import SaveButton from "@/components/SaveButton";
 import { Stars } from "@/components/Stars";
 import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
@@ -17,12 +18,15 @@ export default async function PublicItem({ params }: { params: { username: strin
   const { data } = await supabase.from("items").select("*, owner:profiles!cars_owner_id_fkey(id, username)").eq("id", params.itemId).maybeSingle();
   const car = data as (Item & { owner: { id: string; username: string } }) | null;
   if (!car || car.owner.username !== params.username.toLowerCase()) notFound();
-  const [{ data: values }, { data: owner }, { data: location }, { data: myRating }] = await Promise.all([
+  const [{ data: values }, { data: owner }, { data: location }, { data: myRating }, { data: mySave }] = await Promise.all([
     supabase.rpc("item_values", { p_owner: car.owner_id }),
     supabase.from("profiles").select("show_values, show_location").eq("id", car.owner_id).single(),
     supabase.rpc("profile_location", { p_profile: car.owner_id }),
     user && user.id !== car.owner_id
       ? supabase.from("item_ratings").select("stars").eq("item_id", car.id).eq("rater_id", user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    user && user.id !== car.owner_id
+      ? supabase.from("favorites").select("item_id").eq("item_id", car.id).eq("user_id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
   const sellerLocation = typeof location === "string" && (user?.id !== car.owner_id || owner?.show_location) ? location : null;
@@ -37,7 +41,9 @@ export default async function PublicItem({ params }: { params: { username: strin
     <main className="wrap">
       <div className="head">
         <div><Link href={`/c/${car.owner.username}`}>← @{car.owner.username}&apos;s collection</Link><h1>{car.title}</h1></div>
-        {isOwner && <Link className="btn" href={`/collection/${car.id}`}>Edit item</Link>}
+        {isOwner ? <Link className="btn" href={`/collection/${car.id}`}>Edit item</Link>
+          : user ? <SaveButton itemId={car.id} saved={!!mySave} />
+          : <Link className="btn small" href={`/login?next=${encodeURIComponent(path)}`}>♡ Save</Link>}
       </div>
       {car.is_hidden && <p className="notice">This item is hidden. Only you can see this page.</p>}
       {car.under_review && <p className="notice">This item is hidden from other collectors while our team reviews reports about it.</p>}

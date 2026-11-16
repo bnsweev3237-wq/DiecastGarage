@@ -106,6 +106,8 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
         </div>
         {atLimit ? <Link className="btn flag" href="/settings#membership">Become a member to add more</Link>
           : <div className="actions">
+              <Link className="btn" href="/saved">♥ Saved</Link>
+              <Link className="btn" href="/collection/bulk">Bulk edit</Link>
               <Link className="btn" href="/collection/new?status=wishlist">+ Wishlist</Link>
               <Link className="btn primary" href="/collection/new">+ Add an item</Link>
             </div>}

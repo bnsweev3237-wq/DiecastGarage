@@ -242,6 +242,63 @@ export async function voteComment(f: FormData): Promise<FormState> {
   return { ok: "Voted" };
 }
 
+// Change several of your items at once from the Bulk edit page. Only fields you fill in change.
+export async function bulkEditItems(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const ids = f.getAll("ids").map(String).filter(Boolean).slice(0, 500);
+  if (!ids.length) return { error: "Tick at least one item." };
+  const addTags = tagList(str(f, "add_tags"));
+  const removeTag = str(f, "remove_tag").toLowerCase();
+  const category = CATEGORIES.some((c) => c.key === str(f, "category")) ? str(f, "category") : null;
+  const hidden = str(f, "hidden"); // "", "yes" or "no"
+  const box = str(f, "box");
+  const storage = str(f, "storage_location").slice(0, 100);
+  const clearStorage = f.get("clear_storage") === "on";
+  const blocked = checkFields([["tags", addTags.join(", ")]]);
+  if (blocked) return { error: blocked };
+  if (!addTags.length && !removeTag && !category && !hidden && !box && !storage && !clearStorage)
+    return { error: "Choose at least one change to make." };
+
+  const { data: rows } = await supabase.from("items").select("id, tags").eq("owner_id", user.id).in("id", ids);
+  let changed = 0;
+  for (const r of rows ?? []) {
+    const update: Record<string, unknown> = {};
+    if (addTags.length || removeTag) {
+      const kept = (r.tags as string[]).filter((t) => t.toLowerCase() !== removeTag);
+      const seen = new Set(kept.map((t) => t.toLowerCase()));
+      update.tags = [...kept, ...addTags.filter((t) => !seen.has(t.toLowerCase()))].slice(0, MAX_TAGS);
+    }
+    if (category) update.category = category;
+    if (hidden) update.is_hidden = hidden === "yes";
+    if (box) update.in_package = box === "yes";
+    if (Object.keys(update).length) {
+      const { error } = await supabase.from("items").update(update).eq("id", r.id).eq("owner_id", user.id);
+      if (error) return { error: contentDbMessage(error.message) ?? `Stopped after ${changed} items: couldn't save one. Try again.` };
+    }
+    if (storage || clearStorage)
+      await supabase.from("item_purchases").upsert({ item_id: r.id, storage_location: clearStorage ? null : storage });
+    changed++;
+  }
+  revalidatePath("/collection");
+  return { ok: `Updated ${changed} item${changed === 1 ? "" : "s"}.` };
+}
+
+// Save or unsave someone else's item to your private Saved list.
+export async function toggleFavorite(f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) return { error: "Sign in to save items." };
+  const itemId = str(f, "item_id");
+  const { error } = f.get("saved") === "1"
+    ? await supabase.from("favorites").delete().eq("user_id", user.id).eq("item_id", itemId)
+    : await supabase.from("favorites").insert({ item_id: itemId });
+  if (error && !error.message.includes("duplicate")) return {
+    error: error.message.includes("FAVORITE_OWN_ITEM") ? "This is your own item." : error.message.includes("FAVORITE_LIMIT") ? "Your Saved list is full (2,000 items)." : "Couldn't save that. Try again.",
+  };
+  revalidatePath("/saved");
+  return { ok: f.get("saved") === "1" ? "Removed" : "Saved" };
+}
+
 // Rate someone else's item from 1 to 5 stars, or 0 to take your rating back.
 // The database checks who may rate and keeps the item's totals (supabase/migrations/0017_ratings.sql).
 export async function rateItem(f: FormData): Promise<FormState> {

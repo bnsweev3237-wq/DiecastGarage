@@ -12,21 +12,23 @@ import FormMessage from "./FormMessage";
 import { MembersBadge, MembersNote } from "./MembersOnly";
 import { FREE_PHOTO_LIMIT } from "@/lib/limits";
 
-type Props = { userId: string; member: boolean; item?: Item; purchase?: Purchase | null; defaultCategory?: string; defaultStatus?: string };
+// copyFrom: start a new item with another item's details ("Add another like this"). Photos aren't copied.
+type Props = { userId: string; member: boolean; item?: Item; copyFrom?: Item; purchase?: Purchase | null; defaultCategory?: string; defaultStatus?: string };
 
-export default function ItemForm({ userId, member, item, purchase, defaultCategory, defaultStatus }: Props) {
+export default function ItemForm({ userId, member, item, copyFrom, purchase, defaultCategory, defaultStatus }: Props) {
+  const src = item ?? copyFrom;
   const isNew = !item;
   const [state, action] = useFormState<FormState, FormData>(isNew ? createItem : updateItem, undefined);
-  const [category, setCategory] = useState(item?.category ?? defaultCategory ?? "cards");
-  const [status, setStatus] = useState<ItemStatus>(item?.status ?? (STATUSES.some((s) => s.key === defaultStatus) ? (defaultStatus as ItemStatus) : "owned"));
-  const [certified, setCertified] = useState(item?.is_certified ?? false);
-  const [certType, setCertType] = useState(item?.cert_type ?? "graded");
+  const [category, setCategory] = useState(src?.category ?? defaultCategory ?? "cards");
+  const [status, setStatus] = useState<ItemStatus>(src?.status ?? (STATUSES.some((s) => s.key === defaultStatus) ? (defaultStatus as ItemStatus) : "owned"));
+  const [certified, setCertified] = useState(src?.is_certified ?? false);
+  const [certType, setCertType] = useState(src?.cert_type ?? "graded");
   const [forSale, setForSale] = useState(item?.for_sale ?? false);
   const [ebay, setEbay] = useState(item?.ebay_url ?? "");
   const ebayBad = forSale && ebay.trim() !== "" && !isEbayUrl(ebay);
-  const [title, setTitle] = useState(item?.title ?? "");
+  const [title, setTitle] = useState(src?.title ?? "");
   const cat = categoryOf(category);
-  const attrs = item?.attributes ?? {};
+  const attrs = src?.attributes ?? {};
   const owned = status === "owned";
 
   return (
@@ -56,9 +58,9 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
           <input id="title" name="title" required maxLength={160} value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="What is it? e.g. 1999 Pokémon Base Set Charizard" /></div>
         <div className="field"><label className="label" htmlFor="brand">{cat.brandLabel}</label>
-          <input id="brand" name="brand" maxLength={60} defaultValue={item?.brand ?? ""} /></div>
+          <input id="brand" name="brand" maxLength={60} defaultValue={src?.brand ?? ""} /></div>
         <div className="field"><label className="label" htmlFor="year">Year</label>
-          <input id="year" name="year" maxLength={12} inputMode="numeric" defaultValue={item?.year ?? ""} placeholder="1999" /></div>
+          <input id="year" name="year" maxLength={12} inputMode="numeric" defaultValue={src?.year ?? ""} placeholder="1999" /></div>
 
         {/* Category-specific details. The key on the wrapper resets these inputs when the category changes. */}
         <div className="grid2 span-all" key={category}>
@@ -66,23 +68,23 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
             <div className="field" key={f.key}>
               <label className="label" htmlFor={`a_${f.key}`}>{f.label}</label>
               <input id={`a_${f.key}`} name={`a_${f.key}`} maxLength={100} list={f.options ? `opts_${f.key}` : undefined}
-                defaultValue={item?.category === category ? attrs[f.key] ?? "" : ""} placeholder={f.placeholder} />
+                defaultValue={src?.category === category ? attrs[f.key] ?? "" : ""} placeholder={f.placeholder} />
               {f.options && <datalist id={`opts_${f.key}`}>{f.options.map((o) => <option key={o} value={o} />)}</datalist>}
             </div>
           ))}
         </div>
 
         <div className="field"><label className="label" htmlFor="condition">Condition</label>
-          <select id="condition" name="condition" defaultValue={item?.condition ?? ""}>
+          <select id="condition" name="condition" defaultValue={src?.condition ?? ""}>
             <option value="">Not set</option>
             {CONDITIONS.map(([k, label]) => <option key={k} value={k}>{label}</option>)}
           </select></div>
         <div className="field" style={{ justifyContent: "flex-end" }}>
-          <label className="check" htmlFor="in_package"><input id="in_package" name="in_package" type="checkbox" defaultChecked={item?.in_package ?? false} /> {cat.packagingLabel}</label></div>
+          <label className="check" htmlFor="in_package"><input id="in_package" name="in_package" type="checkbox" defaultChecked={src?.in_package ?? false} /> {cat.packagingLabel}</label></div>
         <div className="field"><label className="label" htmlFor="quantity">Quantity</label>
-          <input id="quantity" name="quantity" type="number" min="1" max="9999" step="1" inputMode="numeric" defaultValue={item?.quantity ?? 1} /></div>
+          <input id="quantity" name="quantity" type="number" min="1" max="9999" step="1" inputMode="numeric" defaultValue={src?.quantity ?? 1} /></div>
         <div className="field"><label className="label" htmlFor="edition">Edition or serial number</label>
-          <input id="edition" name="edition" maxLength={60} defaultValue={item?.edition ?? ""} placeholder="#45 of 500, 1st edition" /></div>
+          <input id="edition" name="edition" maxLength={60} defaultValue={src?.edition ?? ""} placeholder="#45 of 500, 1st edition" /></div>
       </div>
 
       <div className="certbox">
@@ -98,13 +100,13 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
               </div>
             </div>
             <div className="field"><label className="label" htmlFor="cert_by">{certType === "coa" ? "COA issued by" : "Graded by"}</label>
-              <input id="cert_by" name="cert_by" maxLength={60} list={certType === "coa" ? "coa_issuers" : "graders"} defaultValue={item?.cert_by ?? ""}
+              <input id="cert_by" name="cert_by" maxLength={60} list={certType === "coa" ? "coa_issuers" : "graders"} defaultValue={src?.cert_by ?? ""}
                 placeholder={certType === "coa" ? "PSA/DNA, JSA, Beckett" : "PSA, BGS, CGC, PCGS"} />
               <datalist id="graders">{GRADERS.map((g) => <option key={g} value={g} />)}</datalist>
               <datalist id="coa_issuers">{COA_ISSUERS.map((g) => <option key={g} value={g} />)}</datalist></div>
             {certType === "graded" && (
               <div className="field"><label className="label" htmlFor="cert_grade">Grade</label>
-                <input id="cert_grade" name="cert_grade" maxLength={20} defaultValue={item?.cert_grade ?? ""} placeholder="10, 9.8, MS-65" /></div>
+                <input id="cert_grade" name="cert_grade" maxLength={20} defaultValue={src?.cert_grade ?? ""} placeholder="10, 9.8, MS-65" /></div>
             )}
             <div className="field"><label className="label" htmlFor="cert_number">{certType === "coa" ? "COA or sticker number" : "Certification number"}</label>
               <input id="cert_number" name="cert_number" maxLength={60} defaultValue={item?.cert_number ?? ""} placeholder="12345678" />
@@ -114,23 +116,23 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
       </div>
 
       <div className="grid2">
-        <div className="field"><span className="label">My rating</span><StarInput initial={item?.rating ?? null} /></div>
+        <div className="field"><span className="label">My rating</span><StarInput initial={src?.rating ?? null} /></div>
         <div className="field" style={{ justifyContent: "flex-end" }}>
           <label className="check" htmlFor="featured"><input id="featured" name="featured" type="checkbox" defaultChecked={item?.featured ?? false} /> ★ Feature it: one of my grails</label>
           <span className="hint">Featured items show first on your page.</span></div>
         <div className="field full"><label className="label" htmlFor="tags">Tags</label>
-          <input id="tags" name="tags" maxLength={400} defaultValue={item?.tags?.join(", ") ?? ""} placeholder="Earnhardt, PC, Trade bait" />
+          <input id="tags" name="tags" maxLength={400} defaultValue={src?.tags?.join(", ") ?? ""} placeholder="Earnhardt, PC, Trade bait" />
           <span className="hint">Your own labels, separated by commas. Up to 10.</span></div>
         <div className="field full"><label className="label" htmlFor="description">Description</label>
-          <textarea id="description" name="description" maxLength={2000} defaultValue={item?.description ?? ""}
+          <textarea id="description" name="description" maxLength={2000} defaultValue={src?.description ?? ""}
             placeholder="Anything worth knowing: details, autographs, flaws, where you found it…" /></div>
         <div className="field full"><label className="label" htmlFor="provenance">Provenance and history</label>
-          <textarea id="provenance" name="provenance" maxLength={2000} defaultValue={item?.provenance ?? ""}
+          <textarea id="provenance" name="provenance" maxLength={2000} defaultValue={src?.provenance ?? ""}
             placeholder="Previous owners, where it came from, receipts or paperwork…" /></div>
       </div>
 
       <div className="field">
-        <label className="check" htmlFor="is_hidden"><input id="is_hidden" name="is_hidden" type="checkbox" defaultChecked={item?.is_hidden ?? false} /> Hide this item from my public page</label>
+        <label className="check" htmlFor="is_hidden"><input id="is_hidden" name="is_hidden" type="checkbox" defaultChecked={src?.is_hidden ?? false} /> Hide this item from my public page</label>
         <span className="hint">Only you will see it, even when your collection is public. A hidden item also stays off the For sale page.</span>
       </div>
       </section>
@@ -164,7 +166,7 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
               <span className="hint">Takes this percent off the sold-listing estimate for wear, damage or missing parts. Not used when you enter your own value.</span></div>
           )}
           <div className="field"><label className="label" htmlFor="search_terms">Search words for sold listings</label>
-            <input id="search_terms" name="search_terms" maxLength={200} defaultValue={item?.search_terms ?? ""} placeholder="Uses the name and details if blank" /></div>
+            <input id="search_terms" name="search_terms" maxLength={200} defaultValue={src?.search_terms ?? ""} placeholder="Uses the name and details if blank" /></div>
         </div>
         {status === "sold" && (
           <div className="grid2 soldbox">
@@ -176,7 +178,7 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
           </div>
         )}
       </fieldset>
-      {!member && item?.search_terms && <input type="hidden" name="search_terms" value={item.search_terms} />}
+      {!member && src?.search_terms && <input type="hidden" name="search_terms" value={src.search_terms} />}
 
       {status !== "wishlist" && (
         <div className="grid2">

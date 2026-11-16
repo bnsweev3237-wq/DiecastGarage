@@ -8,7 +8,7 @@ export const metadata = { title: "Notifications" };
 
 type Row = {
   id: string; kind: string; item_id: string | null; read_at: string | null; created_at: string; comment_id: string | null;
-  subject: string | null; message: string | null;
+  subject: string | null; message: string | null; stars: number | null;
   actor: { username: string; avatar_path: string | null } | null; owner: { username: string } | null;
   item: { title: string } | null; comment: { body: string } | null;
 };
@@ -25,7 +25,7 @@ export default async function Notifications() {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login?next=/notifications");
   const { data } = await supabase.from("notifications")
-    .select("id, kind, item_id, read_at, created_at, comment_id, subject, message, actor:profiles!notifications_actor_id_fkey(username, avatar_path), owner:profiles!notifications_profile_id_fkey(username), item:items(title), comment:comments(body)")
+    .select("id, kind, item_id, read_at, created_at, comment_id, subject, message, stars, actor:profiles!notifications_actor_id_fkey(username, avatar_path), owner:profiles!notifications_profile_id_fkey(username), item:items(title), comment:comments(body)")
     .eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
   const rows = (data ?? []) as unknown as Row[];
   // Opening this page counts as reading them; they stay highlighted this time so you can see what's new.
@@ -34,7 +34,7 @@ export default async function Notifications() {
   return (
     <main className="wrap" style={{ maxWidth: 760 }}>
       <div className="head">
-        <div><h1>Notifications</h1><p>Comments on your collection, replies to you, and notes from our team. <Link href="/settings#notifications">Email settings</Link></p></div>
+        <div><h1>Notifications</h1><p>Comments, replies, new followers, ratings, new items from collectors you follow, and notes from our team. <Link href="/settings#notifications">Email settings</Link></p></div>
       </div>
       {rows.length ? (
         <section className="notif-list">
@@ -55,12 +55,20 @@ export default async function Notifications() {
                 </Link>
               );
             }
-            const href = `/c/${n.owner?.username}${n.item_id ? `/${n.item_id}` : ""}#comment-${n.comment_id}`;
+            const href = n.kind === "follow" ? `/c/${actor}`
+              : n.kind === "new_item" || n.kind === "rating" ? `/c/${n.owner?.username}/${n.item_id}`
+              : `/c/${n.owner?.username}${n.item_id ? `/${n.item_id}` : ""}#comment-${n.comment_id}`;
+            const what = n.kind === "follow" ? <>started following you</>
+              : n.kind === "new_item" ? <>added new items, including <b>{n.item?.title ?? "a new item"}</b></>
+              : n.kind === "rating" ? <>rated <b>{n.item?.title ?? "your item"}</b> <span className="stars small">{"★".repeat(n.stars ?? 0)}<span className="off">{"★".repeat(5 - (n.stars ?? 0))}</span></span></>
+              : n.kind === "reply" ? <>replied to your comment</>
+              : n.kind === "comment_item" ? <>commented on <b>{n.item?.title ?? "your item"}</b></>
+              : <>commented on your collection</>;
             return (
               <Link key={n.id} href={href} className={n.read_at ? "notif" : "notif unread"}>
                 <Avatar path={n.actor?.avatar_path ?? null} username={actor} size="small" />
                 <span className="notif-text">
-                  <span><b>@{actor}</b> {n.kind === "reply" ? "replied to your comment" : n.kind === "comment_item" ? <>commented on <b>{n.item?.title ?? "your item"}</b></> : "commented on your collection"}</span>
+                  <span><b>@{actor}</b> {what}</span>
                   {n.comment?.body && <span className="notif-quote">“{n.comment.body.slice(0, 160)}{n.comment.body.length > 160 ? "…" : ""}”</span>}
                   <span className="hint">{ago(n.created_at)}</span>
                 </span>
