@@ -66,6 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="nav-right">
               {user ? (
                 <>
+                  <Link className="bell" href="/help" aria-label="Help"><span aria-hidden="true">?</span></Link>
                   <Link className={unread ? "bell has-new" : "bell"} href="/notifications" aria-label={unread ? `Notifications, ${unread} new` : "Notifications"}>
                     <span aria-hidden="true">🔔</span>{!!unread && <span className="bell-count">{unread > 99 ? "99+" : unread}</span>}
                   </Link>
@@ -88,6 +89,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <footer className="footer">
           <div className="footer-in">
             <span>theCollectorHQ · <span className="num">v{currentVersion}</span> test version</span>
+            <Link href="/help">Help</Link>
             <Link href="/release-notes">Release notes</Link>
             {LEGAL_PAGES_LIVE && <><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></>}
           </div>
