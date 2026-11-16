@@ -32,7 +32,8 @@ function LoginForm() {
     <form className="card" onSubmit={onSubmit}>
       <h2>Sign in</h2>
       <div className="field"><label className="label" htmlFor="email">Email</label><input id="email" name="email" type="email" required autoComplete="email" /></div>
-      <div className="field"><label className="label" htmlFor="password">Password</label><input id="password" name="password" type="password" required autoComplete="current-password" /></div>
+      <div className="field"><label className="label" htmlFor="password">Password</label><input id="password" name="password" type="password" required autoComplete="current-password" />
+        <Link className="hint" href="/forgot-password" style={{ alignSelf: "flex-end" }}>Forgot your password?</Link></div>
       {error && <p className="msg error" role="alert">{error}</p>}
       <Turnstile ref={human} />
       <button className="btn primary" type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>

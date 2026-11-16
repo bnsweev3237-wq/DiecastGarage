@@ -319,6 +319,14 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
+    key: "petroliana", emoji: "⛽", group: "ebay", label: "Petroliana", brandLabel: "Oil or gas brand", packagingLabel: "In original packaging",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Porcelain sign, oil can, pump globe, gas pump", options: ["Porcelain sign", "Tin sign", "Pump globe", "Gas pump", "Oil can", "Oil bottle", "Thermometer", "Clock", "Map", "Uniform patch", "Display rack"], short: true },
+      { key: "material", label: "Material", placeholder: "Porcelain, tin, glass", options: ["Porcelain", "Tin", "Glass", "Cardboard", "Neon", "Cast iron"], short: true },
+      { key: "era", label: "Era or decade", placeholder: "1950s", short: true },
+    ],
+  },
+  {
     key: "pez", emoji: "🔑", group: "ebay", label: "Pez, keychains & promo glasses", brandLabel: "Brand", packagingLabel: "In original packaging",
     fields: [
       { key: "character", label: "Character or promo", placeholder: "Santa Pez, McDonald's glass", short: true },

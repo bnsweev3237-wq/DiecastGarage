@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "My collection" };
 
 type Row = Item & { item_purchases: Purchase | null; comps: Comp[] };
-type Params = { category?: string; status?: string; tag?: string; sort?: string; q?: string; grails?: string };
+type Params = { category?: string; status?: string; tag?: string; sort?: string; q?: string; grails?: string; password?: string };
 
 const SORTS = [
   { key: "featured", label: "Grails first, then newest" },
@@ -111,6 +111,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
             </div>}
       </div>
 
+      {searchParams.password === "changed" && <p className="msg ok">Your password has been changed.</p>}
       <nav className="seg-tabs" aria-label="Collection, wishlist or sold">
         {VIEWS.map((v) => (
           <Link key={v.key} className={view === v.key ? "on" : undefined} href={v.key === "owned" ? "/collection" : `/collection?status=${v.key}`}>
