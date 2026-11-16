@@ -675,3 +675,51 @@ body > main { flex: 1 0 auto; width: 100%; }
 .sort-toggle button { border: 0; background: none; padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 13px; color: var(--muted); cursor: pointer; }
 .sort-toggle button.on { background: var(--ink); color: var(--bg); }
 @media (prefers-reduced-motion: reduce) { .set-card:hover { transform: none; } }
+
+/* value over time */
+.value-chart svg { width: 100%; height: auto; display: block; }
+.value-chart .grid { stroke: var(--line); stroke-width: 1; }
+.value-chart .axis { fill: var(--muted); font-size: 11px; font-family: var(--f-body); }
+.value-chart .value-line { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.value-chart .value-area { fill: var(--accent); opacity: .12; }
+.value-chart .cost-line { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 5; }
+.value-chart .value-dot { fill: var(--accent); stroke: var(--panel); stroke-width: 2; }
+.value-chart .key { display: inline-block; width: 14px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+.value-chart .key.value { background: var(--accent); }
+.value-chart .key.cost { background: var(--muted); }
+
+/* collection report (prints cleanly) */
+.report-sheet { background: #fff; color: #121212; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; display: flex; flex-direction: column; gap: 18px; }
+.report-head { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; border-bottom: 3px solid #fe7101; padding-bottom: 14px; }
+.report-head h2 { font-size: 30px; }
+.report-head p { margin: 4px 0 0; }
+.report-totals { display: flex; gap: 24px; margin: 0; }
+.report-totals div { display: flex; flex-direction: column; }
+.report-totals dt { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #666; font-weight: 700; }
+.report-totals dd { margin: 0; font: italic 900 26px/1.1 var(--f-display); }
+.report-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.report-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #666; border-bottom: 1px solid #ddd; padding: 6px; }
+.report-table td { border-bottom: 1px solid #eee; padding: 8px 6px; vertical-align: top; }
+.report-table .r { text-align: right; white-space: nowrap; }
+.report-table img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; display: block; }
+.report-table tfoot td { border-top: 2px solid #121212; border-bottom: 0; font-size: 14px; }
+.report-sheet .hint { color: #666; }
+.report-link { margin: 0; }
+@media print {
+  .nav, .footer, .feedback, .install-banner, .no-print { display: none !important; }
+  body { background: #fff; }
+  .wrap.report { padding: 0; max-width: none; }
+  .report-sheet { border: 0; padding: 0; }
+  .report-table tr { break-inside: avoid; }
+}
+.invite-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.invite-row input { flex: 1 1 260px; min-width: 0; border-radius: 999px; padding: 8px 14px; font-size: 14px; }
+
+/* admin stats */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+.bars { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end; height: 140px; }
+.bar-col { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; }
+.bar { width: 100%; min-height: 2px; background: var(--accent); border-radius: 4px 4px 0 0; }
+.bar-n { font-size: 11px; font-weight: 800; color: var(--muted); }
+.bar-axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.report-table .nowrap { white-space: nowrap; }

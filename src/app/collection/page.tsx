@@ -2,6 +2,7 @@ import Link from "next/link";
 import ItemPlaceholder from "@/components/ItemPlaceholder";
 import Thumb from "@/components/Thumb";
 import SortSelect from "@/components/SortSelect";
+import ValueChart from "@/components/ValueChart";
 import { MembersNote } from "@/components/MembersOnly";
 import { matchesAll, searchWords } from "@/lib/search";
 import { Stars } from "@/components/Stars";
@@ -36,11 +37,12 @@ const VIEWS: { key: ItemStatus; label: string }[] = [
 export default async function MyCollection({ searchParams }: { searchParams: Params }) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login?next=/collection");
-  const [{ data }, { data: membership }, { data: me }] = await Promise.all([
+  const [{ data }, { data: membership }, { data: me }, { data: snaps }] = await Promise.all([
     supabase.from("items").select("*, item_purchases(*), comps(*)").eq("owner_id", user.id)
       .order("featured", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("memberships").select("status, comp_active, comp_until").eq("user_id", user.id).single(),
     supabase.from("profiles").select("username, is_public").eq("id", user.id).single(),
+    supabase.from("collection_snapshots").select("day, value, cost").eq("owner_id", user.id).gte("day", new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10)).order("day"),
   ]);
   const everything = (data ?? []) as Row[];
   const view: ItemStatus = VIEWS.some((v) => v.key === searchParams.status) ? (searchParams.status as ItemStatus) : "owned";
@@ -182,6 +184,10 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
             <span className="n">{valued && gainBase ? `${((gain / gainBase) * 100).toFixed(0)}% vs. what it cost` : "on valued items"}</span></div>
         </section>
       )}
+      {member && view === "owned" && !searchParams.category && !searchParams.tag && !searchParams.q && searchParams.grails !== "1" && (
+        <ValueChart points={((snaps ?? []) as { day: string; value: number; cost: number }[]).map((p) => ({ day: p.day, value: Number(p.value), cost: Number(p.cost) }))} />
+      )}
+      {member && view === "owned" && <p className="hint report-link">🛡️ Need a list for insurance? <a href="/collection/report">Open your collection report</a> to print or save as PDF.</p>}
       {member && view === "sold" && (
         <section className="totals" aria-label="Sales totals">
           <div className="total"><span className="label">Sold</span><span className="v num">{items.length}</span><span className="n">items</span></div>

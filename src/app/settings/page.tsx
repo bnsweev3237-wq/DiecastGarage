@@ -5,6 +5,7 @@ import DeleteAccount from "@/components/DeleteAccount";
 import { InstallSection } from "@/components/InstallApp";
 import { getUser } from "@/lib/supabase/server";
 import { unblockUser } from "@/app/actions";
+import InviteCard from "@/components/InviteCard";
 import { FREE_ITEM_LIMIT, compActive, compEnds, isActiveMembership, isMember } from "@/lib/limits";
 import { paymentsEnabled } from "@/lib/stripe";
 
@@ -14,12 +15,13 @@ export const metadata = { title: "Settings" };
 export default async function Settings({ searchParams }: { searchParams: { membership?: string } }) {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login?next=/settings");
-  const [{ data: profile }, { data: priv }, { data: m }, { count }, { data: blocked }] = await Promise.all([
+  const [{ data: profile }, { data: priv }, { data: m }, { count }, { data: blocked }, { count: invited }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("profile_private").select("full_name, location, email_notifications").eq("id", user.id).maybeSingle(),
     supabase.from("memberships").select("*").eq("user_id", user.id).single(),
     supabase.from("items").select("id", { count: "exact", head: true }).eq("owner_id", user.id),
     supabase.from("blocks").select("blocked_id, created_at, blocked:profiles!blocks_blocked_id_fkey(username)").eq("blocker_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("referred_by", user.id),
   ]);
   const member = isMember(m);
   const paid = isActiveMembership(m?.status);
@@ -38,6 +40,8 @@ export default async function Settings({ searchParams }: { searchParams: { membe
         showFollows={profile?.show_follows ?? true} defaultCategory={profile?.default_category ?? null} emailNotifications={priv?.email_notifications ?? true}
         userId={user.id} username={profile?.username ?? ""} avatarPath={profile?.avatar_path ?? null}
         links={{ facebook_url: profile?.facebook_url, x_url: profile?.x_url, instagram_url: profile?.instagram_url, ebay_url: profile?.ebay_url }} />
+
+      {profile?.username && <InviteCard username={profile.username} joined={invited ?? 0} />}
 
       <section className="card" id="blocked">
         <h3>Blocked collectors</h3>

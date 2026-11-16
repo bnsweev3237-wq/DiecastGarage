@@ -11,7 +11,7 @@ import { NETWORKS, normalizeSocial } from "@/lib/social";
 import { FREE_ITEM_LIMIT, FREE_PHOTO_LIMIT } from "@/lib/limits";
 import { REPORT_REASONS } from "@/lib/reports";
 import { checkFields, contentDbMessage } from "@/lib/content-rules";
-import { emailNotifications } from "@/lib/notify-email";
+import { emailNotificationIds, emailNotifications } from "@/lib/notify-email";
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
@@ -136,6 +136,17 @@ const dbError = (message: string) =>
       ? "The for-sale link must be an eBay listing."
       : "Couldn't save. Check your connection and try again.");
 
+
+// When an item goes up for sale, the database alerts collectors with a matching wishlist item.
+// This emails those alerts to people who turned emails on.
+async function emailWishlistMatches(supabaseItemId: string) {
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const { data } = await createAdminClient().from("notifications").select("id").eq("item_id", supabaseItemId).eq("kind", "wishlist_match").is("emailed_at", null);
+    if (data?.length) await emailNotificationIds(data.map((r) => r.id));
+  } catch { /* best effort */ }
+}
+
 export async function createItem(_: FormState, f: FormData): Promise<FormState> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/login");
@@ -144,6 +155,7 @@ export async function createItem(_: FormState, f: FormData): Promise<FormState> 
   const { data, error } = await supabase.from("items").insert(parsed.item).select("id").single();
   if (error) return { error: dbError(error.message) };
   await supabase.from("item_purchases").insert({ item_id: data.id, ...parsed.purchase });
+  if (parsed.item.for_sale) await emailWishlistMatches(data.id);
   revalidatePath("/collection");
   redirect(`/collection/${data.id}?added=1`);
 }
@@ -164,6 +176,7 @@ export async function updateItem(_: FormState, f: FormData): Promise<FormState> 
   if (gone.length) await supabase.storage.from("car-photos").remove(withThumbs(gone));
   revalidatePath(`/collection/${id}`);
   revalidatePath("/collection");
+  if (parsed.item.for_sale) await emailWishlistMatches(id);
   // Back to the list, which shows a "Saved" message.
   redirect(`/collection?saved=${encodeURIComponent(parsed.item.title.slice(0, 80))}`);
 }

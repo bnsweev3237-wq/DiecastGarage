@@ -56,9 +56,10 @@ export default async function Notifications() {
               );
             }
             const href = n.kind === "follow" ? `/c/${actor}`
-              : n.kind === "new_item" || n.kind === "rating" ? `/c/${n.owner?.username}/${n.item_id}`
+              : n.kind === "new_item" || n.kind === "rating" || n.kind === "wishlist_match" ? `/c/${n.owner?.username}/${n.item_id}`
               : `/c/${n.owner?.username}${n.item_id ? `/${n.item_id}` : ""}#comment-${n.comment_id}`;
-            const what = n.kind === "follow" ? <>started following you</>
+            const what = n.kind === "wishlist_match" ? <>is selling <b>{n.item?.title ?? "an item"}</b>, which matches <b>{n.subject}</b> on your wishlist 🎯</>
+              : n.kind === "follow" ? <>started following you</>
               : n.kind === "new_item" ? <>added new items, including <b>{n.item?.title ?? "a new item"}</b></>
               : n.kind === "rating" ? <>rated <b>{n.item?.title ?? "your item"}</b> <span className="stars small">{"★".repeat(n.stars ?? 0)}<span className="off">{"★".repeat(5 - (n.stars ?? 0))}</span></span></>
               : n.kind === "reply" ? <>replied to your comment</>

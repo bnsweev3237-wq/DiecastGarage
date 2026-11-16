@@ -30,9 +30,11 @@ export async function GET(req: Request) {
       deleted[bucket] = (deleted[bucket] ?? 0) + (gone?.length ?? 0);
     }
   }
+  // Record each member's collection value for the Value over time chart.
+  const { data: snapshots } = await db.rpc("take_collection_snapshots");
   let thumbs: Awaited<ReturnType<typeof makeMissingThumbs>> | { error: string };
   try { thumbs = await makeMissingThumbs(db, { limit: 80, budgetMs: 40_000 }); }
   catch (e) { thumbs = { error: e instanceof Error ? e.message : "failed" }; }
-  console.log("photo cleanup", { deleted, thumbs });
-  return NextResponse.json({ deleted, thumbs });
+  console.log("daily job", { deleted, thumbs, snapshots });
+  return NextResponse.json({ deleted, thumbs, snapshots });
 }

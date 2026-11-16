@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.32",
+    date: "2026-11-16",
+    title: "Value over time, insurance report, wishlist alerts and invites",
+    changes: [
+      "📈 Members see their collection's value over time on My collection, recorded once a day.",
+      "🛡️ Members can open a collection report with photos, grading, cost and value, and print it or save it as a PDF for insurance.",
+      "🎯 Wishlist alerts: when someone lists an item for sale that matches something on your wishlist, you get a notification (and an email if they're on).",
+      "🤝 Invite friends with your own link from Settings, and see how many have joined.",
+    ],
+  },
+  {
     version: "0.31",
     date: "2026-11-16",
     title: "Spreadsheet import and export, and set checklists",

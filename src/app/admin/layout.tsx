@@ -20,6 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </div>
       <nav className="actions" aria-label="Admin sections">
         <Link className="btn small" href="/admin">Overview</Link>
+        <Link className="btn small" href="/admin/stats">📊 Stats</Link>
         <Link className={`btn small${openReports ? " flag" : ""}`} href="/admin/reports">Reports{openReports ? ` (${openReports})` : ""}</Link>
         <Link className={`btn small${openFeedback ? " primary" : ""}`} href="/admin/feedback">Feedback{openFeedback ? ` (${openFeedback})` : ""}</Link>
         <Link className="btn small" href="/admin/users">Users</Link>

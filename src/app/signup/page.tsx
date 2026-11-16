@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Turnstile, { TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/Turnstile";
 import { contentProblem } from "@/lib/content-rules";
 import { createClient } from "@/lib/supabase/client";
@@ -12,6 +12,11 @@ export default function SignUp() {
   const [sentTo, setSentTo] = useState("");
   const [busy, setBusy] = useState(false);
   const human = useRef<TurnstileHandle>(null);
+  // Remember who invited them, even if they look around the site before signing up.
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    try { if (ref && /^[a-z0-9_]{3,20}$/i.test(ref)) localStorage.setItem("chq-ref", ref.toLowerCase()); } catch { /* private mode */ }
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,7 +35,7 @@ export default function SignUp() {
     const { error } = await supabase.auth.signUp({
       email, password,
       options: {
-        data: { username, full_name: String(f.get("full_name")).trim() || null, ...(LEGAL_PAGES_LIVE ? { terms_version: TERMS_VERSION } : {}) },
+        data: { ref: (() => { try { return localStorage.getItem("chq-ref") ?? undefined; } catch { return undefined; } })(), username, full_name: String(f.get("full_name")).trim() || null, ...(LEGAL_PAGES_LIVE ? { terms_version: TERMS_VERSION } : {}) },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/collection`,
         captchaToken,
       },
