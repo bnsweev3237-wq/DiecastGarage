@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.35",
+    date: "2026-11-16",
+    title: "A fresh, friendlier look",
+    changes: [
+      "New colors: navy with a soft apricot in place of black and bright orange, on the site, the logo and the app icon.",
+      "Friendlier headings in normal sentence case, rounded labels and softer shadows throughout.",
+      "Dark mode gets the same navy and apricot look.",
+    ],
+  },
+  {
     version: "0.34.1",
     date: "2026-11-16",
     title: "Security tune-up",

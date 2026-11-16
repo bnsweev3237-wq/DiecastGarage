@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.34";
+export const HELP_UPDATED_FOR = "0.35";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 

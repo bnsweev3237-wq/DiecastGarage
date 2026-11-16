@@ -9,7 +9,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
     <html lang="en"><body style={{ fontFamily: "system-ui, sans-serif", padding: 40, textAlign: "center" }}>
       <h1>theCollectorHQ hit a problem</h1>
       <p>We&apos;ve been told about it automatically. Please try again in a moment.</p>
-      <button type="button" onClick={reset} style={{ padding: "10px 20px", borderRadius: 999, border: 0, background: "#fe7101", fontWeight: 700 }}>Try again</button>
+      <button type="button" onClick={reset} style={{ padding: "10px 20px", borderRadius: 999, border: 0, background: "#f0915a", color: "#1d2639", fontWeight: 700 }}>Try again</button>
     </body></html>
   );
 }

@@ -70,11 +70,11 @@ async function send(db: ReturnType<typeof createAdminClient>, rows: Row[]) {
       body: JSON.stringify({
         from, to, subject: `${what} on theCollectorHQ`,
         text: `${what}.\n\n${intro}\n"${body}"\n\n${button}: ${link}\n\nTurn these emails off in Settings: ${SITE}/settings#notifications`,
-        html: `<div style="font-family:Arial,sans-serif;max-width:520px;color:#121212">
+        html: `<div style="font-family:Arial,sans-serif;max-width:520px;color:#1d2639">
           <p style="font-size:16px"><b>${esc(what)}</b></p>
           ${fromTeam ? `<p>${esc(intro)}</p>` : ""}
-          <blockquote style="margin:0;padding:12px 16px;border-left:4px solid #fe7101;background:#faf8f5;white-space:pre-wrap">${esc(body)}</blockquote>
-          <p><a href="${link}" style="display:inline-block;margin-top:12px;padding:10px 18px;background:#fe7101;color:#121212;border-radius:999px;font-weight:bold;text-decoration:none">${button}</a></p>
+          <blockquote style="margin:0;padding:12px 16px;border-left:4px solid #f0915a;background:#fbfaf8;white-space:pre-wrap">${esc(body)}</blockquote>
+          <p><a href="${link}" style="display:inline-block;margin-top:12px;padding:10px 18px;background:#f0915a;color:#1d2639;border-radius:999px;font-weight:bold;text-decoration:none">${button}</a></p>
           <p style="color:#777;font-size:12px">You get these because email notifications are on. <a href="${SITE}/settings#notifications" style="color:#777">Turn them off</a>.</p>
         </div>`,
       }),
