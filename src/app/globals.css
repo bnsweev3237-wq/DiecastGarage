@@ -602,3 +602,14 @@ body > main { flex: 1 0 auto; width: 100%; }
 :target { scroll-margin-top: 90px; }
 .comment:target { background: color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 10px; }
 .reply-form > .linkbtn { align-self: flex-start; }
+
+/* comment votes */
+.votes { display: inline-flex; align-items: center; gap: 2px; margin-left: 4px; }
+.vote { border: 0; background: none; color: var(--muted); font-size: 13px; line-height: 1; padding: 4px 5px; border-radius: 6px; cursor: pointer; text-decoration: none; }
+.vote:hover:not(:disabled) { background: var(--chip); color: var(--ink); }
+.vote:disabled { cursor: default; opacity: .45; }
+.vote.on-up { color: var(--accent); }
+.vote.on-down { color: #5b6bd6; }
+.vote-score { min-width: 18px; text-align: center; font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
+.vote-score.up { color: var(--accent); }
+.vote-score.down { color: #5b6bd6; }

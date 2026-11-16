@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.27",
+    date: "2026-11-16",
+    title: "Vote on comments",
+    changes: [
+      "Up vote or down vote other collectors' comments with ▲ and ▼. Click the same arrow again to take your vote back.",
+      "The best-voted conversations show first, and replies stay in order underneath.",
+      "A + Add an item button on your own collection page.",
+      "Admins: feedback can be New, In review, Done or Dismissed.",
+    ],
+  },
+  {
     version: "0.26",
     date: "2026-11-16",
     title: "Notifications, replies, beta feedback and more",

@@ -222,6 +222,24 @@ export async function sendFeedback(_: FormState, f: FormData): Promise<FormState
   return { ok: "Sent" };
 }
 
+// Up (+1) or down (-1) vote someone else's comment, or 0 to take your vote back.
+export async function voteComment(f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) return { error: "Sign in to vote." };
+  const commentId = str(f, "comment_id");
+  const value = Number(str(f, "value"));
+  const { error } = value === 1 || value === -1
+    ? await supabase.from("comment_votes").upsert({ comment_id: commentId, voter_id: user.id, value })
+    : await supabase.from("comment_votes").delete().eq("comment_id", commentId).eq("voter_id", user.id);
+  if (error) return {
+    error: error.message.includes("VOTE_OWN_COMMENT") ? "You can't vote on your own comment."
+      : error.message.includes("RATE_LIMIT_VOTES") ? "You're voting very quickly. Take a short break."
+      : "Couldn't save your vote. Try again.",
+  };
+  revalidatePath(str(f, "path"));
+  return { ok: "Voted" };
+}
+
 // Rate someone else's item from 1 to 5 stars, or 0 to take your rating back.
 // The database checks who may rate and keeps the item's totals (supabase/migrations/0017_ratings.sql).
 export async function rateItem(f: FormData): Promise<FormState> {

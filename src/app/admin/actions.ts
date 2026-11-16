@@ -161,8 +161,10 @@ export async function adminSetBetaTester(f: FormData) {
   refresh();
 }
 
+// Feedback moves between New (open), In review, Done and Dismissed.
 export async function adminSetFeedbackStatus(f: FormData) {
+  const status = ["open", "in_review", "done", "dismissed"].includes(str(f, "status")) ? str(f, "status") : "open";
   await requireAdmin().then(({ db }) =>
-    db.from("feedback").update({ status: str(f, "status") === "done" ? "done" : "open" }).eq("id", str(f, "id")));
+    db.from("feedback").update({ status, status_changed_at: new Date().toISOString() }).eq("id", str(f, "id")));
   revalidatePath("/admin", "layout");
 }
