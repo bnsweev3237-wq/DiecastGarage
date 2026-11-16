@@ -30,10 +30,12 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
   const owned = status === "owned";
 
   return (
-    <form action={action} className="card item-form">
+    <form action={action} className="item-form">
+      {/* Two sections: the item itself, then what it cost and selling it. */}
+      <section className="card form-section" aria-labelledby="sec-item">
       {item && <input type="hidden" name="id" value={item.id} />}
 
-      <div className="card-title"><h3>Status</h3></div>
+      <div className="card-title"><h3 id="sec-item">Status</h3></div>
       <div className="seg" role="radiogroup" aria-label="Status">
         {STATUSES.map((s) => (
           <label key={s.key} className={status === s.key ? "on" : undefined}>
@@ -127,7 +129,14 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
             placeholder="Previous owners, where it came from, receipts or paperwork…" /></div>
       </div>
 
-      <div className="card-title"><h3>{status === "wishlist" ? "Hunting for it" : "Purchase"}</h3><span className="hint">Only you can see this</span></div>
+      <div className="field">
+        <label className="check" htmlFor="is_hidden"><input id="is_hidden" name="is_hidden" type="checkbox" defaultChecked={item?.is_hidden ?? false} /> Hide this item from my public page</label>
+        <span className="hint">Only you will see it, even when your collection is public. A hidden item also stays off the For sale page.</span>
+      </div>
+      </section>
+
+      <section className="card form-section" aria-labelledby="sec-purchase">
+      <div className="card-title"><h3 id="sec-purchase">{status === "wishlist" ? "Hunting for it" : "Purchase and value"}</h3><span className="hint">🔒 Only you can see this</span></div>
       {!member && (
         <MembersNote>Members track what they paid, estimated value from sold listings, gain or loss, and profit when they sell.</MembersNote>
       )}
@@ -179,11 +188,6 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
         </div>
       )}
 
-      <div className="field">
-        <label className="check" htmlFor="is_hidden"><input id="is_hidden" name="is_hidden" type="checkbox" defaultChecked={item?.is_hidden ?? false} /> Hide this item from my public page</label>
-        <span className="hint">Only you will see it, even when your collection is public. A hidden item also stays off the For sale page.</span>
-      </div>
-
       {owned && (
         <div className={member ? "forsale-box" : "forsale-box locked-set"}>
           <label className="check" htmlFor="for_sale"><input id="for_sale" name="for_sale" type="checkbox" checked={member && forSale} disabled={!member}
@@ -204,9 +208,10 @@ export default function ItemForm({ userId, member, item, purchase, defaultCatego
         </div>
       )}
       {(!owned || !forSale || !member) && item?.ebay_url && <input type="hidden" name="ebay_url" value={item.ebay_url} />}
+      </section>
 
       <FormMessage state={state} />
-      <div className="actions"><SubmitButton>{isNew ? (status === "wishlist" ? "Add to my wishlist" : "Add to my collection") : "Save changes"}</SubmitButton></div>
+      <div className="actions form-actions"><SubmitButton>{isNew ? (status === "wishlist" ? "Add to my wishlist" : "Add to my collection") : "Save changes"}</SubmitButton></div>
     </form>
   );
 }
