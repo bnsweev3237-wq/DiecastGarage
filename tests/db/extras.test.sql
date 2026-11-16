@@ -56,7 +56,7 @@ begin
   update app_errors set status = 'resolved' where fingerprint = 'fp1';
   perform t.ok(log_app_error('fp1', 'server', 'Boom', null, '/x', null), 'it is new again after being marked resolved');
   perform t.act_as(a);
-  perform t.fails($q$insert into app_errors (source, message, fingerprint) values ('server', 'x', 'y')$q$, 'new row violates row-level security', 'members can''t write to it');
+  perform t.fails($q$insert into app_errors (source, message, fingerprint) values ('server', 'x', 'y')$q$, 'permission denied', 'members can''t write to it');
   perform t.ok((select count(*) = 0 from app_errors), 'members can''t read it');
   perform t.fails($q$select log_app_error('fp2', 'server', 'x', null, null, null)$q$, 'permission denied', 'members can''t call the logger');
 end $$;

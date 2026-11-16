@@ -52,7 +52,8 @@ describe("search", () => {
 describe("release notes and help", () => {
   it("newest release first, versions unique", () => {
     const v = releases.map((r) => r.version.split(".").map(Number));
-    for (let i = 1; i < v.length; i++) expect(v[i - 1][0] * 1000 + v[i - 1][1]).toBeGreaterThan(v[i][0] * 1000 + v[i][1]);
+    const n = (x: number[]) => x[0] * 1e6 + x[1] * 1e3 + (x[2] ?? 0);
+    for (let i = 1; i < v.length; i++) expect(n(v[i - 1])).toBeGreaterThan(n(v[i]));
   });
   it("help is up to date for the newest release", () => expect(HELP_UPDATED_FOR).toBe(releases[0].version.split(".").slice(0, 2).join(".")));
   it("help sections have unique ids and content", () => {

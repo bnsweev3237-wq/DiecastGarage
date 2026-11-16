@@ -20,8 +20,8 @@ PSQL=(psql -X -q -v ON_ERROR_STOP=1 --no-psqlrc)
 for f in supabase/migrations/*.sql; do
   "${PSQL[@]}" -d "$DB" -f "$f" >/dev/null 2>"/tmp/chq-migration.err" || { echo "✗ migration $f failed:"; cat /tmp/chq-migration.err; exit 1; }
 done
-"${PSQL[@]}" -d "$DB" -c "grant select, insert, update, delete on all tables in schema public to anon, authenticated;
-  grant usage on schema extensions to anon, authenticated;" >/dev/null
+# Tables get member access by default (set in supabase-stub.sql, as on Supabase); extensions need this too.
+"${PSQL[@]}" -d "$DB" -c "grant usage on schema extensions to anon, authenticated;" >/dev/null
 echo "✓ $(ls supabase/migrations/*.sql | wc -l) migrations applied"
 
 fail=0; passed=0

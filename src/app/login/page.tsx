@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { safeNext } from "@/lib/safe-next";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useRef, useState } from "react";
 import Turnstile, { TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/Turnstile";
@@ -8,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next")?.startsWith("/") ? params.get("next")! : "/collection";
+  const next = safeNext(params.get("next"));
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const human = useRef<TurnstileHandle>(null);

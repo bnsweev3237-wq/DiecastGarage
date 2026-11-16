@@ -4,6 +4,17 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.34.1",
+    date: "2026-11-16",
+    title: "Security tune-up",
+    changes: [
+      "Passwords must be at least 8 characters everywhere, matching the sign-up form.",
+      "Photo storage only accepts JPEG pictures up to 5 MB, the size the app already makes.",
+      "Extra protections against other sites framing our pages and against fake sign-in links that bounce you to another site.",
+      "Members' accounts can no longer change membership, admin or log records even by going around the app (they already couldn't through it).",
+    ],
+  },
+  {
     version: "0.34",
     date: "2026-11-16",
     title: "Error alerts and automated tests",

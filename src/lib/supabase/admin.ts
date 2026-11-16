@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 // Bypasses row level security. Server only: used by the Stripe webhook and checkout.

@@ -36,7 +36,9 @@ begin
   update profiles set under_review = true where id = a;
   perform t.act_as(a);
   update items set under_review = false where id = it;
-  update profiles set under_review = false, is_beta_tester = true where id = a;
+  perform t.fails(format('update profiles set under_review = false where id = %L', a), 'permission denied', 'clearing your own review flag');
+  perform t.fails(format('update profiles set is_beta_tester = true where id = %L', a), 'permission denied', 'making yourself a beta tester');
+  perform t.works(format($q$update profiles set bio = 'Collector' where id = %L$q$, a), 'editing your own profile');
   perform t.ok((select under_review from items where id = it), 'item stays under review');
   perform t.ok((select under_review and not is_beta_tester from profiles where id = a), 'profile flags unchanged');
   perform t.as_system();
