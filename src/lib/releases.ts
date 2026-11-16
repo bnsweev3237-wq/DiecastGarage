@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.28",
+    date: "2026-11-16",
+    title: "Notices from the team",
+    changes: [
+      "If our team removes one of your items or photos, you'll get a notification (and an email, if you've turned emails on) explaining why.",
+      "Admins: removing an item or photo asks for a reason and an optional note for the collector, and the report screen shows how many of a collector's items and comments were reported in the last 3 months.",
+    ],
+  },
+  {
     version: "0.27",
     date: "2026-11-16",
     title: "Vote on comments",

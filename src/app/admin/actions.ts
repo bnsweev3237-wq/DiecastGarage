@@ -4,8 +4,23 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAdminAction, requireAdmin } from "@/lib/admin";
 import { withThumbs } from "@/lib/items";
+import { REMOVAL_REASONS, removalText } from "@/lib/reports";
+import { emailNotificationIds } from "@/lib/notify-email";
 
-// Removals are silent: nothing tells the collector, and nothing on the site marks the content as removed.
+// Removing an item or photo notifies its owner with the reason. Other removals are silent.
+
+// Tells a collector the team removed their item or photo, and why.
+async function noticeRemoval(db: Awaited<ReturnType<typeof requireAdmin>>["db"], f: FormData,
+  n: { userId: string; kind: "removed_item" | "removed_photo"; title: string; itemId?: string }) {
+  const reason = REMOVAL_REASONS.some(([k]) => k === str(f, "reason")) ? str(f, "reason") : "other";
+  const note = str(f, "note").slice(0, 500);
+  const { data } = await db.from("notifications").insert({
+    user_id: n.userId, kind: n.kind, profile_id: n.userId, item_id: n.itemId ?? null,
+    subject: n.title.slice(0, 200), message: [removalText(reason), note].filter(Boolean).join("\n\n"),
+  }).select("id").single();
+  if (data) { try { await emailNotificationIds([data.id]); } catch { /* best effort */ } }
+  return { reason, note: note || null };
+}
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
 function refresh() {
@@ -27,7 +42,8 @@ export async function adminDeleteItem(f: FormData) {
   const files = [car.photo_path, ...(car.photos ?? [])].filter((x): x is string => !!x);
   if (files.length) await db.storage.from("car-photos").remove(withThumbs(files));
   await closeReports(db, adminId, id);
-  await logAdminAction(db, adminId, "delete_item", car.owner_id, { title: car.title, reason: str(f, "reason") || null });
+  const why = await noticeRemoval(db, f, { userId: car.owner_id, kind: "removed_item", title: car.title });
+  await logAdminAction(db, adminId, "delete_item", car.owner_id, { title: car.title, reason: removalText(why.reason) + (why.note ? ` (${why.note})` : "") });
   refresh();
 }
 
@@ -40,7 +56,8 @@ export async function adminRemoveItemPhoto(f: FormData) {
   const rest = (car.photos ?? []) as string[];
   await db.from("items").update({ photo_path: rest[0] ?? null, photos: rest.slice(1) }).eq("id", id);
   await db.storage.from("car-photos").remove(withThumbs([car.photo_path]));
-  await logAdminAction(db, adminId, "remove_item_photo", car.owner_id, { title: car.title });
+  const why = await noticeRemoval(db, f, { userId: car.owner_id, kind: "removed_photo", title: car.title, itemId: id });
+  await logAdminAction(db, adminId, "remove_item_photo", car.owner_id, { title: car.title, reason: removalText(why.reason) + (why.note ? ` (${why.note})` : "") });
   refresh();
 }
 

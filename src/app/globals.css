@@ -613,3 +613,10 @@ body > main { flex: 1 0 auto; width: 100%; }
 .vote-score { min-width: 18px; text-align: center; font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
 .vote-score.up { color: var(--accent); }
 .vote-score.down { color: #5b6bd6; }
+
+/* moderation */
+.remove-reason { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 2px solid color-mix(in srgb, var(--bad) 40%, transparent); border-radius: 12px; background: var(--soft); min-width: min(100%, 420px); }
+.history { margin: 0; padding: 8px 12px; border-radius: 10px; background: var(--chip); font-size: 14px; }
+.history.warn { background: color-mix(in srgb, var(--bad) 12%, var(--panel)); }
+.team-badge { width: 32px; height: 32px; border-radius: 99px; display: grid; place-items: center; background: #121212; flex: none; font-size: 16px; }
+.notif.team .notif-quote { color: var(--ink); }

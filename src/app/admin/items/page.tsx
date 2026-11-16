@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ConfirmAction from "@/components/ConfirmAction";
+import RemoveWithReason from "@/components/admin/RemoveWithReason";
 import Thumb from "@/components/Thumb";
 import { adminDeleteItem, adminRemoveItemPhoto } from "@/app/admin/actions";
 import { requireAdmin, when } from "@/lib/admin";
@@ -31,8 +32,8 @@ export default async function AdminCars() {
                 </div>
               </div>
               <div className="actions">
-                {c.photo_path && <ConfirmAction action={adminRemoveItemPhoto} fields={{ id: c.id }} label="Remove photo" confirmText="Remove this photo?" />}
-                <ConfirmAction action={adminDeleteItem} fields={{ id: c.id }} label="Delete item" confirmText="Delete this item, its photo and its comments?" />
+                {c.photo_path && <RemoveWithReason action={adminRemoveItemPhoto} id={c.id} label="Remove photo" what="the cover photo" />}
+                <RemoveWithReason action={adminDeleteItem} id={c.id} label="Delete item" what="this item" />
               </div>
             </div>
           );

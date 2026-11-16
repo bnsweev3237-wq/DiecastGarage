@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import ConfirmAction from "@/components/ConfirmAction";
+import RemoveWithReason from "@/components/admin/RemoveWithReason";
 import Thumb from "@/components/Thumb";
 import SubmitButton from "@/components/SubmitButton";
 import { adminSetBetaTester } from "@/app/admin/actions";
@@ -99,9 +100,9 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
                   </div>
                 </div>
                 <div className="actions">
-                  {c.photo_path && <ConfirmAction action={adminRemoveItemPhoto} fields={{ id: c.id }} label="Remove photo" confirmText="Remove this photo?" />}
+                  {c.photo_path && <RemoveWithReason action={adminRemoveItemPhoto} id={c.id} label="Remove photo" what="the cover photo" />}
                   {c.description && <ConfirmAction action={adminClearItemDescription} fields={{ id: c.id }} label="Remove description" confirmText="Clear this description?" />}
-                  <ConfirmAction action={adminDeleteItem} fields={{ id: c.id }} label="Delete item" confirmText="Delete this item, its photo and its comments?" />
+                  <RemoveWithReason action={adminDeleteItem} id={c.id} label="Delete item" what="this item" />
                 </div>
               </div>
             );

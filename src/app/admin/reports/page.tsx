@@ -1,18 +1,19 @@
 import Link from "next/link";
 import ConfirmAction from "@/components/ConfirmAction";
+import RemoveWithReason from "@/components/admin/RemoveWithReason";
 import SubmitButton from "@/components/SubmitButton";
 import { adminCloseReport, adminDeleteItem, adminDeleteComment } from "@/app/admin/actions";
 import { requireAdmin, when } from "@/lib/admin";
 import { photoUrl } from "@/lib/items";
 import { reasonLabel } from "@/lib/reports";
 
-type Report = { id: string; target_type: "item" | "comment" | "profile"; target_id: string; reason: string; details: string | null; created_at: string; reporter: { username: string } | null };
+type Report = { id: string; target_type: "item" | "comment" | "profile"; target_id: string; target_owner_id: string | null; reason: string; details: string | null; created_at: string; reporter: { username: string } | null };
 
 export default async function AdminReports({ searchParams }: { searchParams: { show?: string } }) {
   const { db } = await requireAdmin();
   const closed = searchParams.show === "closed";
   const { data } = await db.from("reports")
-    .select("id, target_type, target_id, reason, details, created_at, status, reporter:profiles!reports_reporter_id_fkey(username)")
+    .select("id, target_type, target_id, target_owner_id, reason, details, created_at, status, reporter:profiles!reports_reporter_id_fkey(username)")
     .in("status", closed ? ["resolved", "dismissed"] : ["open"]).order("created_at", { ascending: false }).limit(300);
   const reports = (data ?? []) as unknown as (Report & { status: string })[];
 
@@ -25,6 +26,20 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
     db.from("comments").select("id, body, item_id, under_review, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)").in("id", ids("comment")),
     db.from("profiles").select("id, username, bio, under_review").in("id", ids("profile")),
   ]);
+  // Each collector's report history for the last 3 months: how many different items, comments and
+  // profile reports were filed about them, including content that's since been removed.
+  const owners = [...new Set(reports.map((r) => r.target_owner_id).filter((x): x is string => !!x))];
+  const since = new Date(Date.now() - 90 * 864e5).toISOString();
+  const { data: past } = owners.length
+    ? await db.from("reports").select("target_owner_id, target_type, target_id").in("target_owner_id", owners).gte("created_at", since)
+    : { data: [] };
+  const history = new Map<string, { item: Set<string>; comment: Set<string>; profile: Set<string> }>();
+  for (const r of (past ?? []) as { target_owner_id: string; target_type: "item" | "comment" | "profile"; target_id: string }[]) {
+    const h = history.get(r.target_owner_id) ?? { item: new Set(), comment: new Set(), profile: new Set() };
+    h[r.target_type].add(r.target_id);
+    history.set(r.target_owner_id, h);
+  }
+  const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
   const car = new Map((cars ?? []).map((c) => [c.id, c]));
   const comment = new Map((comments ?? []).map((c) => [c.id, c]));
   const profile = new Map((profiles ?? []).map((p) => [p.id, p]));
@@ -43,7 +58,9 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
         const p = first.target_type === "profile" ? profile.get(targetId) : undefined;
         const carOwner = c?.owner as unknown as { id: string; username: string } | undefined;
         const author = k?.author as unknown as { id: string; username: string } | undefined;
-        const ownerId = carOwner?.id ?? author?.id ?? p?.id ?? "";
+        const ownerId = carOwner?.id ?? author?.id ?? p?.id ?? first.target_owner_id ?? "";
+        const h = history.get(ownerId);
+        const ownerName = carOwner?.username ?? author?.username ?? p?.username;
         const gone = !c && !k && !p;
         return (
           <section className="card" key={targetId}>
@@ -53,6 +70,13 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
               <span className="hint">{when(first.created_at)}</span>
             </div>
 
+            {h && (
+              <p className={h.item.size + h.comment.size > 2 ? "history warn" : "history"}>
+                <b>{ownerName ? `@${ownerName}` : "This collector"}, last 3 months:</b>{" "}
+                {plural(h.item.size, "item")} reported{h.comment.size ? `, ${plural(h.comment.size, "comment")}` : ""}{h.profile.size ? ", their profile" : ""}.
+                {ownerId && <> <Link href={`/admin/users/${ownerId}`}>See account</Link></>}
+              </p>
+            )}
             {gone && <p className="hint">This {first.target_type} has already been deleted.</p>}
             {c && (
               <div className="car">
@@ -89,7 +113,7 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
 
             {!closed && (
               <div className="actions">
-                {c && <ConfirmAction action={adminDeleteItem} fields={{ id: c.id }} label="Delete item" confirmText="Delete this item, its photo and comments? Its reports close too." />}
+                {c && <RemoveWithReason action={adminDeleteItem} id={c.id} label="Delete item" what="this item (its reports close too)" />}
                 {k && <ConfirmAction action={adminDeleteComment} fields={{ id: k.id }} label="Delete comment" confirmText="Delete this comment? Its reports close too." />}
                 {p && <Link className="btn small" href={`/admin/users/${p.id}`}>Review account</Link>}
                 <form action={adminCloseReport}>
