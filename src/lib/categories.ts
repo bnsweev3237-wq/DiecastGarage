@@ -34,7 +34,7 @@ export const CATEGORIES: Category[] = [
   {
     key: "cards", emoji: "🃏", group: "popular", label: "Trading cards", brandLabel: "Manufacturer", packagingLabel: "In a sleeve, toploader or slab",
     fields: [
-      { key: "game", label: "Sport or game", placeholder: "Pokémon, Baseball", options: ["Pokémon", "Magic: The Gathering", "Yu-Gi-Oh!", "One Piece", "Lorcana", "Baseball", "Basketball", "Football", "Hockey", "Soccer"], short: true },
+      { key: "game", label: "Sport or game", placeholder: "Pokémon, Baseball", options: ["Pokémon", "Magic: The Gathering", "Yu-Gi-Oh!", "One Piece", "Lorcana", "Baseball", "Basketball", "Football", "Hockey", "Soccer", "Racing", "Wrestling", "Other"], short: true },
       { key: "set", label: "Set", placeholder: "Base Set, 2023 Topps Chrome", short: true },
       { key: "number", label: "Card number", placeholder: "4/102" },
       { key: "subject", label: "Player or character", placeholder: "Charizard, Shohei Ohtani" },

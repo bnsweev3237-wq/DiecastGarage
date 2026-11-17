@@ -4,6 +4,12 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.35.3",
+    date: "2026-11-17",
+    title: "More choices for trading cards",
+    changes: ["Trading cards: Sport or game now offers Racing, Wrestling and Other. You can still type anything."],
+  },
+  {
     version: "0.35.2",
     date: "2026-11-17",
     title: "Add a new item from any item",
