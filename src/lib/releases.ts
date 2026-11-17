@@ -4,6 +4,12 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.35.1",
+    date: "2026-11-17",
+    title: "Cleaner headings",
+    changes: ["Headings use a cleaner font with simpler letters."],
+  },
+  {
     version: "0.35",
     date: "2026-11-16",
     title: "A fresh, friendlier look",

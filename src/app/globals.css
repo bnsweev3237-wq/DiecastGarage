@@ -1,4 +1,4 @@
-/* theCollectorHQ: friendly and warm. Bricolage Grotesque headings, Manrope text, navy with soft apricot.
+/* theCollectorHQ: friendly and warm. Plus Jakarta Sans headings, Manrope text, navy with soft apricot.
    Light by default, dark when the device asks. */
 :root {
   --bg: #fbfaf8; --panel: #ffffff; --ink: #1d2639; --muted: #5d6475; --line: #e6e4e0;
@@ -6,7 +6,7 @@
   --good: #13804a; --bad: #c8412a; --chip: #f2f1ee; --soft: #f7f6f3;
   --band: #1f2b45; --band-ink: #ffffff; --band-muted: #c3cadb; --band-line: rgb(255 255 255 / .22);
   --hl: #f6ad80; --hl-bg: #fde4d4; --hl-ink: #7a3412; --strip: #eef1f7; --strip-ink: #1d2639;
-  --f-display: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono: "Manrope", system-ui, sans-serif;
   --radius: 16px; --shadow: 0 1px 2px rgb(29 38 57 / .05), 0 8px 24px rgb(29 38 57 / .06);
