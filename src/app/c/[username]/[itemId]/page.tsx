@@ -9,10 +9,22 @@ import { Stars } from "@/components/Stars";
 import ReportButton from "@/components/ReportButton";
 import { getUser } from "@/lib/supabase/server";
 import { allPhotos, certLookupUrl, money, type Item } from "@/lib/items";
-import { categoryOf, conditionLabel } from "@/lib/categories";
+import { categoryOf, conditionLabel, summary } from "@/lib/categories";
+import { publicDb } from "@/lib/supabase/public";
 import { checkQueries } from "@/lib/report-error";
 
 export const dynamic = "force-dynamic";
+
+// Title and description for browser tabs and link previews; only public details, read signed out.
+export async function generateMetadata({ params }: { params: { username: string; itemId: string } }) {
+  const { data } = await publicDb().from("items").select("title, category, brand, year, attributes, is_certified, cert_type, cert_by, cert_grade, owner:profiles!cars_owner_id_fkey(username)")
+    .eq("id", params.itemId).maybeSingle();
+  const item = data as unknown as (Parameters<typeof summary>[0] & { title: string; owner: { username: string } | null }) | null;
+  if (!item || item.owner?.username !== params.username.toLowerCase()) return { title: "Item" };
+  const cat = categoryOf(item.category);
+  const description = [summary(item), `${cat.label} in @${item.owner.username}'s collection on theCollectorHQ.`].filter(Boolean).join(" · ");
+  return { title: item.title, description, openGraph: { title: item.title, description }, twitter: { card: "summary_large_image", title: item.title, description } };
+}
 
 export default async function PublicItem({ params }: { params: { username: string; itemId: string } }) {
   const { supabase, user } = await getUser();

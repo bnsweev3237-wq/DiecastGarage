@@ -14,11 +14,15 @@ import { money, type Item } from "@/lib/items";
 import { CATEGORIES, categoryOf } from "@/lib/categories";
 import { matchesAll, searchWords } from "@/lib/search";
 import { checkQueries } from "@/lib/report-error";
+import { badgeStats, badgesFor } from "@/lib/badges";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: { username: string } }) {
-  return { title: `@${params.username}` };
+  const name = params.username.toLowerCase();
+  const title = `@${name}`;
+  const description = `See @${name}'s collection on theCollectorHQ: catalog, value and show off every collection.`;
+  return { title, description, openGraph: { title: `@${name}'s collection`, description }, twitter: { card: "summary_large_image", title: `@${name}'s collection`, description } };
 }
 
 export default async function Collection({ params, searchParams }: { params: { username: string }; searchParams: { filter?: string; tag?: string; q?: string; category?: string; grails?: string } }) {
@@ -77,6 +81,10 @@ export default async function Collection({ params, searchParams }: { params: { u
   const grails = !filter && !narrowed ? all.filter((c) => c.featured) : [];
   const forSale = all.filter((c) => c.for_sale).length;
   const name = profile.username;
+  const followers = (counts as { followers: number } | null)?.followers ?? 0;
+  const badges = canView && !underReview
+    ? badgesFor(badgeStats(visible, (setRows ?? []) as Parameters<typeof badgeStats>[1], { followers, joined: profile.created_at, beta: profile.is_beta_tester }))
+    : [];
 
   return (
     <>
@@ -93,6 +101,12 @@ export default async function Collection({ params, searchParams }: { params: { u
               </span>
               {profile.bio && !underReview && <p style={{ margin: 0, maxWidth: "60ch", color: "var(--band-muted)" }}>{profile.bio}</p>}
               {!underReview && <SocialLinks profile={profile} />}
+              {!!badges.length && (
+                <ul className="badges" aria-label="Badges">
+                  {badges.map((b) => <li key={b.key} title={b.why}><span aria-hidden="true">{b.emoji}</span>{b.label}</li>)}
+                  {isOwner && <li className="badges-help"><Link href="/help#badges">How badges work</Link></li>}
+                </ul>
+              )}
               <div className="actions" style={{ marginTop: 6 }}>
                 {isOwner ? <><Link className="btn small primary" href="/collection/new">+ Add an item</Link><Link className="btn small" href="/settings">Edit profile &amp; privacy</Link></>
                   : profile.is_public && !myBlock && !underReview && <FollowButton signedIn={!!user} followeeId={profile.id} username={profile.username} following={!!myFollow} />}

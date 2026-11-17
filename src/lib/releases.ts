@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.37",
+    date: "2026-11-17",
+    title: "Share cards and badges",
+    changes: [
+      "📣 Share cards: links to your page or any item now show a preview with the photo, name, grade, price and your username when shared on Facebook, X, texts and more.",
+      "🏅 Badges on collector pages: Founding collector, item and follower milestones, Grail hunter, Graded collection, Set complete, Crowd favorite, Explorer and Beta tester. See Help for how to earn each one.",
+    ],
+  },
+  {
     version: "0.36.1",
     date: "2026-11-17",
     title: "More sports",

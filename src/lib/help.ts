@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.36";
+export const HELP_UPDATED_FOR = "0.37";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -115,6 +115,30 @@ export const HELP: HelpSection[] = [
       "- The **🔔 bell** at the top counts new notifications: comments and replies, new followers, ratings, new items from people you follow, wishlist matches, and notes from our team. Click it to see them all.",
       "- **Emails:** turn notification emails on or off in [Settings → Notifications](/settings#notifications).",
       "- **🤝 Invite friends** with your own link in [Settings](/settings#invite).",
+    ],
+  },
+  {
+    id: "badges", emoji: "🏅", title: "Badges",
+    body: [
+      "Badges show on your page under your name. They're earned automatically from what's on your public page, so hidden items and private details never count. Point at a badge to see what it's for.",
+      "- 🌱 **Founding collector:** joined during the beta, before theCollectorHQ launched. Yours for good.",
+      "- 🧪 **Beta tester:** helps test new features.",
+      "- 📦 **Item milestones:** 10, 50, 100, 250, 500 and 1,000 items in your collection.",
+      "- ⭐ **Grail hunter:** feature one of your items as a grail.",
+      "- 🏅 **Graded collection:** 5 or more graded or certified items.",
+      "- 📋 **Set complete:** tick off every piece of a public set checklist with 5 or more pieces.",
+      "- 🔥 **Crowd favorite:** an item rated 4.5 stars or more by at least 3 collectors.",
+      "- 🧭 **Explorer:** items in 5 or more categories.",
+      "- 👥 **Follower milestones:** 10, 50, 100, 250 and 1,000 followers.",
+    ],
+  },
+  {
+    id: "sharing", emoji: "📣", title: "Sharing your collection",
+    body: [
+      "Copy the link to your page or any item and paste it into Facebook, X, Instagram stories, a text or an email. It shows a preview card with the photo, name, grade, price if it's for sale, and your username.",
+      "- Your page's card shows your profile picture, item count, followers, badges and up to 4 of your best items (grails first).",
+      "- Only public details are ever shown. Hidden items and private collections show a plain theCollectorHQ card instead.",
+      "- Facebook and others remember a preview for a while, so changes you make may take a day or so to show on links you already shared.",
     ],
   },
   {

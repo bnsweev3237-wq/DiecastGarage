@@ -732,3 +732,11 @@ body > main { flex: 1 0 auto; width: 100%; }
 /* admin errors */
 .error-item h3 { font-size: 17px; font-family: var(--f-body); font-weight: 800; overflow-wrap: anywhere; }
 .error-detail { margin: 0; padding: 10px 12px; background: var(--soft); border-radius: 8px; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 200px; overflow: auto; }
+
+/* badges on a collector's page */
+.badges { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.badges li { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px 5px 9px; border-radius: 999px; background: rgb(255 255 255 / .1);
+  border: 1px solid rgb(255 255 255 / .16); color: var(--band-ink); font-size: 13px; font-weight: 700; cursor: default; }
+.badges li span { font-size: 15px; }
+.badges li.badges-help { background: none; border: 0; padding-left: 4px; font-weight: 600; }
+.badges li.badges-help a { color: var(--band-muted); }
