@@ -6,10 +6,11 @@ export const releases: Release[] = [
   {
     version: "0.36.1",
     date: "2026-11-17",
-    title: "Wrestling and golf",
+    title: "More sports",
     changes: [
       "🤼 Wrestling: type of item, promotion (WWE, WCW, AEW and more), wrestler and event.",
       "⛳ Golf: type of item, golfer and tournament.",
+      "Also new: 🥊 Boxing & MMA, 🎓 College sports, 🥇 Olympics, 🎾 Tennis, 🏇 Horse racing and 🎣 Fishing & hunting, each with its own details.",
     ],
   },
   {

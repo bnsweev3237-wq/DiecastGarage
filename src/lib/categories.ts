@@ -173,12 +173,64 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
+    key: "boxing_mma", emoji: "🥊", group: "sports", label: "Boxing & MMA", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Signed glove, fight poster", options: ["Autographed item", "Fight-worn", "Glove", "Trunks or shorts", "Robe", "Championship belt", "Fight poster", "Ticket stub", "Program", "Photo", "Credential", "Other"], short: true },
+      { key: "sport", label: "Sport", options: ["Boxing", "MMA"], short: true },
+      { key: "player", label: "Fighter", placeholder: "Muhammad Ali, Conor McGregor" },
+      { key: "event", label: "Fight or event", placeholder: "Thrilla in Manila, UFC 229" },
+    ],
+  },
+  {
+    key: "college_sports", emoji: "🎓", group: "sports", label: "College sports", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Pennant, program, signed football", options: ["Autographed item", "Game-used", "Jersey", "Ball", "Helmet", "Pennant", "Program", "Ticket stub", "Photo", "Poster", "Pin", "Other"], short: true },
+      { key: "sport", label: "Sport", placeholder: "Football, basketball", options: ["Football", "Basketball", "Baseball", "Hockey", "Soccer", "Wrestling", "Track and field", "Other"], short: true },
+      { key: "team", label: "School", placeholder: "Notre Dame, Alabama", short: true },
+      { key: "player", label: "Player or coach", placeholder: "Bear Bryant" },
+    ],
+  },
+  {
+    key: "olympics", emoji: "🥇", group: "sports", label: "Olympics", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Pin, torch, mascot", options: ["Pin", "Torch", "Medal", "Participation medal", "Mascot", "Ticket stub", "Program", "Poster", "Uniform", "Autographed item", "Other"], short: true },
+      { key: "games", label: "Games", placeholder: "1984 Los Angeles", short: true },
+      { key: "country", label: "Country or team", placeholder: "USA", short: true },
+      { key: "player", label: "Athlete", placeholder: "Michael Phelps" },
+    ],
+  },
+  {
+    key: "tennis", emoji: "🎾", group: "sports", label: "Tennis", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Signed racquet, match-used ball", options: ["Autographed item", "Match-used", "Racquet", "Ball", "Clothing", "Photo", "Program", "Ticket stub", "Poster", "Pin", "Other"], short: true },
+      { key: "player", label: "Player", placeholder: "Serena Williams, Roger Federer" },
+      { key: "event", label: "Tournament", placeholder: "Wimbledon 2003" },
+    ],
+  },
+  {
+    key: "horse_racing", emoji: "🏇", group: "sports", label: "Horse racing", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Derby glass, program, winning ticket", options: ["Mint julep glass", "Program", "Betting ticket", "Ticket stub", "Photo", "Silks", "Horseshoe", "Autographed item", "Pin", "Poster", "Other"], short: true },
+      { key: "event", label: "Race", placeholder: "1973 Kentucky Derby", short: true },
+      { key: "horse", label: "Horse", placeholder: "Secretariat", short: true },
+      { key: "player", label: "Jockey or trainer", placeholder: "Ron Turcotte" },
+    ],
+  },
+  {
+    key: "fishing_hunting", emoji: "🎣", group: "sports", label: "Fishing & hunting", brandLabel: "Maker", packagingLabel: "In the original box",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Lure, decoy, license", options: ["Fishing lure", "Reel", "Rod", "Decoy", "Duck stamp", "License", "Patch", "Call", "Tackle box", "Sign", "Other"], short: true },
+      { key: "model", label: "Model or species", placeholder: "Lucky 13, mallard drake" },
+      { key: "era", label: "Era or decade", placeholder: "1930s", short: true },
+    ],
+  },
+  {
     key: "other_sports", emoji: "🏅", group: "sports", label: "Other sports", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
     fields: [
       { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Game-used", "Game-worn jersey", "Replica jersey", "Ball or puck", "Helmet", "Bobblehead", "Figure", "Photo", "Program", "Ticket stub", "Pennant", "Poster", "Plaque", "Pin", "Other"], short: true },
       { key: "team", label: "Team", placeholder: "Team, school or club", short: true },
-      { key: "player", label: "Player or athlete", placeholder: "Muhammad Ali, Serena Williams" },
-      { key: "sport", label: "Sport", placeholder: "Boxing, tennis, Olympics", options: ["Boxing", "MMA", "Tennis", "Olympics", "College sports", "Lacrosse", "Bowling", "Horse racing", "Other"], short: true },
+      { key: "player", label: "Player or athlete", placeholder: "Tony Hawk" },
+      { key: "sport", label: "Sport", placeholder: "Lacrosse, bowling, cycling", options: ["Lacrosse", "Bowling", "Cycling", "Volleyball", "Skiing", "Skateboarding", "Rodeo", "Billiards", "Other"], short: true },
     ],
   },
   {
