@@ -624,3 +624,77 @@ export async function deleteMyAccount(_: FormState, f: FormData): Promise<FormSt
   revalidatePath("/", "layout");
   redirect("/?deleted=1");
 }
+
+// ---------- shelves ----------
+// Limits and content rules are also enforced in the database (supabase/migrations/0030_shelves.sql).
+const shelfError = (msg: string) =>
+  msg.includes("SHELF_LIMIT") ? "You can have up to 50 shelves."
+  : msg.includes("SHELF_ITEM_LIMIT") ? "A shelf can hold up to 200 items."
+  : contentDbMessage(msg) ?? "Couldn't save. Try again.";
+
+export async function createShelf(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const name = str(f, "name").slice(0, 80);
+  if (!name) return { error: "Give the shelf a name." };
+  const blocked = checkFields([["the shelf name", name], ["the description", str(f, "description")]]);
+  if (blocked) return { error: blocked };
+  const { data, error } = await supabase.from("shelves")
+    .insert({ name, description: optStr(f, "description")?.slice(0, 500) ?? null, is_public: f.get("is_public") === "on" })
+    .select("id").single();
+  if (error) return { error: shelfError(error.message) };
+  redirect(`/shelves/${data.id}?new=1`);
+}
+
+export async function updateShelf(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const id = str(f, "id");
+  const blocked = checkFields([["the shelf name", str(f, "name")], ["the description", str(f, "description")]]);
+  if (blocked) return { error: blocked };
+  const { error } = await supabase.from("shelves").update({
+    name: str(f, "name").slice(0, 80) || "Untitled shelf", description: optStr(f, "description")?.slice(0, 500) ?? null,
+    is_public: f.get("is_public") === "on",
+  }).eq("id", id).eq("owner_id", user.id);
+  if (error) return { error: shelfError(error.message) };
+  revalidatePath(`/shelves/${id}`);
+  return { ok: "Saved" };
+}
+
+export async function deleteShelf(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  await supabase.from("shelves").delete().eq("id", str(f, "id")).eq("owner_id", user.id);
+  revalidatePath("/shelves");
+  redirect("/shelves");
+}
+
+// Puts the ticked items on the shelf, after what's already there.
+export async function addToShelf(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const id = str(f, "id");
+  const ids = f.getAll("item_id").map(String).filter(Boolean).slice(0, 200);
+  if (!ids.length) return { error: "Tick the items to add." };
+  const { data: last } = await supabase.from("shelf_items").select("position").eq("shelf_id", id).order("position", { ascending: false }).limit(1).maybeSingle();
+  const start = (last?.position ?? 0) + 1;
+  let added = 0;
+  for (const [i, item_id] of ids.entries()) {
+    const { error } = await supabase.from("shelf_items").insert({ shelf_id: id, item_id, position: start + i });
+    if (error && !error.message.includes("duplicate")) {
+      revalidatePath(`/shelves/${id}`);
+      return added ? { error: `Added ${added}, then: ${shelfError(error.message)}` } : { error: shelfError(error.message) };
+    }
+    if (!error) added++;
+  }
+  revalidatePath(`/shelves/${id}`);
+  return { ok: `Added ${added} item${added === 1 ? "" : "s"}.` };
+}
+
+export async function removeFromShelf(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const id = str(f, "id");
+  await supabase.from("shelf_items").delete().eq("shelf_id", id).eq("item_id", str(f, "item_id"));
+  revalidatePath(`/shelves/${id}`);
+}

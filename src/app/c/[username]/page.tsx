@@ -47,9 +47,10 @@ export default async function Collection({ params, searchParams }: { params: { u
     supabase.rpc("profile_location", { p_profile: profile.id }),
     user && !isOwner ? supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id).eq("blocked_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
     canView ? supabase.from("sets").select("id, name, category, is_public, set_entries(have)").eq("owner_id", profile.id).order("updated_at", { ascending: false }) : Promise.resolve({ data: [] }),
+    canView ? supabase.from("shelves").select("id, name, description, is_public, shelf_items(position, item_id)").eq("owner_id", profile.id).eq("is_public", true).order("created_at") : Promise.resolve({ data: [] }),
   ]);
   await checkQueries("Collector page", `/c/${params.username}`, loaded, user?.id);
-  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }] = loaded;
+  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }, { data: shelfRows }] = loaded;
   // Only public sets show here, so the owner sees what everyone else sees.
   const sets = summarize(((setRows ?? []) as Parameters<typeof summarize>[0]).filter((s) => s.is_public));
   const valueByCar = new Map(((values ?? []) as { item_id: string; value: number }[]).map((v) => [v.item_id, Number(v.value)]));
@@ -64,8 +65,13 @@ export default async function Collection({ params, searchParams }: { params: { u
   const all = visible.filter((c) => c.status === "owned");
   const wishlist = visible.filter((c) => c.status === "wishlist");
   const sold = visible.filter((c) => c.status === "sold");
-  const filter = ["sale", "wishlist", "sold", "sets"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
-  const base = filter === "sets" ? [] : filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : all;
+  // Public shelves, each with the items on it that others can see, in shelf order.
+  const byId = new Map(visible.map((i) => [i.id, i]));
+  const shelves = ((shelfRows ?? []) as { id: string; name: string; description: string | null; shelf_items: { position: number; item_id: string }[] }[])
+    .map((sh) => ({ ...sh, items: [...sh.shelf_items].sort((a, b) => a.position - b.position).map((x) => byId.get(x.item_id)).filter((i): i is Item => !!i) }))
+    .filter((sh) => sh.items.length);
+  const filter = ["sale", "wishlist", "sold", "sets", "shelves"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
+  const base = filter === "sets" || filter === "shelves" ? [] : filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : all;
   const tag = searchParams.tag?.toLowerCase();
   const words = searchWords(searchParams.q);
   const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
@@ -141,9 +147,17 @@ export default async function Collection({ params, searchParams }: { params: { u
             {forSale > 0 && <Link className={filter === "sale" ? "on" : undefined} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>}
             {wishlist.length > 0 && <Link className={filter === "wishlist" ? "on" : undefined} href={`/c/${profile.username}?filter=wishlist`}>Wishlist ({wishlist.length})</Link>}
             {sold.length > 0 && <Link className={filter === "sold" ? "on" : undefined} href={`/c/${profile.username}?filter=sold`}>Sold ({sold.length})</Link>}
+            {shelves.length > 0 && <Link className={filter === "shelves" ? "on" : undefined} href={`/c/${profile.username}?filter=shelves`}>🗄️ Shelves ({shelves.length})</Link>}
             {sets.length > 0 && <Link className={filter === "sets" ? "on" : undefined} href={`/c/${profile.username}?filter=sets`}>📋 Sets ({sets.length})</Link>}
           </nav>
           {filter === "sets" && <section className="set-grid">{sets.map((s) => <SetCard key={s.id} s={s} />)}</section>}
+          {filter === "shelves" && shelves.map((sh) => (
+            <section key={sh.id} className="shelf-row" aria-label={sh.name}>
+              <div className="sec-head"><h2>🗄️ {sh.name}</h2>{sh.items.length > 8 && <Link href={`/shelves/${sh.id}`}>See all {sh.items.length} →</Link>}</div>
+              {sh.description && <p className="hint">{sh.description}</p>}
+              <div className="gallery">{sh.items.slice(0, 8).map((c) => <ItemTile key={c.id} item={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</div>
+            </section>
+          ))}
           {base.length > 1 && (
             <form className="filterbar" role="search" action={`/c/${profile.username}`}>
               {filter && <input type="hidden" name="filter" value={filter} />}
@@ -173,7 +187,7 @@ export default async function Collection({ params, searchParams }: { params: { u
           )}
           {shown.length > grails.length ? (
             <section className="gallery">{shown.filter((c) => !grails.includes(c)).map((c) => <ItemTile key={c.id} item={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</section>
-          ) : grails.length || filter === "sets" ? null : (
+          ) : grails.length || filter === "sets" || filter === "shelves" ? null : (
             <div className="empty"><h3>Nothing here yet</h3>{isOwner && <Link className="btn primary" href="/collection/new">+ Add an item</Link>}</div>
           )}
           <Comments profileId={profile.id} path={`/c/${profile.username}`} />

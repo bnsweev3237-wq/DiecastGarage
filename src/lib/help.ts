@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.37";
+export const HELP_UPDATED_FOR = "0.38";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -50,7 +50,7 @@ export const HELP: HelpSection[] = [
       "- **Sort** by grails first, last modified, recently added, oldest, name, or highest value.",
       "- The **Box** column shows a ✓ for items with their original box or packaging.",
       "- Members see totals for cost, estimated value and gain or loss at the top, and a **Value over time** chart.",
-      "Other tools at the top of the page: **📋 Sets**, **♥ Saved**, **Bulk edit**, **Import** and **Export**.",
+      "Other tools at the top of the page: **📋 Sets**, **🗄️ Shelves**, **♥ Saved**, **Bulk edit**, **Import** and **Export**.",
     ],
   },
   {
@@ -63,6 +63,7 @@ export const HELP: HelpSection[] = [
       "- **Your value** overrides the estimate if you'd rather set it yourself.",
       "- **Condition adjustment (%)** takes a percent off the sold-listing estimate for wear, damage or missing parts. It isn't used when you enter your own value.",
       "- **Gain or loss** compares the value to what it cost. For sold items you see your **profit** instead.",
+      "- **📈 Value history** on each item: once you've logged 2 or more sold listings with a date, a chart shows each sale and the middle price each month, and how much it's gone up or down.",
       "- **📈 Value over time** on My collection records your collection's value once a day.",
       "- **🛡️ Collection report:** from the link under the chart, open a printable list of everything you own with photos, grading, cost and value. Use **Print or save as PDF** for insurance or your records.",
     ],
@@ -86,6 +87,16 @@ export const HELP: HelpSection[] = [
       "- Tick lines off as you get them. **🔗 Match my items** ticks off lines that match items already in your collection: a line matches when every word appears in one of your items.",
       "- Filter by **All**, **Have** or **Missing**, and search long checklists.",
       "- Public sets show on your page under a **Sets** tab, so others can see what you're missing. Untick \"Show on my public page\" to keep a set private.",
+    ],
+  },
+  {
+    id: "shelves", emoji: "🗄️", title: "Shelves",
+    body: [
+      "Shelves are display cases for your page. Group your favorite items however you like, like an Earnhardt shelf, your PSA 10s or a holiday display. Unlike sets, a shelf only holds items you already have.",
+      "- Go to **🗄️ Shelves** on My collection, name your shelf and create it.",
+      "- On the shelf's page, search your collection and tick the items to add. Use **Remove from shelf** to take one off; it stays in your collection.",
+      "- Public shelves show on your page under a **Shelves** tab. Untick \"Show on my public page\" to keep one private. Hidden items never show to others, even on a public shelf.",
+      "- You can have up to 50 shelves with up to 200 items each, and an item can be on more than one shelf.",
     ],
   },
   {
@@ -154,8 +165,8 @@ export const HELP: HelpSection[] = [
   {
     id: "plans", emoji: "⭐", title: "Free and member plans",
     body: [
-      "- **Free:** up to 25 items, 1 photo per item, grading details, ratings, tags, wishlist, sets, follows, comments and search.",
-      "- **Member:** unlimited items, up to 8 photos per item, what you paid and estimated values, gain or loss and profit, value over time, the collection report, and listing items for sale.",
+      "- **Free:** up to 25 items, 1 photo per item, grading details, ratings, tags, wishlist, sets, shelves, follows, comments and search.",
+      "- **Member:** unlimited items, up to 8 photos per item, what you paid and estimated values, gain or loss and profit, value history on each item, value over time, the collection report, and listing items for sale.",
       "Member features show a 🔒 on the free plan so you can see what's included. If a membership ends, everything already saved stays; you just can't add more of the member-only details. See your plan in [Settings](/settings#membership).",
     ],
   },

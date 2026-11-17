@@ -740,3 +740,26 @@ body > main { flex: 1 0 auto; width: 100%; }
 .badges li span { font-size: 15px; }
 .badges li.badges-help { background: none; border: 0; padding-left: 4px; font-weight: 600; }
 .badges li.badges-help a { color: var(--band-muted); }
+
+/* shelves */
+.shelf-card { display: flex; flex-direction: column; gap: 8px; padding: 12px 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel);
+  color: var(--ink); text-decoration: none; transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease; }
+.shelf-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 16px rgb(0 0 0 / .08); }
+.shelf-covers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; align-items: start; }
+.shelf-cover { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: var(--chip); display: block; }
+.shelf-cover.blank { border: 1px dashed var(--line); }
+.shelf-slot { display: flex; flex-direction: column; gap: 6px; }
+.shelf-slot form { font-size: 13px; padding-left: 4px; }
+.shelf-row { display: flex; flex-direction: column; gap: 10px; }
+.pick-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; max-height: 460px; overflow-y: auto; }
+.pick-list label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; }
+.pick-list label.on { border-color: var(--accent); background: var(--accent-soft); }
+.pick-img { width: 44px; height: 44px; flex: none; object-fit: cover; border-radius: 8px; background: var(--chip); display: block; }
+@media (prefers-reduced-motion: reduce) { .shelf-card:hover { transform: none; } }
+
+/* value history on an item */
+.trend svg { width: 100%; height: auto; display: block; }
+.trend .dot { fill: var(--accent); opacity: .55; }
+.trend .median { fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.trend .grid { stroke: var(--line); stroke-width: 1; }
+.trend .axis { fill: var(--muted); font-size: 11px; }

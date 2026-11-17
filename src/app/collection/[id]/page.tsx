@@ -5,6 +5,7 @@ import CompForm from "@/components/CompForm";
 import DeleteItem from "@/components/DeleteItem";
 import { MembersBadge } from "@/components/MembersOnly";
 import { isMember } from "@/lib/limits";
+import PriceTrend from "@/components/PriceTrend";
 import { removeComp } from "@/app/actions";
 import { getUser } from "@/lib/supabase/server";
 import { conditionLabel } from "@/lib/categories";
@@ -100,6 +101,7 @@ export default async function EditItem({ params, searchParams }: { params: { id:
                 </div>
               )) : <p className="hint">Nothing logged yet.</p>}
             </div>
+            {comps.length > 0 && <PriceTrend sales={comps} />}
             <CompForm itemId={c.id} />
           </section>
           </> : (
@@ -113,6 +115,7 @@ export default async function EditItem({ params, searchParams }: { params: { id:
               <ul className="members-list">
                 <li>Log real sold listings from eBay and Facebook Marketplace</li>
                 <li>See an estimated value, updated as you add sales</li>
+                <li>Watch its value history: how sold prices move month to month</li>
                 <li>Track what you paid, plus shipping, tax and fees if you like</li>
                 <li>See your gain or loss, and your profit when you sell</li>
                 <li>List items for sale, with up to 8 photos each</li>

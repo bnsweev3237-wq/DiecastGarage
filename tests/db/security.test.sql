@@ -10,6 +10,15 @@ begin
   perform t.ok(missing is null, 'tables without row level security: ' || coalesce(missing, ''));
 end $$;
 
+-- check: no table lets members or visitors empty it (row level security doesn't cover truncate)
+do $$
+declare open_tables text;
+begin
+  select string_agg(distinct table_name, ', ') into open_tables from information_schema.role_table_grants
+  where table_schema = 'public' and grantee in ('anon', 'authenticated') and privilege_type = 'TRUNCATE';
+  perform t.ok(open_tables is null, 'tables members can truncate: ' || coalesce(open_tables, ''));
+end $$;
+
 -- check: database functions that run with extra rights pin their search path (so they can't be tricked into running someone else's function)
 do $$
 declare missing text;

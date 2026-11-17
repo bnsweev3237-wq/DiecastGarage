@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.38",
+    date: "2026-11-17",
+    title: "Shelves and value history",
+    changes: [
+      "🗄️ Shelves: display cases for your page. Group your favorites however you like and they show under a Shelves tab on your page. Find them on My collection.",
+      "📈 Value history (members): each item's sold listings now show on a chart, with the middle price each month and how much it's gone up or down.",
+    ],
+  },
+  {
     version: "0.37",
     date: "2026-11-17",
     title: "Share cards and badges",

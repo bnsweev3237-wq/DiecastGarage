@@ -15,6 +15,7 @@ export async function runSiteCheck() {
     ["Search", db.from("items").select("id, owner:profiles!cars_owner_id_fkey!inner(username)").ilike("search_text", "%a%").limit(5)],
     ["Comments", db.from("comments").select("id, author:profiles!comments_author_id_fkey(username)").limit(5)],
     ["Public sets", db.from("sets").select("id, set_entries(have)").limit(5)],
+    ["Public shelves", db.from("shelves").select("id, shelf_items(position, item_id)").limit(5)],
     ["Item values", db.rpc("item_values", { p_owner: "00000000-0000-0000-0000-000000000000" })],
   ];
   if (one) checks.push(["Item page", db.from("items").select("*, owner:profiles!cars_owner_id_fkey(id, username)").eq("id", one.id).maybeSingle()]);
