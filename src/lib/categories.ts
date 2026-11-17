@@ -156,12 +156,29 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
+    key: "wrestling", emoji: "🤼", group: "sports", label: "Wrestling", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Signed photo, championship belt, figure", options: ["Autographed item", "Event-used", "Ring-worn gear", "Championship belt", "Replica belt", "Action figure", "Photo", "Program", "Ticket stub", "Poster", "Mask", "Pin", "Other"], short: true },
+      { key: "promotion", label: "Promotion", placeholder: "WWE, WCW, AEW", options: ["WWE", "WWF", "WCW", "ECW", "AEW", "TNA / Impact", "NWA", "AWA", "NJPW", "Other"], short: true },
+      { key: "player", label: "Wrestler", placeholder: "Hulk Hogan, Stone Cold Steve Austin" },
+      { key: "event", label: "Event", placeholder: "WrestleMania III" },
+    ],
+  },
+  {
+    key: "golf", emoji: "⛳", group: "sports", label: "Golf", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Signed flag, tournament-used ball", options: ["Autographed item", "Tournament-used", "Golf ball", "Club", "Flag", "Scorecard", "Photo", "Program", "Ticket or badge", "Poster", "Pin", "Other"], short: true },
+      { key: "player", label: "Golfer", placeholder: "Tiger Woods, Arnold Palmer" },
+      { key: "event", label: "Tournament", placeholder: "1997 Masters" },
+    ],
+  },
+  {
     key: "other_sports", emoji: "🏅", group: "sports", label: "Other sports", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
     fields: [
       { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Game-used", "Game-worn jersey", "Replica jersey", "Ball or puck", "Helmet", "Bobblehead", "Figure", "Photo", "Program", "Ticket stub", "Pennant", "Poster", "Plaque", "Pin", "Other"], short: true },
       { key: "team", label: "Team", placeholder: "Team, school or club", short: true },
-      { key: "player", label: "Player or athlete", placeholder: "Tiger Woods, Muhammad Ali" },
-      { key: "sport", label: "Sport", placeholder: "Golf, boxing, wrestling", options: ["Golf", "Boxing", "Wrestling", "MMA", "Tennis", "Olympics", "College sports", "Lacrosse", "Bowling", "Horse racing", "Other"], short: true },
+      { key: "player", label: "Player or athlete", placeholder: "Muhammad Ali, Serena Williams" },
+      { key: "sport", label: "Sport", placeholder: "Boxing, tennis, Olympics", options: ["Boxing", "MMA", "Tennis", "Olympics", "College sports", "Lacrosse", "Bowling", "Horse racing", "Other"], short: true },
     ],
   },
   {

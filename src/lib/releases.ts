@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.36.1",
+    date: "2026-11-17",
+    title: "Wrestling and golf",
+    changes: [
+      "🤼 Wrestling: type of item, promotion (WWE, WCW, AEW and more), wrestler and event.",
+      "⛳ Golf: type of item, golfer and tournament.",
+    ],
+  },
+  {
     version: "0.36",
     date: "2026-11-17",
     title: "Sports memorabilia",
