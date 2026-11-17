@@ -6,8 +6,11 @@ export const releases: Release[] = [
   {
     version: "0.35.3",
     date: "2026-11-17",
-    title: "More choices for trading cards",
-    changes: ["Trading cards: Sport or game now offers Racing, Wrestling and Other. You can still type anything."],
+    title: "Hollywood props, and more choices for trading cards",
+    changes: [
+      "🎬 New category: Hollywood props, with fields for the movie or TV show, the type of prop, and the character or actor.",
+      "Trading cards: Sport or game now offers Racing, Wrestling and Other. You can still type anything.",
+    ],
   },
   {
     version: "0.35.2",

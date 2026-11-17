@@ -247,6 +247,14 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
+    key: "hollywood_props", emoji: "🎬", group: "ebay", label: "Hollywood props", brandLabel: "Studio or production company", packagingLabel: "With original studio tags or packaging",
+    fields: [
+      { key: "production", label: "Movie or TV show", placeholder: "Jurassic Park, Star Trek: The Next Generation", short: true },
+      { key: "type", label: "Type", placeholder: "Hero prop, costume, script, set piece", options: ["Hero prop", "Stunt prop", "Background prop", "Costume", "Wardrobe piece", "Script", "Set piece", "Set decoration", "Crew item", "Replica"], short: true },
+      { key: "character", label: "Character or actor", placeholder: "Dr. Alan Grant, Harrison Ford" },
+    ],
+  },
+  {
     key: "kitchen", emoji: "🍳", group: "ebay", label: "Kitchen & home", brandLabel: "Maker", packagingLabel: "In original packaging",
     fields: [
       { key: "type", label: "Type", placeholder: "Cookie jar, Pyrex, cast iron, canisters", short: true },
@@ -450,7 +458,7 @@ export const CATEGORIES: Category[] = [
   },
   {
     key: "other", emoji: "⭐", group: "other", label: "Other", brandLabel: "Brand or maker", packagingLabel: "In original packaging",
-    fields: [{ key: "type", label: "What kind of collectible", placeholder: "Stamps, watches, movie props", short: true }],
+    fields: [{ key: "type", label: "What kind of collectible", placeholder: "Stamps, watches, militaria", short: true }],
   },
 ];
 
