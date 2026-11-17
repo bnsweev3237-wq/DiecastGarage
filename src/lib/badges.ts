@@ -16,8 +16,9 @@ export type BadgeStats = {
 
 export type Badge = { key: string; emoji: string; label: string; why: string };
 
-// Accounts made during the beta, before the public launch, keep this one for good.
-export const FOUNDING_BEFORE = "2027-01-01";
+// Everyone who joins before the official launch is a founding collector, for good. The launch date
+// isn't set yet, so for now every collector gets it. On launch, set it ("2027-03-01") and ship.
+export const LAUNCH_DATE: string | null = null;
 
 const ITEM_TIERS = [1000, 500, 250, 100, 50, 10];
 const FOLLOWER_TIERS = [1000, 250, 100, 50, 10];
@@ -25,7 +26,7 @@ const n = (x: number) => x.toLocaleString("en-US");
 
 export function badgesFor(s: BadgeStats): Badge[] {
   const out: Badge[] = [];
-  if (s.joined && s.joined < FOUNDING_BEFORE) out.push({ key: "founding", emoji: "🌱", label: "Founding collector", why: "Joined during the beta, before theCollectorHQ launched" });
+  if (LAUNCH_DATE === null || (s.joined && s.joined < LAUNCH_DATE)) out.push({ key: "founding", emoji: "🌱", label: "Founding collector", why: "Joined before theCollectorHQ officially launched" });
   if (s.beta) out.push({ key: "beta", emoji: "🧪", label: "Beta tester", why: "Helps test new features before everyone else" });
   const items = ITEM_TIERS.find((t) => s.items >= t);
   if (items) out.push({ key: "items", emoji: "📦", label: `${n(items)}+ items`, why: `Has ${n(items)} or more items in their collection` });

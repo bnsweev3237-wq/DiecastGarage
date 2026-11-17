@@ -15,6 +15,9 @@ Next.js 14 (App Router) + Supabase (Postgres, auth, storage) + Vercel. Live at h
 - GitHub runs both on every push (`.github/workflows/tests.yml`).
 - Errors from pages, the browser and the daily site check are logged to `app_errors` (see `src/lib/report-error.ts`) and shown in Admin → Errors. New ones are emailed to ALERT_EMAIL once Resend is set up. Wrap new page queries in `checkQueries(...)` so failed queries get logged instead of showing an empty page.
 
+## On the official launch
+- Set `LAUNCH_DATE` in `src/lib/badges.ts`. Until then everyone gets the Founding collector badge; after it, only people who joined before that date.
+
 ## Things that have bitten us
 - **Name the owner link when joining items to profiles.** Tables like `item_ratings` and `favorites` give Supabase a second path between `items` and `profiles`, so embeds must say which: `owner:profiles!cars_owner_id_fkey(...)` and `items!cars_owner_id_fkey(count)`. Same for comments (`!comments_author_id_fkey`, `!comments_profile_id_fkey`) and notifications.
 - Rules are enforced in the database as well as the app (content rules, free plan, member features, rate limits, blocking). Keep both in sync; comments in each file point to the other.

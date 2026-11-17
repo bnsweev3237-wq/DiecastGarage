@@ -121,7 +121,7 @@ export const HELP: HelpSection[] = [
     id: "badges", emoji: "🏅", title: "Badges",
     body: [
       "Badges show on your page under your name. They're earned automatically from what's on your public page, so hidden items and private details never count. Point at a badge to see what it's for.",
-      "- 🌱 **Founding collector:** joined during the beta, before theCollectorHQ launched. Yours for good.",
+      "- 🌱 **Founding collector:** joined before theCollectorHQ officially launches. Yours for good.",
       "- 🧪 **Beta tester:** helps test new features.",
       "- 📦 **Item milestones:** 10, 50, 100, 250, 500 and 1,000 items in your collection.",
       "- ⭐ **Grail hunter:** feature one of your items as a grail.",

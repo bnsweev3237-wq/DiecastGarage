@@ -9,7 +9,7 @@ export const releases: Release[] = [
     title: "Share cards and badges",
     changes: [
       "📣 Share cards: links to your page or any item now show a preview with the photo, name, grade, price and your username when shared on Facebook, X, texts and more.",
-      "🏅 Badges on collector pages: Founding collector, item and follower milestones, Grail hunter, Graded collection, Set complete, Crowd favorite, Explorer and Beta tester. See Help for how to earn each one.",
+      "🏅 Badges on collector pages: Founding collector (everyone who joins before the official launch), item and follower milestones, Grail hunter, Graded collection, Set complete, Crowd favorite, Explorer and Beta tester. See Help for how to earn each one.",
     ],
   },
   {
