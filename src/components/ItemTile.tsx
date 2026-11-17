@@ -22,6 +22,7 @@ export default function ItemTile({ item, owner, value }: Props) {
         {item.featured && <span className="tag-grail" title="Featured">★ Grail</span>}
         {item.status === "wishlist" && <span className="tag-status want">Wishlist</span>}
         {item.status === "sold" && <span className="tag-status sold">Sold</span>}
+        {item.open_to_trade && item.status === "owned" && <span className="tag-status trade">🔁 Trade</span>}
         {cert && <span className="tag-cert">{cert}</span>}
         {morePhotos > 0 && <span className="tag-count" title={`${morePhotos + 1} photos`}>📷 {morePhotos + 1}</span>}
         {item.for_sale && <span className="tag-sale">{item.asking_price != null ? money(Number(item.asking_price), 2) : "For sale"}</span>}

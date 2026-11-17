@@ -76,6 +76,14 @@ export default async function PublicItem({ params }: { params: { username: strin
               <p className="hint">Sales happen on eBay. Check the listing, seller feedback and shipping before you buy.</p>
             </section>
           )}
+          {car.open_to_trade && car.status === "owned" && (
+            <section className="forsale-box">
+              <span className="chip trade" style={{ alignSelf: "flex-start" }}>🔁 Open to trade</span>
+              {isOwner ? <p className="hint">Collectors with this on their wishlist will see it in their trade matches.</p>
+                : <p className="hint">@{car.owner.username} is open to trading this. Ask about a trade in the comments below{sellerLocation ? ` (they're in ${sellerLocation})` : ""}. Agree on shipping and condition before you send anything.</p>}
+              {!isOwner && <a className="btn small" href="#comments">Ask in the comments</a>}
+            </section>
+          )}
           {(car.featured || car.status !== "owned") && (
             <div className="item-flags">
               {car.featured && <span className="flag grail">★ Grail</span>}

@@ -191,6 +191,12 @@ export default function ItemForm({ userId, member, item, copyFrom, purchase, def
       )}
 
       {owned && (
+        <div className="forsale-box">
+          <label className="check" htmlFor="open_to_trade"><input id="open_to_trade" name="open_to_trade" type="checkbox" defaultChecked={item?.open_to_trade ?? false} /> 🔁 Open to trade</label>
+          <span className="hint">Shows on your page and in trade matches for collectors who have it on their wishlist. Talk trades over in the comments on the item.</span>
+        </div>
+      )}
+      {owned && (
         <div className={member ? "forsale-box" : "forsale-box locked-set"}>
           <label className="check" htmlFor="for_sale"><input id="for_sale" name="for_sale" type="checkbox" checked={member && forSale} disabled={!member}
             onChange={(e) => setForSale(e.target.checked)} /> Mark this item for sale {!member && <MembersBadge />}</label>

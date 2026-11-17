@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.39",
+    date: "2026-11-17",
+    title: "Trading",
+    changes: [
+      "🔁 Open to trade: tick it on any item you own, or many at once with Bulk edit. It shows on the item, and under an Open to trade tab on your page.",
+      "🔁 Trades page (on My collection): items up for trade that match your wishlist, your trade items on others' wishlists, and two-way matches where you each want something the other has.",
+      "🔁 Get a notification when something on your wishlist goes up for trade.",
+    ],
+  },
+  {
     version: "0.38",
     date: "2026-11-17",
     title: "Shelves and value history",

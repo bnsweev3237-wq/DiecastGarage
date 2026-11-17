@@ -41,6 +41,8 @@ export default function BulkEditor({ rows, tags }: { rows: BulkRow[]; tags: stri
             <select id="hidden" name="hidden" defaultValue=""><option value="">Keep as is</option><option value="yes">Hide from my public page</option><option value="no">Show on my public page</option></select></div>
           <div className="field"><label className="label" htmlFor="box">Original box or packaging</label>
             <select id="box" name="box" defaultValue=""><option value="">Keep as is</option><option value="yes">Has it</option><option value="no">Doesn&apos;t have it</option></select></div>
+          <div className="field"><label className="label" htmlFor="trade">🔁 Open to trade</label>
+            <select id="trade" name="trade" defaultValue=""><option value="">Keep as is</option><option value="yes">Open to trade</option><option value="no">Not open to trade</option></select></div>
         </div>
         <FormMessage state={state} />
         <div className="actions"><SubmitButton pending="Updating…">Apply to {picked.size} item{picked.size === 1 ? "" : "s"}</SubmitButton>

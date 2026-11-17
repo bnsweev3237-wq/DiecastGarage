@@ -70,8 +70,8 @@ export default async function Collection({ params, searchParams }: { params: { u
   const shelves = ((shelfRows ?? []) as { id: string; name: string; description: string | null; shelf_items: { position: number; item_id: string }[] }[])
     .map((sh) => ({ ...sh, items: [...sh.shelf_items].sort((a, b) => a.position - b.position).map((x) => byId.get(x.item_id)).filter((i): i is Item => !!i) }))
     .filter((sh) => sh.items.length);
-  const filter = ["sale", "wishlist", "sold", "sets", "shelves"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
-  const base = filter === "sets" || filter === "shelves" ? [] : filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : all;
+  const filter = ["sale", "trade", "wishlist", "sold", "sets", "shelves"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
+  const base = filter === "sets" || filter === "shelves" ? [] : filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : filter === "trade" ? all.filter((c) => c.open_to_trade) : all;
   const tag = searchParams.tag?.toLowerCase();
   const words = searchWords(searchParams.q);
   const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
@@ -86,6 +86,7 @@ export default async function Collection({ params, searchParams }: { params: { u
   // The Grails row shows above everything else only when nothing is filtered.
   const grails = !filter && !narrowed ? all.filter((c) => c.featured) : [];
   const forSale = all.filter((c) => c.for_sale).length;
+  const forTrade = all.filter((c) => c.open_to_trade).length;
   const name = profile.username;
   const followers = (counts as { followers: number } | null)?.followers ?? 0;
   const badges = canView && !underReview
@@ -145,6 +146,7 @@ export default async function Collection({ params, searchParams }: { params: { u
           <nav className="tabs" aria-label="Filter items">
             <Link className={!filter ? "on" : undefined} href={`/c/${profile.username}`}>Collection ({all.length})</Link>
             {forSale > 0 && <Link className={filter === "sale" ? "on" : undefined} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>}
+            {forTrade > 0 && <Link className={filter === "trade" ? "on" : undefined} href={`/c/${profile.username}?filter=trade`}>🔁 Open to trade ({forTrade})</Link>}
             {wishlist.length > 0 && <Link className={filter === "wishlist" ? "on" : undefined} href={`/c/${profile.username}?filter=wishlist`}>Wishlist ({wishlist.length})</Link>}
             {sold.length > 0 && <Link className={filter === "sold" ? "on" : undefined} href={`/c/${profile.username}?filter=sold`}>Sold ({sold.length})</Link>}
             {shelves.length > 0 && <Link className={filter === "shelves" ? "on" : undefined} href={`/c/${profile.username}?filter=shelves`}>🗄️ Shelves ({shelves.length})</Link>}

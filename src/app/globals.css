@@ -425,7 +425,8 @@ body > main { flex: 1 0 auto; width: 100%; }
 .seg label:hover { border-color: var(--accent); }
 .seg label.on { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
 .seg label.on span { color: color-mix(in srgb, var(--accent-ink) 80%, transparent); }
-.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { position: relative; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; left: 0; top: 0; }
 .seg label:has(input:focus-visible) { outline: 3px solid var(--blue); outline-offset: 2px; }
 @media (max-width: 560px) { .seg { grid-template-columns: minmax(0, 1fr); } }
 
@@ -763,3 +764,9 @@ body > main { flex: 1 0 auto; width: 100%; }
 .trend .median { fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
 .trend .grid { stroke: var(--line); stroke-width: 1; }
 .trend .axis { fill: var(--muted); font-size: 11px; }
+
+/* open to trade */
+.tag-status.trade { background: var(--strip); color: var(--strip-ink); }
+.chip.trade { background: var(--strip); color: var(--strip-ink); border-color: transparent; }
+.trade-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.trade-row:last-child { border-bottom: 0; }

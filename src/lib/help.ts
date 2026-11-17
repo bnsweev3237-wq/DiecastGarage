@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.38";
+export const HELP_UPDATED_FOR = "0.39";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -50,7 +50,7 @@ export const HELP: HelpSection[] = [
       "- **Sort** by grails first, last modified, recently added, oldest, name, or highest value.",
       "- The **Box** column shows a ✓ for items with their original box or packaging.",
       "- Members see totals for cost, estimated value and gain or loss at the top, and a **Value over time** chart.",
-      "Other tools at the top of the page: **📋 Sets**, **🗄️ Shelves**, **♥ Saved**, **Bulk edit**, **Import** and **Export**.",
+      "Other tools at the top of the page: **📋 Sets**, **🗄️ Shelves**, **🔁 Trades**, **♥ Saved**, **Bulk edit**, **Import** and **Export**.",
     ],
   },
   {
@@ -71,7 +71,7 @@ export const HELP: HelpSection[] = [
   {
     id: "bulk-import", emoji: "📥", title: "Bulk edit, import and export",
     body: [
-      "**Bulk edit** (on My collection): tick items, then add or remove tags, move them to a category, set where they're stored, hide or show them, or mark them boxed, all at once. Anything you leave empty stays as it is.",
+      "**Bulk edit** (on My collection): tick items, then add or remove tags, move them to a category, set where they're stored, hide or show them, mark them boxed, or mark them open to trade, all at once. Anything you leave empty stays as it is.",
       "**Import** (on My collection): add up to 500 items at a time from a spreadsheet.",
       "- Save your spreadsheet as **CSV** (Excel: File → Save As → CSV; Google Sheets: File → Download → CSV).",
       "- Choose the file. We match each column for you; change any that are wrong or choose Skip.",
@@ -106,6 +106,17 @@ export const HELP: HelpSection[] = [
       "- **List an item for sale (members):** list it on eBay first, then edit the item, tick **Mark this item for sale** and paste the eBay listing link. Add an asking price if you like. It shows on the [For sale](/for-sale) page.",
       "- When it sells, set the item's status to **Sold** and enter what it sold for, so you can see your profit.",
       "- **Wishlist:** add things you're hunting for with **+ Wishlist** on My collection. When someone lists a matching item for sale, you get a 🎯 notification.",
+    ],
+  },
+  {
+    id: "trades", emoji: "🔁", title: "Trading",
+    body: [
+      "Trading is free for everyone. theCollectorHQ helps you find trades; you work out the details with the other collector.",
+      "- **Mark items open to trade:** tick **🔁 Open to trade** on an item you own (or use Bulk edit for many at once). It gets a 🔁 Trade label and shows under an **Open to trade** tab on your page.",
+      "- **Trade matches:** the [Trades](/trades) page shows items up for trade that match your wishlist, your trade items that are on other collectors' wishlists, and **two-way matches**, where you each have something the other wants. Matching works like wishlist alerts: same category, and every word of the wishlist name appears in the item's details.",
+      "- **Alerts:** when someone marks an item open to trade that matches your wishlist, you get a 🔁 notification.",
+      "- **Making the trade:** ask in the comments on the item. Agree on condition, photos and shipping before anything is sent, and keep to theCollectorHQ's rules: no phone numbers, emails or payment apps in comments.",
+      "- Selling an item or moving it to your wishlist takes it off trade automatically.",
     ],
   },
   {

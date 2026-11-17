@@ -81,6 +81,7 @@ function parseItem(f: FormData, userId: string, member: boolean, extraPhotosBefo
       photos: photos.slice(1),
       search_terms: optStr(f, "search_terms"),
       for_sale: forSale,
+      open_to_trade: status === "owned" && f.get("open_to_trade") === "on",
       ebay_url: ebayUrl,
       asking_price: forSale ? num(f, "asking_price") : null,
       status,
@@ -142,7 +143,7 @@ const dbError = (message: string) =>
 async function emailWishlistMatches(supabaseItemId: string) {
   try {
     const { createAdminClient } = await import("@/lib/supabase/admin");
-    const { data } = await createAdminClient().from("notifications").select("id").eq("item_id", supabaseItemId).eq("kind", "wishlist_match").is("emailed_at", null);
+    const { data } = await createAdminClient().from("notifications").select("id").eq("item_id", supabaseItemId).in("kind", ["wishlist_match", "trade_match"]).is("emailed_at", null);
     if (data?.length) await emailNotificationIds(data.map((r) => r.id));
   } catch { /* best effort */ }
 }
@@ -155,7 +156,7 @@ export async function createItem(_: FormState, f: FormData): Promise<FormState> 
   const { data, error } = await supabase.from("items").insert(parsed.item).select("id").single();
   if (error) return { error: dbError(error.message) };
   await supabase.from("item_purchases").insert({ item_id: data.id, ...parsed.purchase });
-  if (parsed.item.for_sale) await emailWishlistMatches(data.id);
+  if (parsed.item.for_sale || parsed.item.open_to_trade) await emailWishlistMatches(data.id);
   revalidatePath("/collection");
   redirect(`/collection/${data.id}?added=1`);
 }
@@ -176,7 +177,7 @@ export async function updateItem(_: FormState, f: FormData): Promise<FormState> 
   if (gone.length) await supabase.storage.from("car-photos").remove(withThumbs(gone));
   revalidatePath(`/collection/${id}`);
   revalidatePath("/collection");
-  if (parsed.item.for_sale) await emailWishlistMatches(id);
+  if (parsed.item.for_sale || parsed.item.open_to_trade) await emailWishlistMatches(id);
   // Back to the list, which shows a "Saved" message.
   redirect(`/collection?saved=${encodeURIComponent(parsed.item.title.slice(0, 80))}`);
 }
@@ -266,11 +267,12 @@ export async function bulkEditItems(_: FormState, f: FormData): Promise<FormStat
   const category = CATEGORIES.some((c) => c.key === str(f, "category")) ? str(f, "category") : null;
   const hidden = str(f, "hidden"); // "", "yes" or "no"
   const box = str(f, "box");
+  const trade = str(f, "trade"); // "", "yes" or "no"; only owned items can be open to trade
   const storage = str(f, "storage_location").slice(0, 100);
   const clearStorage = f.get("clear_storage") === "on";
   const blocked = checkFields([["tags", addTags.join(", ")]]);
   if (blocked) return { error: blocked };
-  if (!addTags.length && !removeTag && !category && !hidden && !box && !storage && !clearStorage)
+  if (!addTags.length && !removeTag && !category && !hidden && !box && !trade && !storage && !clearStorage)
     return { error: "Choose at least one change to make." };
 
   const { data: rows } = await supabase.from("items").select("id, tags").eq("owner_id", user.id).in("id", ids);
@@ -285,6 +287,7 @@ export async function bulkEditItems(_: FormState, f: FormData): Promise<FormStat
     if (category) update.category = category;
     if (hidden) update.is_hidden = hidden === "yes";
     if (box) update.in_package = box === "yes";
+    if (trade) update.open_to_trade = trade === "yes";
     if (Object.keys(update).length) {
       const { error } = await supabase.from("items").update(update).eq("id", r.id).eq("owner_id", user.id);
       if (error) return { error: contentDbMessage(error.message) ?? `Stopped after ${changed} items: couldn't save one. Try again.` };

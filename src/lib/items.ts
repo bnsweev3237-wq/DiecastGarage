@@ -13,6 +13,7 @@ export type Item = {
   photo_path: string | null;
   search_terms: string | null;
   for_sale: boolean;
+  open_to_trade: boolean;
   ebay_url: string | null;
   asking_price: number | null;
   created_at: string;

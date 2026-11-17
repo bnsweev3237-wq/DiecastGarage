@@ -37,7 +37,8 @@ async function send(db: ReturnType<typeof createAdminClient>, rows: Row[]) {
   const from = process.env.EMAIL_FROM!;
   for (const n of rows) {
     const fromTeam = n.kind === "removed_item" || n.kind === "removed_photo";
-    const important = fromTeam || n.kind === "wishlist_match"; // never held back by the 10-minute limit
+    const match = n.kind === "wishlist_match" || n.kind === "trade_match";
+    const important = fromTeam || match; // never held back by the 10-minute limit
     const [{ data: prefs }, { data: recent }] = await Promise.all([
       db.from("profile_private").select("email_notifications").eq("id", n.user_id).maybeSingle(),
       important ? Promise.resolve({ data: [] })
@@ -50,18 +51,20 @@ async function send(db: ReturnType<typeof createAdminClient>, rows: Row[]) {
     if (!to) continue;
 
     const actor = `@${n.actor?.username ?? "someone"}`;
-    const title = n.kind === "wishlist_match" ? n.item?.title : n.subject ?? n.item?.title;
+    const title = match ? n.item?.title : n.subject ?? n.item?.title;
     const what = n.kind === "wishlist_match" ? `Something on your wishlist is for sale: ${title ? `“${title}”` : "an item"}`
+      : n.kind === "trade_match" ? `Something on your wishlist is up for trade: ${title ? `“${title}”` : "an item"}`
       : n.kind === "removed_item" ? `Our team removed your item${title ? ` “${title}”` : ""}`
       : n.kind === "removed_photo" ? `Our team removed a photo from${title ? ` “${title}”` : " your item"}`
       : n.kind === "reply" ? `${actor} replied to your comment`
       : n.kind === "comment_item" ? `${actor} commented on your ${title ? `“${title}”` : "item"}`
       : `${actor} commented on your collection`;
     const body = (n.kind === "wishlist_match" ? `${actor} is selling “${n.item?.title ?? "an item"}”, which matches “${n.subject}” on your wishlist.`
+      : n.kind === "trade_match" ? `${actor} is open to trading “${n.item?.title ?? "an item"}”, which matches “${n.subject}” on your wishlist. Ask about a trade in the comments on the item.`
       : fromTeam ? n.message : n.comment?.body)?.slice(0, 600) ?? "";
     const link = n.kind === "removed_item" ? `${SITE}/collection`
       : `${SITE}/c/${n.owner?.username}${n.item_id ? `/${n.item_id}` : ""}${fromTeam || n.kind === "wishlist_match" ? "" : "#comments"}`;
-    const button = n.kind === "removed_item" ? "Go to my collection" : n.kind === "wishlist_match" ? "See the listing" : fromTeam ? "See the item" : "See it and reply";
+    const button = n.kind === "removed_item" ? "Go to my collection" : n.kind === "wishlist_match" ? "See the listing" : n.kind === "trade_match" ? "See it and ask about a trade" : fromTeam ? "See the item" : "See it and reply";
     const intro = fromTeam ? "Here's why:" : `${what}:`;
 
     const res = await fetch("https://api.resend.com/emails", {
