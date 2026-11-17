@@ -43,6 +43,7 @@ export default async function EditItem({ params, searchParams }: { params: { id:
       <div className="head">
         <div><Link href="/collection">← My collection</Link><h1>{c.title}</h1></div>
         <div className="actions">
+          <Link className="btn primary" href={c.status === "wishlist" ? "/collection/new?status=wishlist" : "/collection/new"}>＋ Add a new item</Link>
           <Link className="btn" href={`/collection/new?copy=${c.id}`}>＋ Add another like this</Link>
           {me && <Link className="btn" href={`/c/${me.username}/${c.id}`}>View public page</Link>}
         </div>

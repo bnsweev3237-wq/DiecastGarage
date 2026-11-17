@@ -36,7 +36,7 @@ export const HELP: HelpSection[] = [
       "- **Tags** are your own labels, separated by commas, like Earnhardt, PC, Trade bait.",
       "- **Description** and **Provenance and history** for anything worth knowing.",
       "- **Hide this item** keeps it off your public page; only you will see it.",
-      "Tip: on any of your items, **＋ Add another like this** starts a new item with the same details filled in. Change what's different, add photos and save.",
+      "On any of your items, **＋ Add a new item** starts a blank one, and **＋ Add another like this** starts a new item with the same details filled in. Change what's different, add photos and save.",
       "After you click **Save changes**, you go back to My collection with a note saying what was saved.",
     ],
   },
