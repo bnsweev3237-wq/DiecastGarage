@@ -1,6 +1,6 @@
 import { CATEGORY_GROUPS, categoriesIn } from "@/lib/categories";
 
-// <option>s for a category <select>, grouped into Popular, More collectibles and Something else.
+// <option>s for a category <select>, grouped into Popular, Sports memorabilia, More collectibles and Something else.
 export default function CategoryOptions() {
   return (
     <>

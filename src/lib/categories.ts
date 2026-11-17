@@ -16,7 +16,7 @@ export type Category = {
   key: string;
   label: string;
   emoji: string; // shown on category buttons and item stickers
-  group: "popular" | "ebay" | "other";
+  group: "popular" | "sports" | "ebay" | "other";
   brandLabel: string; // what "brand" means for this hobby
   packagingLabel: string; // what "in original packaging" means for this hobby
   fields: FieldDef[];
@@ -104,6 +104,64 @@ export const CATEGORIES: Category[] = [
       { key: "platform", label: "Platform", placeholder: "Nintendo 64", options: ["NES", "SNES", "Nintendo 64", "GameCube", "Game Boy", "Switch", "PlayStation", "PS2", "Xbox", "Sega Genesis"], short: true },
       { key: "region", label: "Region", options: ["NTSC (US)", "PAL (Europe)", "NTSC-J (Japan)"] },
       { key: "completeness", label: "Completeness", options: ["Loose", "Complete in box", "New / sealed"], short: true },
+    ],
+  },
+  {
+    key: "baseball", emoji: "⚾", group: "sports", label: "Baseball", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Game-used", "Game-worn jersey", "Replica jersey", "Ball or puck", "Helmet", "Bobblehead", "Figure", "Photo", "Program", "Ticket stub", "Pennant", "Poster", "Plaque", "Pin", "Other"], short: true },
+      { key: "team", label: "Team", placeholder: "New York Yankees", short: true },
+      { key: "player", label: "Player", placeholder: "Babe Ruth, Shohei Ohtani" },
+    ],
+  },
+  {
+    key: "basketball", emoji: "🏀", group: "sports", label: "Basketball", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Game-used", "Game-worn jersey", "Replica jersey", "Ball or puck", "Helmet", "Bobblehead", "Figure", "Photo", "Program", "Ticket stub", "Pennant", "Poster", "Plaque", "Pin", "Other"], short: true },
+      { key: "team", label: "Team", placeholder: "Chicago Bulls", short: true },
+      { key: "player", label: "Player", placeholder: "Michael Jordan" },
+    ],
+  },
+  {
+    key: "football", emoji: "🏈", group: "sports", label: "Football", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Game-used", "Game-worn jersey", "Replica jersey", "Ball or puck", "Helmet", "Bobblehead", "Figure", "Photo", "Program", "Ticket stub", "Pennant", "Poster", "Plaque", "Pin", "Other"], short: true },
+      { key: "team", label: "Team", placeholder: "Green Bay Packers", short: true },
+      { key: "player", label: "Player", placeholder: "Brett Favre" },
+    ],
+  },
+  {
+    key: "hockey", emoji: "🏒", group: "sports", label: "Hockey", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Game-used", "Game-worn jersey", "Replica jersey", "Ball or puck", "Helmet", "Bobblehead", "Figure", "Photo", "Program", "Ticket stub", "Pennant", "Poster", "Plaque", "Pin", "Other"], short: true },
+      { key: "team", label: "Team", placeholder: "Edmonton Oilers", short: true },
+      { key: "player", label: "Player", placeholder: "Wayne Gretzky" },
+    ],
+  },
+  {
+    key: "soccer", emoji: "⚽", group: "sports", label: "Soccer", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Game-used", "Game-worn jersey", "Replica jersey", "Ball or puck", "Helmet", "Bobblehead", "Figure", "Photo", "Program", "Ticket stub", "Pennant", "Poster", "Plaque", "Pin", "Other"], short: true },
+      { key: "team", label: "Team", placeholder: "Manchester United, LA Galaxy", short: true },
+      { key: "player", label: "Player", placeholder: "Pelé, Lionel Messi" },
+    ],
+  },
+  {
+    key: "motorsports", emoji: "🏁", group: "sports", label: "Motorsports", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Race-used", "Driver suit", "Helmet", "Sheet metal", "Lug nut", "Hero card", "Flag", "Photo", "Program", "Ticket or credential", "Pennant", "Poster", "Pin", "Other"], short: true },
+      { key: "team", label: "Team", placeholder: "Richard Childress Racing #3", short: true },
+      { key: "player", label: "Driver", placeholder: "Dale Earnhardt" },
+      { key: "series", label: "Series", placeholder: "NASCAR Cup Series", options: ["NASCAR Cup Series", "NASCAR Xfinity Series", "NASCAR Truck Series", "Formula 1", "IndyCar", "NHRA", "IMSA", "Sprint cars", "Dirt late models", "MotoGP", "Supercross", "Other"], short: true },
+    ],
+  },
+  {
+    key: "other_sports", emoji: "🏅", group: "sports", label: "Other sports", brandLabel: "Brand or maker", packagingLabel: "In a case or display",
+    fields: [
+      { key: "type", label: "Type", placeholder: "Autographed ball, jersey, bobblehead", options: ["Autographed item", "Game-used", "Game-worn jersey", "Replica jersey", "Ball or puck", "Helmet", "Bobblehead", "Figure", "Photo", "Program", "Ticket stub", "Pennant", "Poster", "Plaque", "Pin", "Other"], short: true },
+      { key: "team", label: "Team", placeholder: "Team, school or club", short: true },
+      { key: "player", label: "Player or athlete", placeholder: "Tiger Woods, Muhammad Ali" },
+      { key: "sport", label: "Sport", placeholder: "Golf, boxing, wrestling", options: ["Golf", "Boxing", "Wrestling", "MMA", "Tennis", "Olympics", "College sports", "Lacrosse", "Bowling", "Horse racing", "Other"], short: true },
     ],
   },
   {
@@ -464,6 +522,7 @@ export const CATEGORIES: Category[] = [
 
 export const CATEGORY_GROUPS: { key: Category["group"]; label: string }[] = [
   { key: "popular", label: "Popular" },
+  { key: "sports", label: "Sports memorabilia" },
   { key: "ebay", label: "More collectibles" },
   { key: "other", label: "Something else" },
 ];

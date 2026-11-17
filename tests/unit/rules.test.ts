@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { compActive, isMember, FREE_ITEM_LIMIT, FREE_PHOTO_LIMIT } from "@/lib/limits";
-import { CATEGORIES, categoryOf, cleanAttributes, summary } from "@/lib/categories";
+import { CATEGORIES, categoryOf, cleanAttributes, summary, CATEGORY_GROUPS } from "@/lib/categories";
 import { matchesAll, searchWords } from "@/lib/search";
 import { releases } from "@/lib/releases";
 import { HELP, HELP_UPDATED_FOR } from "@/lib/help";
@@ -27,7 +27,7 @@ describe("categories", () => {
   it("every category has an emoji, a group and unique field keys", () => {
     for (const c of CATEGORIES) {
       expect(c.emoji.length).toBeGreaterThan(0);
-      expect(["popular", "ebay", "other"]).toContain(c.group);
+      expect(CATEGORY_GROUPS.map((g) => g.key)).toContain(c.group);
       expect(new Set(c.fields.map((f) => f.key)).size).toBe(c.fields.length);
     }
   });

@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.35";
+export const HELP_UPDATED_FOR = "0.36";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -30,6 +30,7 @@ export const HELP: HelpSection[] = [
       "- **Status:** In my collection, Wishlist (something you're hunting for) or Sold (keep it on record with what you sold it for).",
       "- **Photos:** the first photo is the cover. Tap ★ on another photo to make it the cover, or ✕ to remove it. Free accounts get 1 photo per item; members get up to 8.",
       "- **Category and details:** each category asks for its own details, like set and card number for cards, or scale and series for diecast.",
+      "- **Sports:** sports cards go under **Trading cards**. Everything else, like signed balls, jerseys, helmets, bobbleheads and programs, goes under **Sports memorabilia**: Baseball, Basketball, Football, Hockey, Soccer, Motorsports or Other sports. Each asks for the type of item, the team and the player or driver.",
       "- **Condition, box or packaging, quantity, and edition or serial number.**",
       "- **Graded or COA:** tick the box to add who graded or certified it, the grade and the cert number. PSA, PCGS, NGC and CGC numbers get a Verify link others can use.",
       "- **My rating** (1 to 5 stars) is your own opinion of the item. **Feature it** marks it as one of your grails, shown first on your page.",

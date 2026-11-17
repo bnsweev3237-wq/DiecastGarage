@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.36",
+    date: "2026-11-17",
+    title: "Sports memorabilia",
+    changes: [
+      "New Sports memorabilia categories: ⚾ Baseball, 🏀 Basketball, 🏈 Football, 🏒 Hockey, ⚽ Soccer, 🏁 Motorsports and 🏅 Other sports.",
+      "Each asks for the type of item (signed ball, jersey, helmet, bobblehead and more), the team and the player. Motorsports also asks for the series and Other sports for the sport.",
+      "Sports cards stay under Trading cards.",
+    ],
+  },
+  {
     version: "0.35.3",
     date: "2026-11-17",
     title: "Hollywood props, and more choices for trading cards",
