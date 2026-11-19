@@ -78,6 +78,7 @@ export default async function EventPage({ params, searchParams }: { params: { id
                 <form action={toggleGoing}>
                   <input type="hidden" name="id" value={e.id} /><input type="hidden" name="going" value={imGoing ? "0" : "1"} />
                   <SubmitButton className={imGoing ? "btn" : "btn primary"} pending="…">{imGoing ? "✓ I'm going (undo)" : "I'm going"}</SubmitButton>
+                  {imGoing && <Link className="btn small" href="/show-mode" style={{ marginLeft: 8 }}>🎪 Show mode</Link>}
                 </form>
               ) : <Link className="btn primary" href={`/login?next=/shows/${e.id}`}>Sign in to say you&apos;re going</Link>
             )}

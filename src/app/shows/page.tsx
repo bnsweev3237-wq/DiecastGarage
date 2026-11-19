@@ -40,7 +40,10 @@ export default async function Shows({ searchParams }: { searchParams: { region?:
       <div className="head">
         <div><h1>📅 Card shows &amp; swap meets</h1>
           <p>Upcoming shows, swap meets, conventions and meetups, posted by collectors. Mark the ones you&apos;re going to.</p></div>
-        <Link className="btn primary" href={user ? "/shows/new" : "/login?next=/shows/new"}>+ Post an event</Link>
+        <div className="actions">
+          {user && <Link className="btn" href="/show-mode">🎪 Show mode</Link>}
+          <Link className="btn primary" href={user ? "/shows/new" : "/login?next=/shows/new"}>+ Post an event</Link>
+        </div>
       </div>
       <form className="filterbar" action="/shows">
         <select name="region" defaultValue={region ?? ""} aria-label="State or region">

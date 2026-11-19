@@ -51,7 +51,10 @@ export default async function Trades() {
       <div className="head">
         <div><Link href="/collection">← My collection</Link><h1>🔁 Trades</h1>
           <p>Matches between what you&apos;re trading and other collectors&apos; wishlists, and the other way around. Talk trades over in the comments on the item.</p></div>
-        {me && <Link className="btn" href={`/c/${me.username}?filter=trade`}>My items open to trade ({myTradeCount ?? 0})</Link>}
+        <div className="actions">
+          <Link className="btn" href="/collection/duplicates">🧩 Find duplicates</Link>
+          {me && <Link className="btn" href={`/c/${me.username}?filter=trade`}>My items open to trade ({myTradeCount ?? 0})</Link>}
+        </div>
       </div>
 
       {(!myTradeCount || !myWishCount) && (

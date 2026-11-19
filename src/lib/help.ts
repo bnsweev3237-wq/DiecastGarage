@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.40";
+export const HELP_UPDATED_FOR = "0.41";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -50,7 +50,7 @@ export const HELP: HelpSection[] = [
       "- **Sort** by grails first, last modified, recently added, oldest, name, or highest value.",
       "- The **Box** column shows a ✓ for items with their original box or packaging.",
       "- Members see totals for cost, estimated value and gain or loss at the top, and a **Value over time** chart.",
-      "Other tools at the top of the page: **📋 Sets**, **🗄️ Shelves**, **🔁 Trades**, **♥ Saved**, **Bulk edit**, **Import** and **Export**.",
+      "Other tools at the top of the page: **📋 Sets**, **🗄️ Shelves**, **🔁 Trades**, **🧩 Duplicates**, **🎪 Show mode**, **♥ Saved**, **Bulk edit**, **Import** and **Export**.",
     ],
   },
   {
@@ -117,6 +117,7 @@ export const HELP: HelpSection[] = [
       "- **Alerts:** when someone marks an item open to trade that matches your wishlist, you get a 🔁 notification.",
       "- **Making the trade:** ask in the comments on the item. Agree on condition, photos and shipping before anything is sent, and keep to theCollectorHQ's rules: no phone numbers, emails or payment apps in comments.",
       "- Selling an item or moving it to your wishlist takes it off trade automatically.",
+      "- **🧩 Duplicates** (on My collection or Trades) finds things you have more than once: entries with the same name, category and grade, or a quantity over 1. One tap marks the extras open to trade.",
     ],
   },
   {
@@ -126,6 +127,7 @@ export const HELP: HelpSection[] = [
       "- **Find one:** filter by state, by what you collect, or by kind of event. Open an event for the dates, hours, address (with a map link), admission and the organizer's website.",
       "- **Going?** Tap **I'm going** so others know. Your page is listed under the event if it's public. Tick **Only ones I'm going to** to see your own plans.",
       "- **Post one:** tap **+ Post an event**, fill in the date, place and what you'll find there. You can edit it later, or tick **This event is cancelled** if it's called off.",
+      "- **🎪 Show mode:** one phone-friendly page with your wishlist (with your target price as the most you'll pay), the pieces missing from your sets, and your trade bait with photos, plus your next show. Search it, tap **Got it!** to move a wishlist item into your collection, or print it. Open it once before you leave and it keeps working with no signal.",
       "- Events follow the same community rules as everything else: the website field is the place for a link, and descriptions can't include phone numbers or emails. Use **Report** on anything that looks fake.",
     ],
   },

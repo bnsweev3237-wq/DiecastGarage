@@ -785,3 +785,23 @@ export async function toggleGoing(f: FormData) {
   revalidatePath(`/shows/${id}`);
   revalidatePath("/shows");
 }
+
+// ---------- duplicate finder and show mode ----------
+// Marks the given items (your own, owned) open to trade.
+export async function openExtrasToTrade(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const ids = f.getAll("ids").map(String).filter(Boolean).slice(0, 200);
+  if (ids.length) await supabase.from("items").update({ open_to_trade: true }).in("id", ids).eq("owner_id", user.id).eq("status", "owned");
+  revalidatePath("/collection/duplicates");
+  revalidatePath("/trades");
+}
+
+// "Got it!" from show mode: a wishlist item moves into the collection.
+export async function gotWishlistItem(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  await supabase.from("items").update({ status: "owned" }).eq("id", str(f, "id")).eq("owner_id", user.id).eq("status", "wishlist");
+  revalidatePath("/show-mode");
+  revalidatePath("/collection");
+}

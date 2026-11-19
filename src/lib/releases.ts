@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.41",
+    date: "2026-11-19",
+    title: "Show mode and duplicates",
+    changes: [
+      "🎪 Show mode: your wishlist, missing set pieces and trade bait on one phone-friendly page, with your next show at the top. Search it, mark wishlist items Got it!, or print it. It keeps working without signal once opened.",
+      "🧩 Duplicates: find things you have more than once and mark the extras open to trade in one tap.",
+    ],
+  },
+  {
     version: "0.40",
     date: "2026-11-19",
     title: "Card show and swap meet calendar",

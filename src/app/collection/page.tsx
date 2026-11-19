@@ -111,7 +111,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
         </div>
         {atLimit ? <Link className="btn flag" href="/settings#membership">Become a member to add more</Link>
           : <div className="actions">
-              <Link className="btn" href="/sets">📋 Sets</Link><Link className="btn" href="/shelves">🗄️ Shelves</Link><Link className="btn" href="/trades">🔁 Trades</Link>
+              <Link className="btn" href="/sets">📋 Sets</Link><Link className="btn" href="/shelves">🗄️ Shelves</Link><Link className="btn" href="/trades">🔁 Trades</Link><Link className="btn" href="/collection/duplicates">🧩 Duplicates</Link><Link className="btn" href="/show-mode">🎪 Show mode</Link>
               <Link className="btn" href="/saved">♥ Saved</Link>
               <Link className="btn" href="/collection/bulk">Bulk edit</Link>
               <Link className="btn" href="/collection/import">Import</Link>
