@@ -93,6 +93,17 @@ export async function adminDeleteEvent(f: FormData) {
   refresh();
 }
 
+export async function adminDeleteReview(f: FormData) {
+  const { adminId, db } = await requireAdmin();
+  const id = str(f, "id");
+  const { data: r } = await db.from("trade_reviews").select("reviewer_id, note").eq("id", id).maybeSingle();
+  if (!r) return;
+  await db.from("trade_reviews").delete().eq("id", id);
+  await closeReports(db, adminId, id);
+  await logAdminAction(db, adminId, "delete_review", r.reviewer_id, { note: r.note });
+  refresh();
+}
+
 const PROFILE_FIELDS = {
   bio: { bio: null },
   links: { facebook_url: null, x_url: null, instagram_url: null, ebay_url: null },
@@ -141,7 +152,7 @@ export async function adminCloseReport(f: FormData) {
   await db.from("reports").update({ status, resolved_by: adminId, resolved_at: new Date().toISOString() })
     .eq("target_id", targetId).eq("status", "open");
   // Whatever was auto-hidden after 5 reports comes back once an admin has looked at it.
-  const table = { item: "items", comment: "comments", profile: "profiles", event: "events" }[str(f, "target_type")];
+  const table = { item: "items", comment: "comments", profile: "profiles", event: "events", review: "trade_reviews" }[str(f, "target_type")];
   if (table) await db.from(table).update({ under_review: false }).eq("id", targetId);
   await logAdminAction(db, adminId, status === "dismissed" ? "dismiss_report" : "resolve_report", str(f, "owner_id") || null, { type: str(f, "target_type") });
   revalidatePath("/admin", "layout");

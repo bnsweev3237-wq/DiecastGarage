@@ -8,7 +8,9 @@ import SocialLinks from "@/components/SocialLinks";
 import ReportButton from "@/components/ReportButton";
 import ConfirmAction from "@/components/ConfirmAction";
 import SetCard, { summarize } from "@/components/SetCard";
-import { blockUser, unblockUser } from "@/app/actions";
+import { blockUser, deleteTradeReview, unblockUser } from "@/app/actions";
+import TradeReviewForm from "@/components/TradeReviewForm";
+import SubmitButton from "@/components/SubmitButton";
 import { getUser } from "@/lib/supabase/server";
 import { money, type Item } from "@/lib/items";
 import { CATEGORIES, categoryOf } from "@/lib/categories";
@@ -49,11 +51,13 @@ export default async function Collection({ params, searchParams }: { params: { u
     supabase.rpc("profile_location", { p_profile: profile.id }),
     user && !isOwner ? supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id).eq("blocked_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
     canView ? supabase.from("sets").select("id, name, category, is_public, set_entries(have)").eq("owner_id", profile.id).order("updated_at", { ascending: false }) : Promise.resolve({ data: [] }),
+    canView ? supabase.from("trade_reviews").select("id, reviewer_id, positive, note, created_at, reviewer:profiles!trade_reviews_reviewer_id_fkey(username, avatar_path)").eq("reviewee_id", profile.id).order("created_at", { ascending: false }).limit(200) : Promise.resolve({ data: [] }),
+    user && !isOwner ? supabase.rpc("can_review_trader", { p_reviewer: user.id, p_reviewee: profile.id }) : Promise.resolve({ data: false }),
     canView ? supabase.from("goals").select("*").eq("owner_id", profile.id).eq("is_public", true).order("created_at") : Promise.resolve({ data: [] }),
     canView ? supabase.from("shelves").select("id, name, description, is_public, shelf_items(position, item_id)").eq("owner_id", profile.id).eq("is_public", true).order("created_at") : Promise.resolve({ data: [] }),
   ]);
   await checkQueries("Collector page", `/c/${params.username}`, loaded, user?.id);
-  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }, { data: goalRows }, { data: shelfRows }] = loaded;
+  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }, { data: reviewRows }, { data: canReview }, { data: goalRows }, { data: shelfRows }] = loaded;
   // Only public sets show here, so the owner sees what everyone else sees.
   const sets = summarize(((setRows ?? []) as Parameters<typeof summarize>[0]).filter((s) => s.is_public));
   const valueByCar = new Map(((values ?? []) as { item_id: string; value: number }[]).map((v) => [v.item_id, Number(v.value)]));
@@ -73,8 +77,8 @@ export default async function Collection({ params, searchParams }: { params: { u
   const shelves = ((shelfRows ?? []) as { id: string; name: string; description: string | null; shelf_items: { position: number; item_id: string }[] }[])
     .map((sh) => ({ ...sh, items: [...sh.shelf_items].sort((a, b) => a.position - b.position).map((x) => byId.get(x.item_id)).filter((i): i is Item => !!i) }))
     .filter((sh) => sh.items.length);
-  const filter = ["sale", "trade", "wishlist", "sold", "sets", "shelves"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
-  const base = filter === "sets" || filter === "shelves" ? [] : filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : filter === "trade" ? all.filter((c) => c.open_to_trade) : all;
+  const filter = ["sale", "trade", "wishlist", "sold", "sets", "shelves", "reviews"].includes(searchParams.filter ?? "") ? searchParams.filter : undefined;
+  const base = filter === "sets" || filter === "shelves" || filter === "reviews" ? [] : filter === "wishlist" ? wishlist : filter === "sold" ? sold : filter === "sale" ? all.filter((c) => c.for_sale) : filter === "trade" ? all.filter((c) => c.open_to_trade) : all;
   const tag = searchParams.tag?.toLowerCase();
   const words = searchWords(searchParams.q);
   const category = CATEGORIES.some((c) => c.key === searchParams.category) ? searchParams.category : undefined;
@@ -94,8 +98,12 @@ export default async function Collection({ params, searchParams }: { params: { u
   const followers = (counts as { followers: number } | null)?.followers ?? 0;
   // Public goals, with progress from what's on this page: public items and public sets.
   const goals = goalProgress((goalRows ?? []) as Goal[], visible, ((setRows ?? []) as { id: string; name: string; is_public: boolean; set_entries: { have: boolean }[] }[]).filter((s) => s.is_public));
+  type Review = { id: string; reviewer_id: string; positive: boolean; note: string | null; created_at: string; reviewer: { username: string; avatar_path: string | null } | null };
+  const reviews = (reviewRows ?? []) as unknown as Review[];
+  const ups = reviews.filter((r) => r.positive).length, downs = reviews.length - ups;
+  const myReview = user ? reviews.find((r) => r.reviewer_id === user.id) ?? null : null;
   const badges = canView && !underReview
-    ? badgesFor(badgeStats(visible, (setRows ?? []) as Parameters<typeof badgeStats>[1], { followers, joined: profile.created_at, beta: profile.is_beta_tester, goalsDone: goals.filter((g) => g.done).length }))
+    ? badgesFor(badgeStats(visible, (setRows ?? []) as Parameters<typeof badgeStats>[1], { followers, joined: profile.created_at, beta: profile.is_beta_tester, goalsDone: goals.filter((g) => g.done).length, tradeUps: ups, tradeDowns: downs }))
     : [];
 
   return (
@@ -134,6 +142,7 @@ export default async function Collection({ params, searchParams }: { params: { u
             <span><b>{canView ? all.length : "—"}</b>Items</span>
             <Link className="stat" href={`/c/${profile.username}/followers`}><b>{(counts as { followers: number } | null)?.followers ?? 0}</b>Followers</Link>
             <Link className="stat" href={`/c/${profile.username}/following`}><b>{(counts as { following: number } | null)?.following ?? 0}</b>Following</Link>
+            {reviews.length > 0 && <Link className="stat" href={`/c/${profile.username}?filter=reviews`} title={`${ups} good, ${downs} with a problem`}><b>👍 {ups}</b>Trade reviews</Link>}
             {showValues && valueByCar.size > 0 && <span className="value"><b>{money(totalValue)}</b>Est. value</span>}
           </div>
         </div>
@@ -162,7 +171,31 @@ export default async function Collection({ params, searchParams }: { params: { u
             {sold.length > 0 && <Link className={filter === "sold" ? "on" : undefined} href={`/c/${profile.username}?filter=sold`}>Sold ({sold.length})</Link>}
             {shelves.length > 0 && <Link className={filter === "shelves" ? "on" : undefined} href={`/c/${profile.username}?filter=shelves`}>🗄️ Shelves ({shelves.length})</Link>}
             {sets.length > 0 && <Link className={filter === "sets" ? "on" : undefined} href={`/c/${profile.username}?filter=sets`}>📋 Sets ({sets.length})</Link>}
+            {(reviews.length > 0 || canReview === true) && <Link className={filter === "reviews" ? "on" : undefined} href={`/c/${profile.username}?filter=reviews`}>🤝 Trade reviews ({reviews.length})</Link>}
           </nav>
+          {filter === "reviews" && (
+            <section className="card">
+              <div className="card-title"><h3>🤝 Trade reviews</h3><span className="hint">👍 {ups} · 👎 {downs}</span></div>
+              {user && !isOwner && (canReview === true || myReview) && (
+                <div className="actions">
+                  <TradeReviewForm revieweeId={profile.id} username={name} existing={myReview ? { positive: myReview.positive, note: myReview.note } : null} />
+                  {myReview && <form action={deleteTradeReview}><input type="hidden" name="reviewee_id" value={profile.id} /><SubmitButton className="linkbtn" pending="…">Remove my review</SubmitButton></form>}
+                </div>
+              )}
+              {user && !isOwner && canReview !== true && !myReview && <p className="hint">You can review collectors after you&apos;ve talked about a trade in the comments on their page or yours.</p>}
+              {reviews.length ? reviews.map((r) => (
+                <div key={r.id} className="review-row">
+                  <span className="review-thumb" aria-label={r.positive ? "Good trade" : "Had a problem"}>{r.positive ? "👍" : "👎"}</span>
+                  <div className="review-body">
+                    <span>{r.reviewer ? <Link href={`/c/${r.reviewer.username}`}>@{r.reviewer.username}</Link> : "Someone"} <span className="hint">· {new Date(r.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span></span>
+                    {r.note && <p>{r.note}</p>}
+                  </div>
+                  {user && user.id !== r.reviewer_id && <ReportButton type="review" id={r.id} />}
+                </div>
+              )) : <p className="hint">No trade reviews yet.</p>}
+              <p className="hint">Reviews are from collectors who say they traded with @{name}. Trades happen off theCollectorHQ, so use your judgment.</p>
+            </section>
+          )}
           {filter === "sets" && <section className="set-grid">{sets.map((s) => <SetCard key={s.id} s={s} />)}</section>}
           {filter === "shelves" && shelves.map((sh) => (
             <section key={sh.id} className="shelf-row" aria-label={sh.name}>
@@ -200,7 +233,7 @@ export default async function Collection({ params, searchParams }: { params: { u
           )}
           {shown.length > grails.length ? (
             <section className="gallery">{shown.filter((c) => !grails.includes(c)).map((c) => <ItemTile key={c.id} item={c} owner={profile} value={showValues ? valueByCar.get(c.id) : null} />)}</section>
-          ) : grails.length || filter === "sets" || filter === "shelves" ? null : (
+          ) : grails.length || filter === "sets" || filter === "shelves" || filter === "reviews" ? null : (
             <div className="empty"><h3>Nothing here yet</h3>{isOwner && <Link className="btn primary" href="/collection/new">+ Add an item</Link>}</div>
           )}
           <Comments profileId={profile.id} path={`/c/${profile.username}`} />

@@ -102,6 +102,7 @@ export default async function Explore({ searchParams }: { searchParams: { delete
           <nav className="sort-toggle" aria-label="Sort">
             <Link className={!newest ? "on" : undefined} href={category ? `/?category=${category}` : "/"}>★ Top rated</Link>
             <Link className={newest ? "on" : undefined} href={category ? `/?category=${category}&sort=new` : "/?sort=new"}>Newest</Link>
+            <Link href="/leaderboards">🏆 Leaderboards</Link>
           </nav>
         </div>
         {rows.length ? (

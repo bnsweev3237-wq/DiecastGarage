@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.42";
+export const HELP_UPDATED_FOR = "0.43";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -126,6 +126,7 @@ export const HELP: HelpSection[] = [
       "- **Alerts:** when someone marks an item open to trade that matches your wishlist, you get a 🔁 notification.",
       "- **Making the trade:** ask in the comments on the item. Agree on condition, photos and shipping before anything is sent, and keep to theCollectorHQ's rules: no phone numbers, emails or payment apps in comments.",
       "- Selling an item or moving it to your wishlist takes it off trade automatically.",
+      "- **🤝 Trade reviews:** after a trade, open the other collector's page, choose the **Trade reviews** tab and leave a 👍 or 👎 with a few words. You can review someone once you've talked in the comments on either of your pages; you can change or remove your review later. Their page shows the totals, and 5 or more good reviews with hardly any bad ones earns the 🤝 **Trusted trader** badge. Use **Report** on a review that's false.",
       "- **🧩 Duplicates** (on My collection or Trades) finds things you have more than once: entries with the same name, category and grade, or a quantity over 1. One tap marks the extras open to trade.",
     ],
   },
@@ -146,6 +147,7 @@ export const HELP: HelpSection[] = [
       "- [Explore](/) shows the top-rated items first, with a Newest option and category buttons. [All categories](/categories) lists every category.",
       "- [Search](/search) finds items and collectors by name, set, player, brand, grade or tags. Every word has to match, and accents don't matter.",
       "- On a collector's page, use the search box, category menu and ★ Grails only to narrow their items, and the tabs for For sale, Wishlist, Sold and Sets.",
+      "- [🏆 Leaderboards](/leaderboards) (linked from Explore): the top-rated items of the last 30 days, the most-followed collectors, and the fastest-growing collections. Only public collections count.",
       "- **Follow** collectors you like. [Following](/feed) shows what they add, and you'll get a notification when they add new items.",
     ],
   },
@@ -173,6 +175,7 @@ export const HELP: HelpSection[] = [
       "- 🔥 **Crowd favorite:** an item rated 4.5 stars or more by at least 3 collectors.",
       "- 🧭 **Explorer:** items in 5 or more categories.",
       "- 🎯 **Goal reached:** reach one of the public goals you set.",
+      "- 🤝 **Trusted trader:** 5 or more good trade reviews, and hardly any bad ones.",
       "- 👥 **Follower milestones:** 10, 50, 100, 250 and 1,000 followers.",
     ],
   },

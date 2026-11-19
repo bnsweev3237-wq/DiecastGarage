@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.43",
+    date: "2026-11-19",
+    title: "Leaderboards and trade reviews",
+    changes: [
+      "🏆 Leaderboards (from Explore): top-rated items of the last 30 days, the most-followed collectors, and the fastest-growing collections.",
+      "🤝 Trade reviews: after a trade, leave the other collector a 👍 or 👎 and a few words. Totals show on their page, and great traders earn the Trusted trader badge.",
+    ],
+  },
+  {
     version: "0.42",
     date: "2026-11-19",
     title: "Goals and collection insights",

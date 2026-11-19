@@ -46,4 +46,10 @@ describe("badges", () => {
     expect(keys([], [], { followers: 49 })).toEqual(["10+ followers"]);
     expect(keys([], [], { followers: 1200 })).toEqual(["1,000+ followers"]);
   });
+  it("trusted trader: 5+ good trade reviews with hardly any bad ones", () => {
+    expect(keys([], [], { tradeUps: 5, tradeDowns: 0 })).toEqual(["Trusted trader"]);
+    expect(keys([], [], { tradeUps: 4, tradeDowns: 0 })).toEqual([]);
+    expect(keys([], [], { tradeUps: 10, tradeDowns: 1 })).toEqual(["Trusted trader"]);
+    expect(keys([], [], { tradeUps: 10, tradeDowns: 2 })).toEqual([]);
+  });
 });

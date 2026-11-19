@@ -52,6 +52,24 @@ async function send(db: ReturnType<typeof createAdminClient>, rows: Row[]) {
 
     const actor = `@${n.actor?.username ?? "someone"}`;
     const title = match ? n.item?.title : n.subject ?? n.item?.title;
+    if (n.kind === "trade_review") {
+      const good = n.subject === "positive";
+      const page = `${SITE}/c/${n.owner?.username}?filter=reviews`;
+      const subject = `${actor} left you a trade review ${good ? "👍" : "👎"}`;
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from, to, subject: `${subject} on theCollectorHQ`,
+          text: `${subject}.\n\nSee it on your page: ${page}\n\nTurn these emails off in Settings: ${SITE}/settings#notifications`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:520px;color:#1d2639"><p style="font-size:16px"><b>${esc(subject)}</b></p>
+            <p><a href="${page}" style="display:inline-block;margin-top:12px;padding:10px 18px;background:#f0915a;color:#1d2639;border-radius:999px;font-weight:bold;text-decoration:none">See your reviews</a></p>
+            <p style="color:#777;font-size:12px">You get these because email notifications are on. <a href="${SITE}/settings#notifications" style="color:#777">Turn them off</a>.</p></div>`,
+        }),
+      });
+      if (res.ok) await db.from("notifications").update({ emailed_at: new Date().toISOString() }).eq("id", n.id);
+      continue;
+    }
     const what = n.kind === "wishlist_match" ? `Something on your wishlist is for sale: ${title ? `“${title}”` : "an item"}`
       : n.kind === "trade_match" ? `Something on your wishlist is up for trade: ${title ? `“${title}”` : "an item"}`
       : n.kind === "removed_item" ? `Our team removed your item${title ? ` “${title}”` : ""}`

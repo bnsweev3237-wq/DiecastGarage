@@ -13,6 +13,8 @@ export type BadgeStats = {
   joined: string; // profile created_at
   beta: boolean;
   goalsDone?: number; // public goals reached
+  tradeUps?: number; // 👍 trade reviews
+  tradeDowns?: number;
 };
 
 export type Badge = { key: string; emoji: string; label: string; why: string };
@@ -35,6 +37,7 @@ export function badgesFor(s: BadgeStats): Badge[] {
   if (s.graded >= 5) out.push({ key: "graded", emoji: "🏅", label: "Graded collection", why: "Has 5 or more graded or certified items" });
   if (s.completedSets > 0) out.push({ key: "set", emoji: "📋", label: s.completedSets > 1 ? `${s.completedSets} sets complete` : "Set complete", why: "Finished a set checklist of 5 or more pieces" });
   if (s.topRated) out.push({ key: "top", emoji: "🔥", label: "Crowd favorite", why: "Has an item rated 4.5 stars or more by at least 3 collectors" });
+  if ((s.tradeUps ?? 0) >= 5 && (s.tradeDowns ?? 0) * 10 <= (s.tradeUps ?? 0)) out.push({ key: "trader", emoji: "🤝", label: "Trusted trader", why: "5 or more good trade reviews, and hardly any bad ones" });
   if (s.goalsDone) out.push({ key: "goal", emoji: "🎯", label: s.goalsDone > 1 ? `${s.goalsDone} goals reached` : "Goal reached", why: "Reached a collection goal they set" });
   if (s.categories >= 5) out.push({ key: "explorer", emoji: "🧭", label: "Explorer", why: "Collects in 5 or more categories" });
   const followers = FOLLOWER_TIERS.find((t) => s.followers >= t);
@@ -46,7 +49,7 @@ type ItemLike = { status: string; is_hidden?: boolean; featured: boolean; is_cer
 type SetLike = { is_public: boolean; set_entries: { have: boolean }[] };
 
 // The stats from rows the page already has. Hidden items and anything not owned are left out.
-export function badgeStats(items: ItemLike[], sets: SetLike[], extra: { followers: number; joined: string; beta: boolean; goalsDone?: number }): BadgeStats {
+export function badgeStats(items: ItemLike[], sets: SetLike[], extra: { followers: number; joined: string; beta: boolean; goalsDone?: number; tradeUps?: number; tradeDowns?: number }): BadgeStats {
   const owned = items.filter((i) => i.status === "owned" && !i.is_hidden);
   return {
     items: owned.length,

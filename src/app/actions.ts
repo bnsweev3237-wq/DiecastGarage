@@ -594,7 +594,7 @@ export async function submitReport(_: FormState, f: FormData): Promise<FormState
   const reason = str(f, "reason");
   const type = str(f, "target_type");
   if (!REPORT_REASONS.some(([k]) => k === reason)) return { error: "Choose a reason." };
-  if (!["item", "comment", "profile", "event"].includes(type)) return { error: "Couldn't send that report." };
+  if (!["item", "comment", "profile", "event", "review"].includes(type)) return { error: "Couldn't send that report." };
   const { error } = await supabase.from("reports").insert({
     target_type: type, target_id: str(f, "target_id"), reason, details: str(f, "details").slice(0, 1000) || null,
   });
@@ -835,4 +835,42 @@ export async function deleteGoal(f: FormData) {
   if (!user) redirect("/login");
   await supabase.from("goals").delete().eq("id", str(f, "id")).eq("owner_id", user.id);
   revalidatePath("/goals");
+}
+
+// ---------- trade reputation ----------
+// Also checked in the database (supabase/migrations/0035_leaderboards_reputation.sql).
+export async function saveTradeReview(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const reviewee = str(f, "reviewee_id");
+  const positive = str(f, "positive") === "1";
+  if (!["0", "1"].includes(str(f, "positive"))) return { error: "Choose 👍 or 👎." };
+  const note = optStr(f, "note")?.slice(0, 300) ?? null;
+  const blocked = checkFields([["the review", note ?? ""]]);
+  if (blocked) return { error: blocked };
+  const { data: existing } = await supabase.from("trade_reviews").select("id").eq("reviewer_id", user.id).eq("reviewee_id", reviewee).maybeSingle();
+  const { data, error } = existing
+    ? await supabase.from("trade_reviews").update({ positive, note }).eq("id", existing.id).select("id").single()
+    : await supabase.from("trade_reviews").insert({ reviewee_id: reviewee, positive, note }).select("id").single();
+  if (error) return {
+    error: error.message.includes("REVIEW_NOT_ALLOWED") ? "You can review collectors you've talked with in comments."
+      : error.message.includes("RATE_LIMIT_REVIEWS") ? "You've left a lot of reviews today. Try again tomorrow."
+      : contentDbMessage(error.message) ?? "Couldn't save your review. Try again.",
+  };
+  if (!existing && data) {
+    try {
+      const { createAdminClient } = await import("@/lib/supabase/admin");
+      const { data: n } = await createAdminClient().from("notifications").select("id").eq("kind", "trade_review").eq("actor_id", user.id).eq("user_id", reviewee).is("emailed_at", null);
+      if (n?.length) await emailNotificationIds(n.map((r) => r.id));
+    } catch { /* best effort */ }
+  }
+  revalidatePath("/c", "layout");
+  return { ok: existing ? "Review updated." : "Thanks for your review." };
+}
+
+export async function deleteTradeReview(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  await supabase.from("trade_reviews").delete().eq("reviewer_id", user.id).eq("reviewee_id", str(f, "reviewee_id"));
+  revalidatePath("/c", "layout");
 }

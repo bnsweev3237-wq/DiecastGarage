@@ -16,6 +16,8 @@ export async function runSiteCheck() {
     ["Comments", db.from("comments").select("id, author:profiles!comments_author_id_fkey(username)").limit(5)],
     ["Public sets", db.from("sets").select("id, set_entries(have)").limit(5)],
     ["Shows calendar", db.from("events").select("id, poster:profiles!events_created_by_fkey(username)").limit(5)],
+    ["Leaderboards", db.rpc("leaderboard_items", { p_days: 30, p_limit: 3 })],
+    ["Trade reviews", db.from("trade_reviews").select("id, reviewer:profiles!trade_reviews_reviewer_id_fkey(username)").limit(5)],
     ["Public goals", db.from("goals").select("id").limit(5)],
     ["Public shelves", db.from("shelves").select("id, shelf_items(position, item_id)").limit(5)],
     ["Item values", db.rpc("item_values", { p_owner: "00000000-0000-0000-0000-000000000000" })],
