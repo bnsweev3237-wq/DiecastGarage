@@ -12,6 +12,7 @@ export type BadgeStats = {
   topRated: boolean; // an item averaging 4.5+ stars from 3+ collectors
   joined: string; // profile created_at
   beta: boolean;
+  goalsDone?: number; // public goals reached
 };
 
 export type Badge = { key: string; emoji: string; label: string; why: string };
@@ -34,6 +35,7 @@ export function badgesFor(s: BadgeStats): Badge[] {
   if (s.graded >= 5) out.push({ key: "graded", emoji: "🏅", label: "Graded collection", why: "Has 5 or more graded or certified items" });
   if (s.completedSets > 0) out.push({ key: "set", emoji: "📋", label: s.completedSets > 1 ? `${s.completedSets} sets complete` : "Set complete", why: "Finished a set checklist of 5 or more pieces" });
   if (s.topRated) out.push({ key: "top", emoji: "🔥", label: "Crowd favorite", why: "Has an item rated 4.5 stars or more by at least 3 collectors" });
+  if (s.goalsDone) out.push({ key: "goal", emoji: "🎯", label: s.goalsDone > 1 ? `${s.goalsDone} goals reached` : "Goal reached", why: "Reached a collection goal they set" });
   if (s.categories >= 5) out.push({ key: "explorer", emoji: "🧭", label: "Explorer", why: "Collects in 5 or more categories" });
   const followers = FOLLOWER_TIERS.find((t) => s.followers >= t);
   if (followers) out.push({ key: "followers", emoji: "👥", label: `${n(followers)}+ followers`, why: `Followed by ${n(followers)} or more collectors` });
@@ -44,7 +46,7 @@ type ItemLike = { status: string; is_hidden?: boolean; featured: boolean; is_cer
 type SetLike = { is_public: boolean; set_entries: { have: boolean }[] };
 
 // The stats from rows the page already has. Hidden items and anything not owned are left out.
-export function badgeStats(items: ItemLike[], sets: SetLike[], extra: { followers: number; joined: string; beta: boolean }): BadgeStats {
+export function badgeStats(items: ItemLike[], sets: SetLike[], extra: { followers: number; joined: string; beta: boolean; goalsDone?: number }): BadgeStats {
   const owned = items.filter((i) => i.status === "owned" && !i.is_hidden);
   return {
     items: owned.length,

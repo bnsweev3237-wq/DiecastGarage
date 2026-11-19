@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.42",
+    date: "2026-11-19",
+    title: "Goals and collection insights",
+    changes: [
+      "🎯 Goals: set targets like finishing a set, reaching 100 items or 50 in one category. Progress fills in by itself, public goals show on your page, and reaching one earns a badge.",
+      "📊 Insights (members): value and cost by category, your most valuable items, biggest gainers and losers, spending by year, and items added each month.",
+      "My collection now opens sorted by last modified, and its tools sit in one row under the heading.",
+    ],
+  },
+  {
     version: "0.41",
     date: "2026-11-19",
     title: "Show mode and duplicates",

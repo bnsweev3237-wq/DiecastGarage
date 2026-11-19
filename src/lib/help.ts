@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.41";
+export const HELP_UPDATED_FOR = "0.42";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -47,10 +47,10 @@ export const HELP: HelpSection[] = [
       "[My collection](/collection) lists everything you've added, with tabs for **Collection**, **Wishlist** and **Sold**.",
       "- **Search** your items, including private details like where they're stored.",
       "- **Filter** by category, by tag (the Filter by tag dropdown) or **★ Grails only**.",
-      "- **Sort** by grails first, last modified, recently added, oldest, name, or highest value.",
+      "- **Sort:** the list starts with what you changed most recently (last modified). You can also sort by grails first, recently added, oldest, name, or highest value.",
       "- The **Box** column shows a ✓ for items with their original box or packaging.",
       "- Members see totals for cost, estimated value and gain or loss at the top, and a **Value over time** chart.",
-      "Other tools at the top of the page: **📋 Sets**, **🗄️ Shelves**, **🔁 Trades**, **🧩 Duplicates**, **🎪 Show mode**, **♥ Saved**, **Bulk edit**, **Import** and **Export**.",
+      "The row of tools under the heading: **📋 Sets**, **🗄️ Shelves**, **🎯 Goals**, **📊 Insights** (members), **🔁 Trades**, **🧩 Duplicates**, **🎪 Show mode**, **♥ Saved**, **Bulk edit**, **Import** and **Export**.",
     ],
   },
   {
@@ -87,6 +87,15 @@ export const HELP: HelpSection[] = [
       "- Tick lines off as you get them. **🔗 Match my items** ticks off lines that match items already in your collection: a line matches when every word appears in one of your items.",
       "- Filter by **All**, **Have** or **Missing**, and search long checklists.",
       "- Public sets show on your page under a **Sets** tab, so others can see what you're missing. Untick \"Show on my public page\" to keep a set private.",
+    ],
+  },
+  {
+    id: "goals", emoji: "🎯", title: "Goals and insights",
+    body: [
+      "**🎯 Goals** (on My collection): pick something to work toward, like finishing a set checklist, reaching 100 items, or 50 in one category. Give it a name if you like.",
+      "- Progress fills in by itself as you add items and tick off set pieces. Items count when they're in your collection and not hidden.",
+      "- Public goals show on your page under **Working toward**, and reaching one earns the 🎯 **Goal reached** badge. Untick \"Show on my public page\" to keep a goal to yourself. You can have up to 20.",
+      "**📊 Insights** (members, on My collection): your collection's value and cost by category, your most valuable items, the biggest gainers, anything worth less than you paid, what you spent each year, and how many items you added each month. Free accounts see how many items they have in each category.",
     ],
   },
   {
@@ -163,6 +172,7 @@ export const HELP: HelpSection[] = [
       "- 📋 **Set complete:** tick off every piece of a public set checklist with 5 or more pieces.",
       "- 🔥 **Crowd favorite:** an item rated 4.5 stars or more by at least 3 collectors.",
       "- 🧭 **Explorer:** items in 5 or more categories.",
+      "- 🎯 **Goal reached:** reach one of the public goals you set.",
       "- 👥 **Follower milestones:** 10, 50, 100, 250 and 1,000 followers.",
     ],
   },

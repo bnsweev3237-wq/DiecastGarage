@@ -805,3 +805,34 @@ export async function gotWishlistItem(f: FormData) {
   revalidatePath("/show-mode");
   revalidatePath("/collection");
 }
+
+// ---------- collection goals ----------
+// Also checked in the database (supabase/migrations/0033_goals.sql).
+export async function createGoal(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login?next=/goals");
+  const kind = ["set", "items", "category"].includes(str(f, "kind")) ? str(f, "kind") : "items";
+  const target = Math.round(Number(str(f, "target")));
+  const category = CATEGORIES.some((c) => c.key === str(f, "category")) ? str(f, "category") : null;
+  const setId = optStr(f, "set_id");
+  const title = optStr(f, "title")?.slice(0, 80) ?? null;
+  if (kind === "set" && !setId) return { error: "Choose the set to finish." };
+  if (kind !== "set" && !(target >= 1 && target <= 100000)) return { error: "Enter how many items, from 1 to 100,000." };
+  if (kind === "category" && !category) return { error: "Choose the category." };
+  const blocked = checkFields([["the goal name", title ?? ""]]);
+  if (blocked) return { error: blocked };
+  const { error } = await supabase.from("goals").insert({
+    kind, title, is_public: f.get("is_public") === "on",
+    target: kind === "set" ? null : target, category: kind === "category" ? category : null, set_id: kind === "set" ? setId : null,
+  });
+  if (error) return { error: error.message.includes("GOAL_LIMIT") ? "You can have up to 20 goals." : contentDbMessage(error.message) ?? "Couldn't save the goal. Try again." };
+  revalidatePath("/goals");
+  return { ok: "Goal added." };
+}
+
+export async function deleteGoal(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  await supabase.from("goals").delete().eq("id", str(f, "id")).eq("owner_id", user.id);
+  revalidatePath("/goals");
+}

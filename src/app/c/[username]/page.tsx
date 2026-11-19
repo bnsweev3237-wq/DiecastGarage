@@ -15,6 +15,8 @@ import { CATEGORIES, categoryOf } from "@/lib/categories";
 import { matchesAll, searchWords } from "@/lib/search";
 import { checkQueries } from "@/lib/report-error";
 import { badgeStats, badgesFor } from "@/lib/badges";
+import { goalProgress, type Goal } from "@/lib/goals";
+import GoalBar from "@/components/GoalBar";
 
 export const dynamic = "force-dynamic";
 
@@ -47,10 +49,11 @@ export default async function Collection({ params, searchParams }: { params: { u
     supabase.rpc("profile_location", { p_profile: profile.id }),
     user && !isOwner ? supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id).eq("blocked_id", profile.id).maybeSingle() : Promise.resolve({ data: null }),
     canView ? supabase.from("sets").select("id, name, category, is_public, set_entries(have)").eq("owner_id", profile.id).order("updated_at", { ascending: false }) : Promise.resolve({ data: [] }),
+    canView ? supabase.from("goals").select("*").eq("owner_id", profile.id).eq("is_public", true).order("created_at") : Promise.resolve({ data: [] }),
     canView ? supabase.from("shelves").select("id, name, description, is_public, shelf_items(position, item_id)").eq("owner_id", profile.id).eq("is_public", true).order("created_at") : Promise.resolve({ data: [] }),
   ]);
   await checkQueries("Collector page", `/c/${params.username}`, loaded, user?.id);
-  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }, { data: shelfRows }] = loaded;
+  const [{ data: counts }, { data: myFollow }, { data: cars }, { data: email }, { data: values }, { data: location }, { data: myBlock }, { data: setRows }, { data: goalRows }, { data: shelfRows }] = loaded;
   // Only public sets show here, so the owner sees what everyone else sees.
   const sets = summarize(((setRows ?? []) as Parameters<typeof summarize>[0]).filter((s) => s.is_public));
   const valueByCar = new Map(((values ?? []) as { item_id: string; value: number }[]).map((v) => [v.item_id, Number(v.value)]));
@@ -89,8 +92,10 @@ export default async function Collection({ params, searchParams }: { params: { u
   const forTrade = all.filter((c) => c.open_to_trade).length;
   const name = profile.username;
   const followers = (counts as { followers: number } | null)?.followers ?? 0;
+  // Public goals, with progress from what's on this page: public items and public sets.
+  const goals = goalProgress((goalRows ?? []) as Goal[], visible, ((setRows ?? []) as { id: string; name: string; is_public: boolean; set_entries: { have: boolean }[] }[]).filter((s) => s.is_public));
   const badges = canView && !underReview
-    ? badgesFor(badgeStats(visible, (setRows ?? []) as Parameters<typeof badgeStats>[1], { followers, joined: profile.created_at, beta: profile.is_beta_tester }))
+    ? badgesFor(badgeStats(visible, (setRows ?? []) as Parameters<typeof badgeStats>[1], { followers, joined: profile.created_at, beta: profile.is_beta_tester, goalsDone: goals.filter((g) => g.done).length }))
     : [];
 
   return (
@@ -143,6 +148,12 @@ export default async function Collection({ params, searchParams }: { params: { u
         <div className="empty"><h3>This collection is private</h3><p>@{name} has chosen to keep their collection to themselves.</p></div>
       ) : (
         <>
+          {goals.length > 0 && !filter && !narrowed && (
+            <section className="card">
+              <div className="card-title"><h3>🎯 Working toward</h3>{isOwner && <Link className="btn small" href="/goals">Edit goals</Link>}</div>
+              <div className="profile-goals">{goals.map((g) => <GoalBar key={g.id} g={g} />)}</div>
+            </section>
+          )}
           <nav className="tabs" aria-label="Filter items">
             <Link className={!filter ? "on" : undefined} href={`/c/${profile.username}`}>Collection ({all.length})</Link>
             {forSale > 0 && <Link className={filter === "sale" ? "on" : undefined} href={`/c/${profile.username}?filter=sale`}>For sale ({forSale})</Link>}

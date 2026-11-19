@@ -19,9 +19,11 @@ export const metadata = { title: "My collection" };
 type Row = Item & { item_purchases: Purchase | null; comps: Comp[] };
 type Params = { category?: string; status?: string; tag?: string; sort?: string; q?: string; grails?: string; password?: string; saved?: string };
 
+// The list opens sorted by last modified, so what you just worked on is at the top.
+const DEFAULT_SORT = "modified";
 const SORTS = [
-  { key: "featured", label: "Grails first, then newest" },
   { key: "modified", label: "Last modified" },
+  { key: "featured", label: "Grails first, then newest" },
   { key: "added", label: "Recently added" },
   { key: "oldest", label: "Oldest added" },
   { key: "name", label: "Name, A to Z" },
@@ -62,9 +64,9 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
       i.description, i.provenance, categoryOf(i.category).label, i.item_purchases?.storage_location, i.item_purchases?.acquired_from));
   const member = isMember(membership);
   const atLimit = !member && everything.length >= FREE_ITEM_LIMIT;
-  const sort = SORTS.some((s) => s.key === searchParams.sort) ? searchParams.sort! : "featured";
+  const sort = SORTS.some((s) => s.key === searchParams.sort) ? searchParams.sort! : DEFAULT_SORT;
   const link = (p: Params) => {
-    const q = new URLSearchParams(Object.entries({ status: view === "owned" ? undefined : view, sort: sort === "featured" ? undefined : sort, q: searchParams.q, grails: searchParams.grails, ...p }).filter(([, v]) => v) as [string, string][]);
+    const q = new URLSearchParams(Object.entries({ status: view === "owned" ? undefined : view, sort: sort === DEFAULT_SORT ? undefined : sort, q: searchParams.q, grails: searchParams.grails, ...p }).filter(([, v]) => v) as [string, string][]);
     const qs = q.toString();
     return `/collection${qs ? `?${qs}` : ""}`;
   };
@@ -111,15 +113,15 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
         </div>
         {atLimit ? <Link className="btn flag" href="/settings#membership">Become a member to add more</Link>
           : <div className="actions">
-              <Link className="btn" href="/sets">📋 Sets</Link><Link className="btn" href="/shelves">🗄️ Shelves</Link><Link className="btn" href="/trades">🔁 Trades</Link><Link className="btn" href="/collection/duplicates">🧩 Duplicates</Link><Link className="btn" href="/show-mode">🎪 Show mode</Link>
-              <Link className="btn" href="/saved">♥ Saved</Link>
-              <Link className="btn" href="/collection/bulk">Bulk edit</Link>
-              <Link className="btn" href="/collection/import">Import</Link>
-              <a className="btn" href="/collection/export">Export</a>
               <Link className="btn" href="/collection/new?status=wishlist">+ Wishlist</Link>
               <Link className="btn primary" href="/collection/new">+ Add an item</Link>
             </div>}
       </div>
+      <nav className="tool-row" aria-label="Collection tools">
+        <Link href="/sets">📋 Sets</Link><Link href="/shelves">🗄️ Shelves</Link><Link href="/goals">🎯 Goals</Link><Link href="/collection/insights">📊 Insights</Link>
+        <Link href="/trades">🔁 Trades</Link><Link href="/collection/duplicates">🧩 Duplicates</Link><Link href="/show-mode">🎪 Show mode</Link><Link href="/saved">♥ Saved</Link>
+        <Link href="/collection/bulk">Bulk edit</Link><Link href="/collection/import">Import</Link><a href="/collection/export">Export</a>
+      </nav>
 
       {searchParams.password === "changed" && <p className="msg ok">Your password has been changed.</p>}
       {searchParams.saved && <p className="msg ok">Saved your changes to “{searchParams.saved}”.</p>}
@@ -141,7 +143,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
         <div className="tagbar">
           <form className="collection-search" role="search" action="/collection">
             {view !== "owned" && <input type="hidden" name="status" value={view} />}
-            {sort !== "featured" && <input type="hidden" name="sort" value={sort} />}
+            {sort !== DEFAULT_SORT && <input type="hidden" name="sort" value={sort} />}
             {searchParams.category && <input type="hidden" name="category" value={searchParams.category} />}
             {searchParams.tag && <input type="hidden" name="tag" value={searchParams.tag} />}
             {searchParams.grails === "1" && <input type="hidden" name="grails" value="1" />}
@@ -149,7 +151,7 @@ export default async function MyCollection({ searchParams }: { searchParams: Par
             {searchParams.q && <Link className="btn small" href={link({ category: searchParams.category, tag: searchParams.tag, q: undefined })}>Clear</Link>}
           </form>
           <SortSelect value={sort} options={SORTS.filter((s) => member || s.key !== "value").map((s) => ({ key: s.key, label: s.key === "value" && view === "sold" ? "Highest sale price" : s.label,
-            href: link({ category: searchParams.category, tag: searchParams.tag, sort: s.key === "featured" ? undefined : s.key }) }))} />
+            href: link({ category: searchParams.category, tag: searchParams.tag, sort: s.key === DEFAULT_SORT ? undefined : s.key }) }))} />
           {searchParams.tag && <Link className="chip tag on" href={link({ category: searchParams.category })} aria-label={`Stop filtering by ${searchParams.tag}`}>#{searchParams.tag} ✕</Link>}
           {all.some((i) => i.featured) && (
             <Link className={searchParams.grails === "1" ? "chip grail-toggle on" : "chip grail-toggle"} aria-pressed={searchParams.grails === "1"}
