@@ -11,6 +11,7 @@ export const releases: Release[] = [
       "🎯 Goals: set targets like finishing a set, reaching 100 items or 50 in one category. Progress fills in by itself, public goals show on your page, and reaching one earns a badge.",
       "📊 Insights (members): value and cost by category, your most valuable items, biggest gainers and losers, spending by year, and items added each month.",
       "My collection now opens sorted by last modified, and its tools sit in one row under the heading.",
+      "Changing what you paid, your value or other purchase details, or logging a sold listing, now counts as modifying the item.",
     ],
   },
   {
