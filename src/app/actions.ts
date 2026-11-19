@@ -10,6 +10,7 @@ import { CATEGORIES, CONDITIONS, categoryOf, cleanAttributes } from "@/lib/categ
 import { NETWORKS, normalizeSocial } from "@/lib/social";
 import { FREE_ITEM_LIMIT, FREE_PHOTO_LIMIT } from "@/lib/limits";
 import { REPORT_REASONS } from "@/lib/reports";
+import { COUNTRIES, EVENT_KINDS, US_STATES, isHttps } from "@/lib/events";
 import { checkFields, contentDbMessage } from "@/lib/content-rules";
 import { emailNotificationIds, emailNotifications } from "@/lib/notify-email";
 
@@ -593,7 +594,7 @@ export async function submitReport(_: FormState, f: FormData): Promise<FormState
   const reason = str(f, "reason");
   const type = str(f, "target_type");
   if (!REPORT_REASONS.some(([k]) => k === reason)) return { error: "Choose a reason." };
-  if (!["item", "comment", "profile"].includes(type)) return { error: "Couldn't send that report." };
+  if (!["item", "comment", "profile", "event"].includes(type)) return { error: "Couldn't send that report." };
   const { error } = await supabase.from("reports").insert({
     target_type: type, target_id: str(f, "target_id"), reason, details: str(f, "details").slice(0, 1000) || null,
   });
@@ -700,4 +701,87 @@ export async function removeFromShelf(f: FormData) {
   const id = str(f, "id");
   await supabase.from("shelf_items").delete().eq("shelf_id", id).eq("item_id", str(f, "item_id"));
   revalidatePath(`/shelves/${id}`);
+}
+
+// ---------- card show calendar ----------
+// The database checks the same things (supabase/migrations/0032_events.sql).
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const eventError = (msg: string) =>
+  msg.includes("RATE_LIMIT_EVENTS") ? "You've posted a lot of events today. Try again tomorrow."
+  : msg.includes("EVENT_IN_PAST") ? "That date has already passed."
+  : contentDbMessage(msg) ?? "Couldn't save the event. Check the details and try again.";
+
+function parseEvent(f: FormData) {
+  const title = str(f, "title").slice(0, 120);
+  const startsOn = str(f, "starts_on");
+  const endsOn = str(f, "ends_on") || startsOn;
+  const country = COUNTRIES.some(([k]) => k === str(f, "country")) ? str(f, "country") : "US";
+  const region = country === "US" ? (US_STATES.some(([k]) => k === str(f, "region")) ? str(f, "region") : "") : str(f, "region_text").slice(0, 40);
+  const website = optStr(f, "website");
+  if (title.length < 3) return { error: "Give the event a name." };
+  if (!DATE.test(startsOn) || !DATE.test(endsOn)) return { error: "Choose the date." };
+  if (endsOn < startsOn) return { error: "The last day can't be before the first day." };
+  if ((Date.parse(endsOn) - Date.parse(startsOn)) / 864e5 > 14) return { error: "Events can run up to two weeks." };
+  if (!str(f, "city")) return { error: "Add the city." };
+  if (region.length < 2) return { error: country === "US" ? "Choose the state." : "Add the state, province or region." };
+  if (website && !isHttps(website)) return { error: "The website must be a full link starting with https://" };
+  const fields = { title, venue: str(f, "venue"), address: str(f, "address"), hours: str(f, "hours"), admission: str(f, "admission"), description: str(f, "description"), city: str(f, "city") };
+  const blocked = checkFields([["the name", fields.title], ["the venue", fields.venue], ["the address", fields.address], ["the hours", fields.hours],
+    ["admission", fields.admission], ["the description", fields.description], ["the city", fields.city]]);
+  if (blocked) return { error: blocked };
+  return {
+    event: {
+      title, kind: EVENT_KINDS.some((k) => k.key === str(f, "kind")) ? str(f, "kind") : "show",
+      starts_on: startsOn, ends_on: endsOn,
+      hours: optStr(f, "hours")?.slice(0, 60) ?? null, venue: optStr(f, "venue")?.slice(0, 120) ?? null,
+      address: optStr(f, "address")?.slice(0, 200) ?? null, city: fields.city.slice(0, 80), region, country,
+      categories: f.getAll("categories").map(String).filter((c) => CATEGORIES.some((x) => x.key === c)).slice(0, 30),
+      admission: optStr(f, "admission")?.slice(0, 60) ?? null, website: website ?? null,
+      description: optStr(f, "description")?.slice(0, 2000) ?? null,
+    },
+  };
+}
+
+export async function createEvent(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login?next=/shows/new");
+  const parsed = parseEvent(f);
+  if ("error" in parsed) return { error: parsed.error };
+  const { data, error } = await supabase.from("events").insert(parsed.event).select("id").single();
+  if (error) return { error: eventError(error.message) };
+  // The person posting it is probably going.
+  await supabase.from("event_rsvps").insert({ event_id: data.id });
+  revalidatePath("/shows");
+  redirect(`/shows/${data.id}?new=1`);
+}
+
+export async function updateEvent(_: FormState, f: FormData): Promise<FormState> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  const id = str(f, "id");
+  const parsed = parseEvent(f);
+  if ("error" in parsed) return { error: parsed.error };
+  const { error } = await supabase.from("events").update({ ...parsed.event, is_cancelled: f.get("is_cancelled") === "on" }).eq("id", id).eq("created_by", user.id);
+  if (error) return { error: eventError(error.message) };
+  revalidatePath(`/shows/${id}`);
+  revalidatePath("/shows");
+  return { ok: "Saved" };
+}
+
+export async function deleteEvent(f: FormData) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/login");
+  await supabase.from("events").delete().eq("id", str(f, "id")).eq("created_by", user.id);
+  revalidatePath("/shows");
+  redirect("/shows");
+}
+
+export async function toggleGoing(f: FormData) {
+  const { supabase, user } = await getUser();
+  const id = str(f, "id");
+  if (!user) redirect(`/login?next=/shows/${id}`);
+  if (f.get("going") === "1") await supabase.from("event_rsvps").insert({ event_id: id });
+  else await supabase.from("event_rsvps").delete().eq("event_id", id).eq("user_id", user.id);
+  revalidatePath(`/shows/${id}`);
+  revalidatePath("/shows");
 }

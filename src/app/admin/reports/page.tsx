@@ -2,12 +2,12 @@ import Link from "next/link";
 import ConfirmAction from "@/components/ConfirmAction";
 import RemoveWithReason from "@/components/admin/RemoveWithReason";
 import SubmitButton from "@/components/SubmitButton";
-import { adminCloseReport, adminDeleteItem, adminDeleteComment } from "@/app/admin/actions";
+import { adminCloseReport, adminDeleteItem, adminDeleteComment, adminDeleteEvent } from "@/app/admin/actions";
 import { requireAdmin, when } from "@/lib/admin";
 import { photoUrl } from "@/lib/items";
 import { reasonLabel } from "@/lib/reports";
 
-type Report = { id: string; target_type: "item" | "comment" | "profile"; target_id: string; target_owner_id: string | null; reason: string; details: string | null; created_at: string; reporter: { username: string } | null };
+type Report = { id: string; target_type: "item" | "comment" | "profile" | "event"; target_id: string; target_owner_id: string | null; reason: string; details: string | null; created_at: string; reporter: { username: string } | null };
 
 export default async function AdminReports({ searchParams }: { searchParams: { show?: string } }) {
   const { db } = await requireAdmin();
@@ -21,10 +21,11 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
   const groups = new Map<string, (Report & { status: string })[]>();
   for (const r of reports) groups.set(r.target_id, [...(groups.get(r.target_id) ?? []), r]);
   const ids = (t: string) => [...new Set(reports.filter((r) => r.target_type === t).map((r) => r.target_id))];
-  const [{ data: cars }, { data: comments }, { data: profiles }] = await Promise.all([
+  const [{ data: cars }, { data: comments }, { data: profiles }, { data: events }] = await Promise.all([
     db.from("items").select("id, title, description, photo_path, under_review, owner:profiles!cars_owner_id_fkey(id, username)").in("id", ids("item")),
     db.from("comments").select("id, body, item_id, under_review, author:profiles!comments_author_id_fkey(id, username), profile:profiles!comments_profile_id_fkey(username)").in("id", ids("comment")),
     db.from("profiles").select("id, username, bio, under_review").in("id", ids("profile")),
+    db.from("events").select("id, title, description, city, region, starts_on, under_review, poster:profiles!events_created_by_fkey(id, username)").in("id", ids("event")),
   ]);
   // Each collector's report history for the last 3 months: how many different items, comments and
   // profile reports were filed about them, including content that's since been removed.
@@ -33,9 +34,9 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
   const { data: past } = owners.length
     ? await db.from("reports").select("target_owner_id, target_type, target_id").in("target_owner_id", owners).gte("created_at", since)
     : { data: [] };
-  const history = new Map<string, { item: Set<string>; comment: Set<string>; profile: Set<string> }>();
-  for (const r of (past ?? []) as { target_owner_id: string; target_type: "item" | "comment" | "profile"; target_id: string }[]) {
-    const h = history.get(r.target_owner_id) ?? { item: new Set(), comment: new Set(), profile: new Set() };
+  const history = new Map<string, { item: Set<string>; comment: Set<string>; profile: Set<string>; event: Set<string> }>();
+  for (const r of (past ?? []) as { target_owner_id: string; target_type: "item" | "comment" | "profile" | "event"; target_id: string }[]) {
+    const h = history.get(r.target_owner_id) ?? { item: new Set(), comment: new Set(), profile: new Set(), event: new Set() };
     h[r.target_type].add(r.target_id);
     history.set(r.target_owner_id, h);
   }
@@ -43,6 +44,7 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
   const car = new Map((cars ?? []).map((c) => [c.id, c]));
   const comment = new Map((comments ?? []).map((c) => [c.id, c]));
   const profile = new Map((profiles ?? []).map((p) => [p.id, p]));
+  const event = new Map((events ?? []).map((e) => [e.id, e]));
 
   return (
     <>
@@ -56,24 +58,26 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
         const c = first.target_type === "item" ? car.get(targetId) : undefined;
         const k = first.target_type === "comment" ? comment.get(targetId) : undefined;
         const p = first.target_type === "profile" ? profile.get(targetId) : undefined;
+        const ev = first.target_type === "event" ? event.get(targetId) : undefined;
+        const evPoster = ev?.poster as unknown as { id: string; username: string } | undefined;
         const carOwner = c?.owner as unknown as { id: string; username: string } | undefined;
         const author = k?.author as unknown as { id: string; username: string } | undefined;
-        const ownerId = carOwner?.id ?? author?.id ?? p?.id ?? first.target_owner_id ?? "";
+        const ownerId = carOwner?.id ?? author?.id ?? p?.id ?? evPoster?.id ?? first.target_owner_id ?? "";
         const h = history.get(ownerId);
-        const ownerName = carOwner?.username ?? author?.username ?? p?.username;
-        const gone = !c && !k && !p;
+        const ownerName = carOwner?.username ?? author?.username ?? p?.username ?? evPoster?.username;
+        const gone = !c && !k && !p && !ev;
         return (
           <section className="card" key={targetId}>
             <div className="card-title">
               <h3>Reported {first.target_type} · {rs.length} report{rs.length > 1 ? "s" : ""}</h3>
-              {(c?.under_review || k?.under_review || p?.under_review) && <span className="chip sale">Auto-hidden: 5+ people reported it. Closing the report brings it back unless you remove it.</span>}
+              {(c?.under_review || k?.under_review || p?.under_review || ev?.under_review) && <span className="chip sale">Auto-hidden: 5+ people reported it. Closing the report brings it back unless you remove it.</span>}
               <span className="hint">{when(first.created_at)}</span>
             </div>
 
             {h && (
               <p className={h.item.size + h.comment.size > 2 ? "history warn" : "history"}>
                 <b>{ownerName ? `@${ownerName}` : "This collector"}, last 3 months:</b>{" "}
-                {plural(h.item.size, "item")} reported{h.comment.size ? `, ${plural(h.comment.size, "comment")}` : ""}{h.profile.size ? ", their profile" : ""}.
+                {plural(h.item.size, "item")} reported{h.comment.size ? `, ${plural(h.comment.size, "comment")}` : ""}{h.event.size ? `, ${plural(h.event.size, "event")}` : ""}{h.profile.size ? ", their profile" : ""}.
                 {ownerId && <> <Link href={`/admin/users/${ownerId}`}>See account</Link></>}
               </p>
             )}
@@ -92,6 +96,13 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
               <div>
                 <div className="hint"><Link href={`/admin/users/${author?.id}`}>@{author?.username}</Link> on {(k.profile as unknown as { username: string }).username}&apos;s {k.item_id ? "item" : "collection"}</div>
                 <p className="admin-text">{k.body}</p>
+              </div>
+            )}
+            {ev && (
+              <div>
+                <Link className="car-title" href={`/shows/${ev.id}`}>{ev.title}</Link>
+                <div className="hint">{ev.starts_on} · {ev.city}, {ev.region} · posted by <Link href={`/admin/users/${evPoster?.id}`}>@{evPoster?.username}</Link></div>
+                {ev.description && <p className="admin-text hint">{ev.description}</p>}
               </div>
             )}
             {p && (
@@ -114,6 +125,7 @@ export default async function AdminReports({ searchParams }: { searchParams: { s
             {!closed && (
               <div className="actions">
                 {c && <RemoveWithReason action={adminDeleteItem} id={c.id} label="Delete item" what="this item (its reports close too)" />}
+                {ev && <ConfirmAction action={adminDeleteEvent} fields={{ id: ev.id }} label="Delete event" confirmText="Delete this event? Its reports close too." />}
                 {k && <ConfirmAction action={adminDeleteComment} fields={{ id: k.id }} label="Delete comment" confirmText="Delete this comment? Its reports close too." />}
                 {p && <Link className="btn small" href={`/admin/users/${p.id}`}>Review account</Link>}
                 <form action={adminCloseReport}>

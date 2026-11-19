@@ -11,7 +11,7 @@ export const REPORT_REASONS = [
   ["other", "Something else"],
 ] as const;
 
-export type ReportTarget = "item" | "comment" | "profile";
+export type ReportTarget = "item" | "comment" | "profile" | "event";
 export const reasonLabel = (r: string) => REPORT_REASONS.find(([k]) => k === r)?.[1] ?? r;
 
 // Why the team removed something, written for the collector who owns it. Sent in their notification.

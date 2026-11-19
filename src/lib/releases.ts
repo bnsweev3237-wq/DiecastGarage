@@ -4,6 +4,16 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.40",
+    date: "2026-11-19",
+    title: "Card show and swap meet calendar",
+    changes: [
+      "📅 Shows: a calendar of upcoming card shows, toy shows, swap meets, conventions, auctions and meetups. Find it in the menu at the top.",
+      "Filter by state, by what you collect or by kind of event, and tap I'm going to let others know.",
+      "Post an event with its dates, place, hours, admission and website, and edit or cancel it later.",
+    ],
+  },
+  {
     version: "0.39",
     date: "2026-11-17",
     title: "Trading",

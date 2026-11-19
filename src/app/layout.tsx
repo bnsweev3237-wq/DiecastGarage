@@ -61,8 +61,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               { href: "/", label: "Explore" },
               { href: "/for-sale", label: "For sale" },
               { href: "/search", label: "🔍 Search" },
+              { href: "/shows", label: "📅 Shows" },
               ...(user ? [{ href: "/feed", label: "Following" }, { href: "/collection", label: "My collection" }] : []),
-              ...(isAdmin === true ? [{ href: "/admin", label: "Admin" }] : []),
             ]} />
             <div className="nav-right">
               {user ? (
@@ -73,6 +73,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   {me && <Link className="btn small" href={`/c/${me.username}`}>My page</Link>}
                   <Link className="btn small" href="/settings">Settings</Link>
                   <Link className="bell" href="/help" aria-label="Help"><span aria-hidden="true">?</span></Link>
+                  {isAdmin === true && <Link className="bell" href="/admin" aria-label="Admin" title="Admin"><span aria-hidden="true">🛠️</span></Link>}
                 </>
               ) : (
                 <>
