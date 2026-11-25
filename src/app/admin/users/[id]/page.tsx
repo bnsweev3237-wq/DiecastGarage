@@ -5,7 +5,7 @@ import ConfirmAction from "@/components/ConfirmAction";
 import RemoveWithReason from "@/components/admin/RemoveWithReason";
 import Thumb from "@/components/Thumb";
 import SubmitButton from "@/components/SubmitButton";
-import { adminSetBetaTester } from "@/app/admin/actions";
+import { adminSetBetaTester, adminResetTwoStep } from "@/app/admin/actions";
 import { adminClearProfile, adminDeleteAccount, adminDeleteItem, adminDeleteComment, adminRemoveItemPhoto, adminClearItemDescription } from "@/app/admin/actions";
 import CompMembership from "@/components/admin/CompMembership";
 import { compActive, compEnds, isActiveMembership } from "@/lib/limits";
@@ -48,6 +48,11 @@ export default async function AdminUser({ params }: { params: { id: string } }) 
           <dt>Location</dt><dd>{priv?.location || "—"}</dd>
           <dt>Joined</dt><dd>{when(p.created_at)}{u?.last_sign_in_at && <span className="hint"> · last signed in {when(u.last_sign_in_at)}</span>}</dd>
           <dt>Plan</dt><dd>{isActiveMembership(m?.status) ? "Member (paid)" : compActive(m) ? `Member (complimentary${compEnds(m) ? ` through ${compEnds(m)}` : ", no end date"})` : "Free"}{m?.status && m.status !== "none" && <span className="hint"> · Stripe: {m.status}</span>}{m?.comp_active && !compActive(m) && <span className="hint"> · comp ended {compEnds(m)}</span>}</dd>
+          <dt>Two-step sign-in</dt><dd>{(u?.factors ?? []).filter((x) => x.status === "verified").length
+            ? <>On ({(u?.factors ?? []).filter((x) => x.status === "verified").length} device{(u?.factors ?? []).filter((x) => x.status === "verified").length === 1 ? "" : "s"}){" "}
+                <ConfirmAction action={adminResetTwoStep} fields={{ user_id: p.id }} label="Turn off (lost phone)"
+                  confirmText={`Turn off two-step sign-in for @${p.username}? Only do this once you're sure it's really them asking. They can sign in with their password and set it up again.`} /></>
+            : "Off"}</dd>
           <dt>Collection</dt><dd>{p.is_public ? "Public" : "Private"}</dd>
           <dt>Shows</dt><dd>{[p.show_email && "email", p.show_values && "values", p.show_location && "location", p.show_follows && "follow lists"].filter(Boolean).join(", ") || "nothing optional"}</dd>
           <dt>Comments from</dt><dd>{p.comments_from}</dd>

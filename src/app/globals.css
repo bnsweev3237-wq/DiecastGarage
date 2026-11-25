@@ -88,8 +88,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .field.full, .span-all { grid-column: 1 / -1; }
 .card label.photo, .card img.photo { aspect-ratio: 16 / 9; max-height: 260px; }
-.field input, .field select, .field textarea { border: 1.5px solid var(--line); background: var(--soft); border-radius: 12px; padding: 10px 12px; width: 100%; }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); outline: none; background: var(--panel); }
+.field input, .field select, .field textarea, .text-input { border: 1.5px solid var(--line); background: var(--soft); border-radius: 12px; padding: 10px 12px; width: 100%; }
+.field input:focus, .field select:focus, .field textarea:focus, .text-input:focus { border-color: var(--blue); outline: none; background: var(--panel); }
 .field textarea { min-height: 88px; resize: vertical; }
 .check { display: flex; gap: 10px; align-items: center; cursor: pointer; font-weight: 600; }
 .check input { width: 19px; height: 19px; accent-color: var(--accent); margin: 0; flex: none; }
@@ -865,3 +865,11 @@ body > main { flex: 1 0 auto; width: 100%; }
 .board a { color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
 .board a b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .board .num { margin-left: auto; font-weight: 700; white-space: nowrap; }
+
+/* two-step sign-in */
+.device-list { list-style: none; margin: 4px 0 10px; padding: 0; }
+.device-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.two-step-setup ol { margin: 8px 0; padding-left: 20px; display: flex; flex-direction: column; gap: 14px; }
+.two-step-setup li { display: flex; flex-direction: column; gap: 8px; }
+.two-step-setup img { background: #fff; padding: 8px; border-radius: 12px; border: 1px solid var(--line); }
+.secret { font: 600 15px/1.4 ui-monospace, Menlo, monospace; background: var(--chip); padding: 2px 6px; border-radius: 6px; word-break: break-all; }

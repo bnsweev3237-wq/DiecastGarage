@@ -104,6 +104,17 @@ export async function adminDeleteReview(f: FormData) {
   refresh();
 }
 
+// For a collector who lost the phone with their authenticator app: turns two-step sign-in off so they
+// can sign in with their password and set it up again. Check it's really them first.
+export async function adminResetTwoStep(f: FormData) {
+  const { adminId, db } = await requireAdmin();
+  const userId = str(f, "user_id");
+  const { data } = await db.auth.admin.mfa.listFactors({ userId });
+  for (const factor of data?.factors ?? []) await db.auth.admin.mfa.deleteFactor({ id: factor.id, userId });
+  await logAdminAction(db, adminId, "reset_two_step", userId, { devices: data?.factors?.length ?? 0 });
+  refresh();
+}
+
 const PROFILE_FIELDS = {
   bio: { bio: null },
   links: { facebook_url: null, x_url: null, instagram_url: null, ebay_url: null },

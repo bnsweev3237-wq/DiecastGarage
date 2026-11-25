@@ -5,8 +5,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 // Everyone who isn't an admin gets a plain 404, so the portal's existence stays hidden.
 export async function requireAdmin() {
-  const { user } = await getUser();
+  const { supabase, user } = await getUser();
   if (!user) notFound();
+  // Admins with two-step sign-in must have entered their code.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") notFound();
   const db = createAdminClient();
   const { data } = await db.from("admins").select("user_id").eq("user_id", user.id).maybeSingle();
   if (!data) notFound();

@@ -6,6 +6,7 @@ import { InstallSection } from "@/components/InstallApp";
 import { getUser } from "@/lib/supabase/server";
 import { unblockUser } from "@/app/actions";
 import InviteCard from "@/components/InviteCard";
+import TwoStepSettings from "@/components/TwoStepSettings";
 import { FREE_ITEM_LIMIT, compActive, compEnds, isActiveMembership, isMember } from "@/lib/limits";
 import { paymentsEnabled } from "@/lib/stripe";
 
@@ -43,6 +44,7 @@ export default async function Settings({ searchParams }: { searchParams: { membe
 
       {profile?.username && <InviteCard username={profile.username} joined={invited ?? 0} />}
 
+      <TwoStepSettings />
       <section className="card" id="blocked">
         <h3>Blocked collectors</h3>
         <p className="hint">People you block can&apos;t comment on your pages or follow you, and you won&apos;t see their comments. They aren&apos;t told. Block someone from their collection page.</p>

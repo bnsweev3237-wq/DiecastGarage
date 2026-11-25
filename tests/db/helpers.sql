@@ -1,6 +1,7 @@
 -- Helpers for the database tests. Loaded inside each test file's transaction, so they vanish afterwards.
 --   t.new_user('name', member, 'invite_ref')  signs someone up (as Supabase would) and returns their id
---   t.act_as(id)       run the next statements as that signed-in collector (null = signed out)
+--   t.act_as(id)       run the next statements as that signed-in collector (null = signed out);
+--                      t.act_as(id, 'aal2') as one who also entered their two-step code
 --   t.as_system()      back to the database owner, like the service role or an admin action
 --   t.ok(condition, 'what should be true')
 --   t.fails('sql', 'ERROR_CODE', 'what should be refused')
@@ -22,10 +23,12 @@ begin
   return u;
 end $$;
 
-create function t.act_as(u uuid) returns void language plpgsql as $$
+-- p_aal: 'aal1' after the password only, 'aal2' after the two-step code too.
+create function t.act_as(u uuid, p_aal text default 'aal1') returns void language plpgsql as $$
 begin
   perform set_config('role', 'none', true);
   perform set_config('request.jwt.sub', coalesce(u::text, ''), true);
+  perform set_config('request.jwt.claims', case when u is null then '' else json_build_object('sub', u, 'aal', p_aal)::text end, true);
   perform set_config('role', case when u is null then 'anon' else 'authenticated' end, true);
 end $$;
 
@@ -33,6 +36,7 @@ create function t.as_system() returns void language plpgsql as $$
 begin
   perform set_config('role', 'none', true);
   perform set_config('request.jwt.sub', '', true);
+  perform set_config('request.jwt.claims', '', true);
 end $$;
 
 create function t.ok(cond boolean, what text) returns void language plpgsql as $$

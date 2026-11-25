@@ -25,6 +25,9 @@ function LoginForm() {
     human.current?.reset(); // each check works once
     if (error) return setError(error.message === "Invalid login credentials" ? "That email and password don't match."
       : /captcha/i.test(error.message) ? "We couldn't confirm you're not a bot. Try again." : error.message);
+    // Collectors with two-step sign-in turned on enter their code next.
+    const { data: aal } = await createClient().auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") return router.push(`/two-step?next=${encodeURIComponent(next)}`);
     router.push(next);
     router.refresh();
   }

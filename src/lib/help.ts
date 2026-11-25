@@ -7,7 +7,7 @@
 // Writing format: each section has paragraphs. A line starting with "- " is a bullet.
 // **bold** and [link text](/path) work inside any line.
 
-export const HELP_UPDATED_FOR = "0.43";
+export const HELP_UPDATED_FOR = "0.44";
 
 export type HelpSection = { id: string; emoji: string; title: string; body: string[] };
 
@@ -212,6 +212,8 @@ export const HELP: HelpSection[] = [
       "- **Privacy:** in [Settings](/settings), choose whether your collection is public, whether your page shows your email, location, values and follow lists, and who can comment.",
       "- **Your full name, what you paid and your gain or loss are always private.**",
       "- **Forgot your password?** Use the link on the [sign-in page](/login). Open the reset email in the same browser you asked from.",
+      "- **🔐 Two-step sign-in:** in [Settings → Two-step sign-in](/settings#two-step), tap **Turn on**, scan the QR code with an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, 1Password and others), and enter the 6-digit code it shows. From then on, signing in asks for a fresh code from the app after your password, so nobody can get in with your password alone.",
+      "- **Add a backup device** (a tablet or second phone) in the same place, so losing one phone doesn't lock you out. If you do lose access to every device, contact theCollectorHQ team: once we've confirmed it's you, we can turn two-step sign-in off so you can sign in with your password and set it up again.",
       "- **Delete your account** at the bottom of Settings. It permanently deletes everything.",
     ],
   },

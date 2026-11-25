@@ -2,6 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const SIGNED_IN_ONLY = ["/collection", "/feed", "/settings"];
+// Pages someone who has entered their password but not yet their two-step code may still open.
+const BEFORE_CODE = ["/two-step", "/auth", "/api", "/login", "/help", "/terms", "/privacy", "/forgot-password", "/reset-password"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -28,6 +30,17 @@ export async function middleware(request: NextRequest) {
     url.pathname = "/login";
     url.search = `?next=${encodeURIComponent(path)}`;
     return NextResponse.redirect(url);
+  }
+  // Two-step sign-in: until the code is entered, everything else sends them to enter it. The database
+  // refuses their requests anyway (supabase/migrations/0036_two_step_signin.sql); this just explains why.
+  if (data.user && !BEFORE_CODE.some((p) => path === p || path.startsWith(p + "/"))) {
+    const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel().then((r) => r.data, () => null);
+    if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/two-step";
+      url.search = `?next=${encodeURIComponent(path)}`;
+      return NextResponse.redirect(url);
+    }
   }
   return response;
 }

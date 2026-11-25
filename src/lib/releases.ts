@@ -4,6 +4,15 @@ export type Release = { version: string; date: string; title: string; changes: s
 
 export const releases: Release[] = [
   {
+    version: "0.44",
+    date: "2026-11-25",
+    title: "Two-step sign-in",
+    changes: [
+      "🔐 Turn on two-step sign-in in Settings: after your password, you'll enter a 6-digit code from an authenticator app on your phone, so your password alone isn't enough to get into your account.",
+      "Add a backup device in case you lose your phone.",
+    ],
+  },
+  {
     version: "0.43",
     date: "2026-11-19",
     title: "Leaderboards and trade reviews",

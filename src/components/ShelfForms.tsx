@@ -58,7 +58,7 @@ export function ShelfPicker({ shelfId, items, room }: { shelfId: string; items: 
     <form action={(f) => { action(f); setPicked(new Set()); }} className="card">
       <input type="hidden" name="id" value={shelfId} />
       <div className="card-title"><h3>Add items</h3><span className="hint">{picked.size} ticked · room for {room} more</span></div>
-      <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search your collection…" aria-label="Search your collection" />
+      <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search your collection…" aria-label="Search your collection" className="text-input" />
       <ul className="pick-list">
         {shown.map((i) => (
           <li key={i.id}>

@@ -10,6 +10,17 @@ begin
   perform t.ok(missing is null, 'tables without row level security: ' || coalesce(missing, ''));
 end $$;
 
+-- check: every table (and photo storage) requires the two-step code from collectors who turned it on
+do $$
+declare missing text;
+begin
+  select string_agg(c.relname, ', ') into missing from pg_class c join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and c.relkind = 'r'
+    and not exists (select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = c.relname and p.policyname = 'two-step sign-in' and p.permissive = 'RESTRICTIVE');
+  perform t.ok(missing is null, 'tables without the two-step sign-in policy: ' || coalesce(missing, ''));
+  perform t.ok(exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'two-step sign-in'), 'photo storage has it too');
+end $$;
+
 -- check: no table lets members or visitors empty it (row level security doesn't cover truncate)
 do $$
 declare open_tables text;
